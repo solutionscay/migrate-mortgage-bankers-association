@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- @partial head -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <link href="assets/app.css" rel="stylesheet">
+  <script src="assets/app.js" defer></script>
+  <!-- @endpartial -->
+  <title>Componentes · MBA</title>
+</head>
+<body data-module="convencion" data-nav="componentes" data-role="admin">
+  <!-- @partial icons -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3.5 3.5"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 16 16"><path d="M10 3.5L5.5 8l4.5 4.5"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></symbol>
+    <symbol id="i-sort" viewBox="0 0 16 16"><path d="M8 13V3M4.5 6.5L8 3l3.5 3.5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 16 16"><path d="M2.5 3.5h11v10h-11zM2.5 6.5h11M5.5 2v3M10.5 2v3"/></symbol>
+    <symbol id="i-more" viewBox="0 0 16 16"><path d="M3 8h.01M8 8h.01M13 8h.01" stroke-width="2.4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2l6.5 12h-13zM8 6.5v3.5M8 12v.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16"><path d="M2.5 2.5h11v11h-11zM8 7v4M8 5v.01"/></symbol>
+    <symbol id="i-print" viewBox="0 0 16 16"><path d="M4.5 6V2.5h7V6M4.5 11.5h-2v-5.5h11v5.5h-2M4.5 9.5h7v4h-7z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 13.5c.6-2.5 2.6-4 5-4s4.4 1.5 5 4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 16 16"><path d="M2.5 4.5h11M6 4.5V2.5h4v2M4 4.5l.7 9h6.6l.7-9"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.2 11.8l7.6-7.6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 16 16"><path d="M10.5 2.5l3 3-8 8h-3v-3z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 16 16"><path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 10.5v3h11v-3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 16 16"><path d="M2 3.5h12v9H2zM2 3.5l6 5 6-5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9zM9.5 1.5v3h3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 16 16"><path d="M3.5 7.5h9v6.5h-9zM5.5 7.5V5a2.5 2.5 0 015 0v2.5"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4.5H2zM2 9h3.5l1 1.5h3l1-1.5H14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 16 16"><path d="M13 3v3.5H9.5M3 13V9.5h3.5M12.5 6.5A5 5 0 004 5M3.5 9.5A5 5 0 0012 11"/></symbol>
+    <symbol id="i-list" viewBox="0 0 16 16"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01" /></symbol>
+    <symbol id="i-table" viewBox="0 0 16 16"><path d="M2 3h12v10H2zM2 6.5h12M2 10h12M6.5 3v10"/></symbol>
+    <symbol id="i-send" viewBox="0 0 16 16"><path d="M14 2L7 9M14 2l-4.5 12-2.5-5-5-2.5z"/></symbol>
+  </svg>
+  <!-- @endpartial -->
+  <div class="app">
+    <!-- @partial topbar -->
+    <header class="topbar">
+      <a class="brand" href="index.html">MBA <small>Convención y Escuela</small></a>
+      <nav class="modules" aria-label="Módulos">
+        <a href="#" data-module="convencion">Convención</a>
+        <a href="#" data-module="escuela">Escuela</a>
+        <a href="#" data-module="correos">Correos</a>
+        <a href="#" data-module="admin" class="admin-only">Admin</a>
+      </nav>
+      <label class="search" role="search">
+        <span class="sr-only">Buscar</span>
+        <svg class="i"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Buscar convencionista, registro, estudiante…" autocomplete="off">
+      </label>
+      <button class="usermenu" type="button" data-menu="menu-user" aria-haspopup="menu" aria-expanded="false">
+        <svg class="i"><use href="#i-user"/></svg><b data-role-name>admin.demo</b><svg class="i i-sm"><use href="#i-chevron-down"/></svg>
+      </button>
+      <div class="menu" id="menu-user" popover role="menu">
+        <div class="menu-note">Sesión: <span data-role-text>ROLE-ADMIN</span></div>
+        <a href="#" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+        <hr>
+        <a href="#" role="menuitem">Salir</a>
+      </div>
+    </header>
+    <!-- @endpartial -->
+    <!-- @partial nav -->
+    <nav class="nav" aria-label="Secciones">
+      <a href="#" data-nav="convencionistas">Convencionistas</a>
+      <a href="#" data-nav="registros">Registros</a>
+      <a href="#" data-nav="convenciones">Convenciones</a>
+      <a href="#" data-nav="planes">Planes</a>
+      <a href="components.html" data-nav="componentes">Componentes</a>
+    </nav>
+    <!-- @endpartial -->
+
+    <div class="pagebar">
+      <div class="crumbs"><a href="#">Inicio</a><span class="sep">/</span><a href="#">Diseño M1</a><span class="sep">/</span><span>Componentes</span></div>
+      <h1 class="title"><b>Componentes</b> <span class="sub">· sistema de diseño, todos los estados</span></h1>
+      <div class="actions">
+        <span class="tag draft">borrador</span>
+        <div class="split">
+          <button class="btn" type="button" data-toast="Vista de impresión"><svg class="i"><use href="#i-print"/></svg>Imprimir</button>
+          <button class="btn" type="button" id="btn-print-top" data-menu="menu-print" aria-haspopup="menu" aria-expanded="false" aria-label="Más impresos"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <main class="content" id="main">
+      <div class="content-inner gallery">
+        <nav class="toc" aria-label="En esta página">
+          <b>En esta página</b>
+          <a href="#fundamentos">Fundamentos</a>
+          <a href="#estructura">Estructura</a>
+          <a href="#botones">Botones</a>
+          <a href="#campos">Campos</a>
+          <a href="#formulario">Formulario de registro</a>
+          <a href="#estatus">Etiquetas y estatus</a>
+          <a href="#pestanas">Pestañas</a>
+          <a href="#listas">Búsqueda y listas</a>
+          <a href="#detalle">Detalle y totales</a>
+          <a href="#roles">Acciones por rol</a>
+          <a href="#dialogos">Diálogos</a>
+          <a href="#avisos">Avisos</a>
+          <a href="#vacios">Vacíos y errores</a>
+          <a href="#otros">Correo, importar, gráfica, impresión</a>
+        </nav>
+
+        <div>
+          <!-- ============ Fundamentos ============ -->
+          <section class="g-section" id="fundamentos">
+            <h2>Fundamentos</h2>
+            <p class="lead">Lienzo de piedra cálida, campos blancos, barras carbón y un solo acento: teal. Coral solo para acciones destructivas. Radio 0, sin sombras, sin degradados. Líneas de 1 px separan las áreas.</p>
+
+            <h3 class="g-sub">Color</h3>
+            <div class="swatches">
+              <div class="swatch"><i style="background:var(--stone-100)"></i><div><b>Piedra 100</b><br><code>--stone-100 #f0eee9</code><br>lienzo</div></div>
+              <div class="swatch"><i style="background:var(--stone-50)"></i><div><b>Piedra 50</b><br><code>--stone-50 #f7f6f3</code><br>barra de página, cabecera de tabla</div></div>
+              <div class="swatch"><i style="background:var(--stone-200)"></i><div><b>Piedra 200</b><br><code>--stone-200 #e5e2db</code><br>panel, hover</div></div>
+              <div class="swatch"><i style="background:var(--stone-300)"></i><div><b>Línea</b><br><code>--stone-300 #d6d2c9</code><br>hairline 1 px</div></div>
+              <div class="swatch"><i style="background:var(--white)"></i><div><b>Blanco</b><br><code>--white #ffffff</code><br>campos, filas</div></div>
+              <div class="swatch"><i style="background:var(--ink)"></i><div><b>Tinta</b><br><code>--ink #1d1c1a</code><br>texto</div></div>
+              <div class="swatch"><i style="background:var(--charcoal-2)"></i><div><b>Carbón 2</b><br><code>--charcoal-2 #2a2b2e</code><br>barra superior, pie</div></div>
+              <div class="swatch"><i style="background:var(--charcoal)"></i><div><b>Carbón</b><br><code>--charcoal #37383b</code><br>barra de navegación, botón primario</div></div>
+              <div class="swatch"><i style="background:var(--teal)"></i><div><b>Teal</b><br><code>--teal #41b1c6</code><br>reglas, marcas, foco</div></div>
+              <div class="swatch"><i style="background:var(--teal-ink)"></i><div><b>Teal tinta</b><br><code>--teal-ink #1a7384</code><br>texto y enlaces teal</div></div>
+              <div class="swatch"><i style="background:var(--coral)"></i><div><b>Coral</b><br><code>--coral #f16350</code><br>solo destructivo</div></div>
+              <div class="swatch"><i style="background:var(--coral-ink)"></i><div><b>Coral tinta</b><br><code>--coral-ink #b73a28</code><br>texto destructivo</div></div>
+            </div>
+
+            <h3 class="g-sub">Tipografía · IBM Plex Sans, cifras tabulares</h3>
+            <div class="typescale">
+              <div><code>24 / 400 + 700</code><span style="font-size:24px"><b>Registro</b> #1283 · María Ejemplo Demo</span></div>
+              <div><code>18 / 700 cifras</code><span style="font-size:18px;font-weight:700">$1,218.00 &nbsp; $500.00 &nbsp; $718.00</span></div>
+              <div><code>15 / 600</code><span style="font-size:15px;font-weight:600">Detalles del registro</span></div>
+              <div><code>13 / 400 base</code><span>Taller de Cumplimiento Afiliado · Hotel Demo Plaza · 5/6/2027 8:30 AM</span></div>
+              <div><code>12 / 400 etiqueta</code><span style="font-size:12px;color:var(--ink-2)">Compañía · Nombre badge · Costeado por</span></div>
+              <div><code>11 / 600 cabecera</code><span style="font-size:11px;font-weight:600;color:var(--ink-2);letter-spacing:.02em">EVENTO · FECHA · PRECIO · QTY. · TOTAL</span></div>
+            </div>
+
+            <h3 class="g-sub">Espaciado · rejilla de 4 px</h3>
+            <div class="spacing">
+              <div><i style="width:4px"></i>4</div><div><i style="width:8px"></i>8</div><div><i style="width:12px"></i>12</div><div><i style="width:16px"></i>16</div><div><i style="width:24px"></i>24</div><div><i style="width:32px"></i>32</div><div><i style="width:48px"></i>48</div>
+              <div style="margin-left:24px;text-align:left">fila 28 · campo 26 · botón 28 · barra superior 40 · navegación 36 · barra de página 72 · pie 28</div>
+            </div>
+          </section>
+
+          <!-- ============ Estructura ============ -->
+          <section class="g-section" id="estructura">
+            <h2>Estructura de página</h2>
+            <p class="lead">La barra superior, la navegación, la barra de página y el pie tienen altura fija. Solo el área de contenido se desplaza. El área reserva el espacio de la barra de desplazamiento, y los diálogos, menús y avisos se abren en la capa superior, así que nada fuera del contenido se mueve.</p>
+
+            <h3 class="g-sub">Cabecera de registro: título grande, estatus a la derecha</h3>
+            <div class="block">
+              <div class="pagebar" style="border-bottom:0">
+                <div class="crumbs"><a href="#">Convención</a><span class="sep">/</span><a href="#">Registros</a><span class="sep">/</span><span>#1283</span></div>
+                <h1 class="title"><b>Registro</b> #1283 · María Ejemplo Demo <span class="sub">· Participante</span></h1>
+                <div class="status-slot">
+                  <label for="st-demo">Estatus</label>
+                  <select class="field" id="st-demo" style="width:150px"><option>Nuevo</option><option>Registrado</option><option>Asistió</option><option>Canceló</option><option>No Canceló</option></select>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="g-sub">Mosaicos de módulo (inicio)</h3>
+            <div class="grid cols-3">
+              <a class="tile" href="#"><div class="k">Convención</div><div class="v">2</div><div class="d">eventos activos</div></a>
+              <a class="tile" href="#"><div class="k">Escuela</div><div class="v">184</div><div class="d">estudiantes activos</div></a>
+              <a class="tile" href="#"><div class="k">Correos</div><div class="v">3</div><div class="d">envíos en borrador</div></a>
+            </div>
+          </section>
+
+          <!-- ============ Botones ============ -->
+          <section class="g-section" id="botones">
+            <h2>Botones</h2>
+            <p class="lead">Primario en carbón, secundario blanco con línea, discreto sin borde. Destructivo con borde coral; el relleno coral queda para la confirmación final.</p>
+            <div class="stack">
+              <div class="demo-row"><span class="cap">Primario</span>
+                <button class="btn btn-primary" type="button">Guardar</button>
+                <button class="btn btn-primary" type="button"><svg class="i"><use href="#i-plus"/></svg>Añadir registro</button>
+                <button class="btn btn-primary" type="button" disabled>Guardar</button>
+                <button class="btn btn-primary" type="button" aria-busy="true" style="width:84px">Guardar</button>
+              </div>
+              <div class="demo-row"><span class="cap">Secundario</span>
+                <button class="btn" type="button">Cancelar</button>
+                <button class="btn" type="button"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</button>
+                <button class="btn" type="button" disabled>Cancelar</button>
+                <button class="btn" type="button" data-busy data-toast="Lista exportada" style="width:96px">Exportar</button>
+              </div>
+              <div class="demo-row"><span class="cap">Discreto</span>
+                <button class="btn btn-quiet" type="button">Ver registros</button>
+                <button class="btn btn-quiet" type="button"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
+                <button class="btn btn-quiet" type="button" disabled>Ver registros</button>
+              </div>
+              <div class="demo-row"><span class="cap">Destructivo</span>
+                <button class="btn btn-danger admin-only" type="button"><svg class="i"><use href="#i-trash"/></svg>Borrar convencionista</button>
+                <button class="btn btn-danger-solid" type="button">Sí, cambiar el plan</button>
+                <button class="btn btn-danger" type="button" disabled>Anular pago</button>
+              </div>
+              <div class="demo-row"><span class="cap">Icono y tamaño</span>
+                <button class="btn btn-icon" type="button" aria-label="Imprimir"><svg class="i"><use href="#i-print"/></svg></button>
+                <button class="btn btn-icon btn-quiet" type="button" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button>
+                <button class="btn btn-sm" type="button">Pequeño</button>
+                <button class="btn btn-sm btn-icon" type="button" aria-label="Añadir"><svg class="i i-sm"><use href="#i-plus"/></svg></button>
+                <span class="split">
+                  <button class="btn" type="button"><svg class="i"><use href="#i-print"/></svg>Imprimir</button>
+                  <button class="btn" type="button" id="btn-print-menu" data-menu="menu-print" aria-haspopup="menu" aria-expanded="false" aria-label="Más impresos"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+                </span>
+              </div>
+              <div class="demo-row"><span class="cap">Solo ROLE-ADMIN</span>
+                <button class="btn btn-danger admin-only" type="button"><svg class="i"><use href="#i-ban"/></svg>Anular pago</button>
+                <span class="muted" style="font-size:12px">Con ROLE-STAFF el botón no se dibuja (cambie la vista en el pie). La ruta responde 403 de todas formas.</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Campos ============ -->
+          <section class="g-section" id="campos">
+            <h2>Campos</h2>
+            <p class="lead">Campo blanco con línea de 1 px. Foco: contorno teal de 2 px, que no cambia el tamaño. Solo lectura: fondo piedra y línea punteada. Inválido: línea roja y mensaje debajo.</p>
+
+            <h3 class="g-sub">Texto</h3>
+            <div class="state-grid">
+              <div><div class="cap">Normal</div><input class="field" value="Cooperativa Muestra" aria-label="Normal"></div>
+              <div><div class="cap">Vacío con ejemplo</div><input class="field" placeholder="Nombre en el badge" aria-label="Vacío"></div>
+              <div><div class="cap">Foco</div><input class="field" value="María" aria-label="Foco" style="outline:2px solid var(--teal);outline-offset:-2px;border-color:var(--teal)"></div>
+              <div><div class="cap">Solo lectura</div><input class="field" value="Ejemplo Demo" readonly aria-label="Solo lectura"></div>
+              <div><div class="cap">Desactivado</div><input class="field" value="Calle Ficticia 123" disabled aria-label="Desactivado"></div>
+              <div><div class="cap">Inválido</div><input class="field" value="" aria-invalid="true" aria-describedby="e-nombre" aria-label="Inválido"><div class="field-error" id="e-nombre"><svg class="i i-sm"><use href="#i-alert"/></svg>Escriba el nombre.</div></div>
+            </div>
+
+            <h3 class="g-sub">Selección, fecha, dinero, número</h3>
+            <div class="state-grid">
+              <div><div class="cap">Selección</div><select class="field" aria-label="Selección"><option>Activo</option><option>Inactivo</option></select></div>
+              <div><div class="cap">Selección, solo lectura</div><input class="field" value="Activo" readonly aria-label="Selección solo lectura"></div>
+              <div><div class="cap">Selección, inválida</div><select class="field" aria-invalid="true" aria-label="Selección inválida"><option>Escoja…</option></select><div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>Escoja un estatus.</div></div>
+              <div><div class="cap">Fecha</div><span class="adorn"><input class="field" value="5/6/2027" inputmode="numeric" aria-label="Fecha"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+              <div><div class="cap">Fecha, solo lectura</div><span class="adorn"><input class="field" value="5/8/2027" readonly aria-label="Fecha solo lectura"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+              <div><div class="cap">Fecha, inválida</div><span class="adorn"><input class="field" value="31/2/2027" aria-invalid="true" aria-label="Fecha inválida"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span><div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>Fecha no válida (m/d/aaaa).</div></div>
+              <div><div class="cap">Dinero (centavos en el servidor)</div><span class="adorn"><span class="pre">$</span><input class="field money" value="1,218.00" inputmode="decimal" aria-label="Dinero"></span></div>
+              <div><div class="cap">Dinero, solo lectura</div><span class="adorn"><span class="pre">$</span><input class="field money" value="718.00" readonly aria-label="Dinero solo lectura"></span></div>
+              <div><div class="cap">Dinero, inválido</div><span class="adorn"><span class="pre">$</span><input class="field money" value="-50.00" aria-invalid="true" aria-label="Dinero inválido"></span><div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>El pago debe ser mayor que 0.</div></div>
+              <div><div class="cap">Número</div><input class="field num" type="number" value="2" min="0" aria-label="Número"></div>
+              <div><div class="cap">Área de texto</div><textarea class="field" rows="3" aria-label="Comentarios">Texto de ejemplo para la demostración. Datos ficticios.</textarea></div>
+              <div><div class="cap">Valor de solo lectura (sin caja)</div><div class="value">Calle Ficticia 123, Ciudad Ejemplo PR 00000</div><div class="value money" style="margin-top:1px">$1,218.00</div></div>
+            </div>
+
+            <h3 class="g-sub">Casillas, opciones, archivo</h3>
+            <div class="state-grid">
+              <div>
+                <div class="cap">Casilla</div>
+                <label class="check"><input type="checkbox"> Sin cargo</label><br>
+                <label class="check"><input type="checkbox" checked> Incluir en el plan</label><br>
+                <label class="check"><input type="checkbox" disabled> Desactivada</label><br>
+                <label class="check"><input type="checkbox" checked disabled> Marcada, desactivada</label><br>
+                <label class="check"><input type="checkbox" aria-invalid="true"> Acepto los términos</label>
+                <div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>Marque la casilla para seguir.</div>
+              </div>
+              <div>
+                <div class="cap">Opciones (Costeado por)</div>
+                <div class="radios"><label class="check"><input type="radio" name="cp1" checked> Afiliado</label><label class="check"><input type="radio" name="cp1"> Individuo</label></div>
+                <div class="radios"><label class="check"><input type="radio" name="cp2" disabled checked> Afiliado</label><label class="check"><input type="radio" name="cp2" disabled> Individuo</label></div>
+              </div>
+              <div>
+                <div class="cap">Archivo</div>
+                <div class="row"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>notas-taller-mayo.xlsx<button class="x" type="button" aria-label="Quitar archivo"><svg class="i i-sm"><use href="#i-x"/></svg></button></span></div>
+                <div class="row" style="margin-top:8px"><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-upload"/></svg>Escoger archivo</button><span class="field-hint">XLSX, hasta 5 MB</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Formulario ============ -->
+          <section class="g-section" id="formulario">
+            <h2>Formulario de registro</h2>
+            <p class="lead">Etiquetas alineadas a la derecha junto al campo, como en FileMaker. El bloque teal sólido del evento y del plan pasa a un bloque blanco con regla teal a la izquierda y texto teal.</p>
+
+            <div class="error-summary" role="alert" style="margin-bottom:16px">
+              <b>Revise 2 campos antes de guardar.</b>
+              <ul><li><a href="#f-badge">Nombre badge</a>: escriba el nombre del badge.</li><li><a href="#f-cp">Costeado por</a>: escoja una opción.</li></ul>
+            </div>
+
+            <form class="grid cols-2" data-done="Registro guardado">
+              <div class="form">
+                <label for="f-comp">Compañía</label>
+                <div class="field-wrap"><input class="field" id="f-comp" list="dl-comp" value="Cooperativa Muestra"><datalist id="dl-comp"><option>Cooperativa Muestra</option><option>Banco Ejemplo</option><option>Acme Mortgage Demo</option></datalist></div>
+                <label>Nombre</label><div class="field-wrap"><input class="field" value="María" readonly aria-label="Nombre"></div>
+                <label>Apellido</label><div class="field-wrap"><input class="field" value="Ejemplo Demo" readonly aria-label="Apellido"></div>
+                <label for="f-badge" class="req">Nombre badge</label>
+                <div class="field-wrap"><input class="field" id="f-badge" aria-invalid="true" aria-describedby="e-badge"><div class="field-error" id="e-badge"><svg class="i i-sm"><use href="#i-alert"/></svg>Escriba el nombre del badge.</div></div>
+                <span class="gap"></span>
+                <span class="label req" id="f-cp">Costeado por</span>
+                <div class="field-wrap radios" role="radiogroup" aria-labelledby="f-cp"><label class="check"><input type="radio" name="cp3" aria-invalid="true"> Afiliado</label><label class="check"><input type="radio" name="cp3" aria-invalid="true"> Individuo</label></div>
+                <label for="f-acomp">Badges acompañantes</label>
+                <div class="field-wrap"><input class="field" id="f-acomp" value="Pedro Prueba"></div>
+              </div>
+              <div class="form">
+                <label>Dirección</label><div class="field-wrap"><input class="field" value="Calle Ficticia 123" readonly aria-label="Dirección"></div>
+                <label>Ciudad/Estado/Zip</label>
+                <div class="field-wrap inline-fields" style="grid-template-columns:1fr 56px 80px"><input class="field" value="Ciudad Ejemplo" readonly aria-label="Ciudad"><input class="field" value="PR" readonly aria-label="Estado"><input class="field" value="00000" readonly aria-label="Zip"></div>
+                <span class="gap"></span>
+                <span class="label">Evento</span>
+                <div class="field-wrap"><button class="pick" type="button" data-open="dlg-evento">Convención Demo 2027 <span class="meta">5/6/2027 – 5/8/2027 · Hotel Demo Plaza</span></button></div>
+                <span class="gap" style="height:4px"></span>
+                <span class="label">Plan</span>
+                <div class="field-wrap"><button class="pick" type="button" data-open="dlg-plan">P2(B) · 15 marzo <span class="meta">$1,218.00</span><span class="act">Cambiar</span></button></div>
+                <span class="gap" style="height:4px"></span>
+                <span class="label">Plan (sin escoger)</span>
+                <div class="field-wrap"><button class="pick empty" type="button" data-open="dlg-evento"><svg class="i"><use href="#i-plus"/></svg>Escoger plan</button></div>
+              </div>
+            </form>
+          </section>
+
+          <!-- ============ Estatus ============ -->
+          <section class="g-section" id="estatus">
+            <h2>Etiquetas y estatus</h2>
+            <p class="lead">Cuadradas, con borde de 1 px y una marca de color. Siempre llevan texto: el color nunca va solo.</p>
+            <div class="stack">
+              <div class="demo-row"><span class="cap">Registro</span><span class="tag">Nuevo</span><span class="tag info">Registrado</span><span class="tag ok">Asistió</span><span class="tag err">Canceló</span><span class="tag warn">No Canceló</span></div>
+              <div class="demo-row"><span class="cap">Tipo</span><span class="tag plain">Convencionista</span><span class="tag plain">Participante</span></div>
+              <div class="demo-row"><span class="cap">Evento y plan</span><span class="tag ok">Activo</span><span class="tag">Inactivo</span><span class="tag info">Incluido</span></div>
+              <div class="demo-row"><span class="cap">Correo</span><span class="tag">Borrador</span><span class="tag warn">En cola</span><span class="tag info">Enviando</span><span class="tag ok">Enviado</span><span class="tag err">Fallido</span></div>
+              <div class="demo-row"><span class="cap">Pago y marcas</span><span class="tag err">Anulado</span><span class="tag draft">borrador</span><span class="tag info">Afiliado</span><span class="tag">Individuo</span></div>
+              <div class="demo-row"><span class="cap">Grande (cabecera)</span><span class="tag lg info">Registrado</span><span class="tag lg ok">Activo</span></div>
+            </div>
+          </section>
+
+          <!-- ============ Pestañas ============ -->
+          <section class="g-section" id="pestanas">
+            <h2>Pestañas</h2>
+            <p class="lead">Enlaces que cambian el panel (en la app: <code>hx-get</code> con <code>hx-push-url</code>). Flechas izquierda y derecha mueven el foco. La pestaña activa es blanca con una regla teal arriba.</p>
+            <div class="tabs" role="tablist" aria-label="Convención">
+              <a href="#" role="tab" aria-selected="true" aria-controls="tp-act" id="tab-act">Actividades<span class="tab-count">12</span></a>
+              <a href="#" role="tab" aria-selected="false" aria-controls="tp-aus" id="tab-aus">Auspiciadores<span class="tab-count">6</span></a>
+              <a href="#" role="tab" aria-selected="false" aria-controls="tp-fac" id="tab-fac">Facturación</a>
+            </div>
+            <div class="tabpanel" role="tabpanel" id="tp-act" aria-labelledby="tab-act">
+              <table class="t">
+                <colgroup><col style="width:110px"><col><col style="width:150px"><col style="width:150px"><col style="width:130px"><col style="width:90px"><col style="width:36px"></colgroup>
+                <thead><tr><th>Tipo</th><th>Nombre</th><th>Comienza</th><th>Termina</th><th>Lugar</th><th class="money">Precio</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                <tbody>
+                  <tr><td>Hotel</td><td>Hotel Demo Plaza</td><td>5/5/2027 4:00 PM</td><td>5/6/2027 12:00 PM</td><td class="muted">—</td><td class="money">$289.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Seminario</td><td>Taller de Cumplimiento Afiliado</td><td>5/6/2027 8:30 AM</td><td>5/6/2027 5:00 PM</td><td>Salón A</td><td class="money">$135.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Cocktail</td><td>Coctel de Bienvenida</td><td>5/6/2027 6:00 PM</td><td>5/6/2027 8:00 PM</td><td>Terraza Demo</td><td class="money">$55.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tabpanel" role="tabpanel" id="tp-aus" aria-labelledby="tab-aus" hidden>
+              <table class="t">
+                <thead><tr><th>Auspiciador</th><th>Categoría</th><th class="money">Aportación</th></tr></thead>
+                <tbody>
+                  <tr><td>Banco Ejemplo</td><td>Platino</td><td class="money">$40,000.00</td></tr>
+                  <tr><td>Acme Mortgage Demo</td><td>Oro</td><td class="money">$24,000.00</td></tr>
+                  <tr><td>Capital Ficticio Lending</td><td>Bronce</td><td class="money">$5,000.00</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tabpanel" role="tabpanel" id="tp-fac" aria-labelledby="tab-fac" hidden>
+              <div class="block-body"><dl class="kv" style="max-width:360px"><dt>Registros</dt><dd class="money">184</dd><dt>Acompañantes</dt><dd class="money">41</dd><dt>Facturado</dt><dd class="money">$214,380.00</dd></dl></div>
+            </div>
+          </section>
+
+          <!-- ============ Listas ============ -->
+          <section class="g-section" id="listas">
+            <h2>Búsqueda y listas</h2>
+            <p class="lead">Búsqueda con espera de 300 ms, filtros, cambio de vista, tabla densa con cabecera fija y orden, y paginación de 50 filas.</p>
+            <div class="toolbar">
+              <label class="search"><span class="sr-only">Buscar registros</span><svg class="i"><use href="#i-search"/></svg><input type="search" placeholder="Nombre, compañía o #" value="demo"></label>
+              <select class="field" aria-label="Evento"><option>Convención Demo 2027</option><option>Convención Demo 2026</option></select>
+              <select class="field" aria-label="Estatus"><option>Todos los estatus</option><option>Nuevo</option><option>Registrado</option></select>
+              <span class="htmx-indicator on">Buscando…</span>
+              <span class="spacer"></span>
+              <span class="seg" role="group" aria-label="Vista">
+                <button class="btn btn-icon" type="button" aria-pressed="false" aria-label="Lista"><svg class="i"><use href="#i-list"/></svg></button>
+                <button class="btn btn-icon" type="button" aria-pressed="true" aria-label="Tabla"><svg class="i"><use href="#i-table"/></svg></button>
+              </span>
+              <button class="btn btn-primary" type="button"><svg class="i"><use href="#i-plus"/></svg>Nuevo</button>
+            </div>
+            <div class="table-wrap scroll" style="border-top:1px solid var(--stone-300)">
+              <table class="t">
+                <colgroup><col style="width:70px"><col><col><col style="width:130px"><col style="width:120px"><col style="width:110px"><col style="width:110px"><col style="width:36px"></colgroup>
+                <thead><tr>
+                  <th aria-sort="descending"><button class="sort" type="button"># <svg class="i"><use href="#i-sort"/></svg></button></th>
+                  <th><button class="sort" type="button">Nombre <svg class="i"><use href="#i-sort"/></svg></button></th>
+                  <th>Compañía</th><th>Tipo</th><th>Estatus</th>
+                  <th class="money">Total</th><th class="money">Balance</th><th class="col-act"><span class="sr-only">Acciones</span></th>
+                </tr></thead>
+                <tbody>
+                  <tr aria-selected="true"><td class="num">1290</td><td>Elena Muestra Ficticia</td><td>Banco Ejemplo</td><td>Convencionista</td><td><span class="tag info">Registrado</span></td><td class="money">$985.00</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1289</td><td>Luis Ejemplo Prueba</td><td>Acme Mortgage Demo</td><td>Participante</td><td><span class="tag">Nuevo</span></td><td class="money">$814.00</td><td class="money">$814.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1288</td><td>Carmen Demo Ficticio</td><td>Capital Ficticio Lending</td><td>Convencionista</td><td><span class="tag ok">Asistió</span></td><td class="money">$2,644.00</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1287</td><td>Rafael Prueba Muestra</td><td>Avalúos Demo Partners</td><td>Participante</td><td><span class="tag err">Canceló</span></td><td class="money">$578.00</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1286</td><td>Sofía Ficticia Demo</td><td>Abogados Demo &amp; Asoc.</td><td>Convencionista</td><td><span class="tag warn">No Canceló</span></td><td class="money">$1,064.00</td><td class="money">$1,064.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1285</td><td>Héctor Muestra Demo</td><td>Bufete Fulano &amp; Mengano</td><td>Participante</td><td><span class="tag info">Registrado</span></td><td class="money">$95.00</td><td class="money">$95.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1284</td><td>Pedro Prueba Demo</td><td>Cooperativa Muestra</td><td>Participante</td><td><span class="tag info">Registrado</span></td><td class="money">$220.00</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1283</td><td>María Ejemplo Demo</td><td>Cooperativa Muestra</td><td>Participante</td><td><span class="tag">Nuevo</span></td><td class="money">$1,218.00</td><td class="money">$718.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1282</td><td>Elena Muestra Ficticia</td><td>Banco Ejemplo</td><td>Convencionista</td><td><span class="tag ok">Asistió</span></td><td class="money">$985.00</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td class="num">1281</td><td>Luis Ejemplo Prueba</td><td>Acme Mortgage Demo</td><td>Participante</td><td><span class="tag">Nuevo</span></td><td class="money">$90.00</td><td class="money">$90.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-row-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pager">
+              <span>1–50 de 214</span>
+              <div class="pages">
+                <button class="btn btn-sm btn-icon" type="button" disabled aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></button>
+                <button class="btn btn-sm" type="button" aria-current="page">1</button>
+                <button class="btn btn-sm" type="button">2</button>
+                <button class="btn btn-sm" type="button">3</button>
+                <button class="btn btn-sm" type="button">4</button>
+                <button class="btn btn-sm" type="button">5</button>
+                <button class="btn btn-sm btn-icon" type="button" aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Detalle y totales ============ -->
+          <section class="g-section" id="detalle">
+            <h2>Detalle y totales</h2>
+            <p class="lead">La tabla de partidas cruza el centro; el bloque de totales queda abajo a la derecha. Una sola acción discreta al final de cada fila reemplaza la columna de X rojas.</p>
+
+            <div class="block">
+              <div class="block-head"><h3>Detalles del registro</h3><span class="count">8 actividades</span>
+                <div class="row"><span class="htmx-indicator">Actualizando…</span><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir actividad</button></div>
+              </div>
+              <table class="t">
+                <colgroup><col style="width:84px"><col><col style="width:58px"><col style="width:84px"><col style="width:80px"><col style="width:84px"><col style="width:80px"><col style="width:172px"><col style="width:84px"><col style="width:44px"><col style="width:90px"><col style="width:66px"><col style="width:36px"></colgroup>
+                <thead>
+                  <tr class="group"><th colspan="3"></th><th colspan="2" class="g">COMIENZA</th><th colspan="2" class="g">TERMINA</th><th colspan="6"></th></tr>
+                  <tr><th>Tipo</th><th>Evento</th><th>Plan</th><th>Fecha</th><th>Hora</th><th>Fecha</th><th>Hora</th><th>Detalles</th><th class="money">Precio</th><th class="num">Qty.</th><th class="money">Total</th><th class="c">Sin cargo</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Seminario</td><td>Taller de Cumplimiento Afiliado</td><td>P2(B)</td><td>5/6/2027</td><td>8:30 AM</td><td>5/6/2027</td><td>5:00 PM</td><td>Mesa #4</td><td class="money">$135.00</td><td class="num">1</td><td class="money">$135.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Cocktail</td><td>Coctel de Bienvenida</td><td>P2(B)</td><td>5/6/2027</td><td>6:00 PM</td><td>5/6/2027</td><td>8:00 PM</td><td class="muted">—</td><td class="money">$55.00</td><td class="num">1</td><td class="money">$55.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Almuerzo</td><td>Almuerzo de Reconocimientos</td><td>P2(B)</td><td>5/7/2027</td><td>12:30 PM</td><td>5/7/2027</td><td>3:00 PM</td><td>Mesa #12</td><td class="money">$140.00</td><td class="num">1</td><td class="money">$140.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Cena</td><td>Cena de Gala Aniversario</td><td>P2(B)</td><td>5/7/2027</td><td>7:00 PM</td><td>5/7/2027</td><td>11:00 PM</td><td>Mesa #12</td><td class="money">$110.00</td><td class="num">2</td><td class="money">$220.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Desayuno</td><td>Desayuno de Clausura</td><td>P2(B)</td><td>5/8/2027</td><td>8:00 AM</td><td>5/8/2027</td><td>10:00 AM</td><td>Mesa #7</td><td class="money">$45.00</td><td class="num">2</td><td class="money">$90.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Desayuno</td><td>Desayuno de Networking</td><td>P2(B)</td><td>5/7/2027</td><td>7:00 AM</td><td>5/7/2027</td><td>9:00 AM</td><td class="muted">Mesa sin asignar</td><td class="money">$0.00</td><td class="num">1</td><td class="money">$0.00</td><td class="c"><label class="check"><input type="checkbox" checked aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Hotel</td><td>Hotel Demo Plaza</td><td>P2(B)</td><td>5/6/2027</td><td></td><td>5/7/2027</td><td></td><td>Reserva DEMO-01</td><td class="money">$289.00</td><td class="num">1</td><td class="money">$289.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr><td>Hotel</td><td>Hotel Demo Plaza</td><td>P2(B)</td><td>5/7/2027</td><td></td><td>5/8/2027</td><td></td><td>Reserva DEMO-01</td><td class="money">$289.00</td><td class="num">1</td><td class="money">$289.00</td><td class="c"><label class="check"><input type="checkbox" aria-label="Sin cargo"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-item-admin" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  <tr class="add-row"><td colspan="8"><select class="field" aria-label="Actividad del evento"><option>Seminario · Panel de Tendencias del Mercado · 5/7/2027 9:00 AM</option><option>Hotel · Hotel Demo Plaza · 5/8/2027</option></select></td><td colspan="2"></td><td colspan="3"><button class="btn btn-sm btn-primary" type="button" style="width:100%"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="grid" style="grid-template-columns:minmax(0,1.35fr) minmax(0,.85fr) auto;margin-top:24px;align-items:start">
+              <div class="block">
+                <div class="block-head"><h3>Detalles de pago</h3><span class="count">2 pagos</span><div class="row"><button class="btn btn-sm" type="button" data-open="dlg-pago"><svg class="i i-sm"><use href="#i-plus"/></svg>Registrar pago</button></div></div>
+                <table class="t">
+                  <colgroup><col style="width:92px"><col style="width:96px"><col><col style="width:96px"><col style="width:36px"></colgroup>
+                  <thead><tr><th>Fecha</th><th>Número</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                  <tbody>
+                    <tr><td>4/02/2027</td><td>DEMO-01</td><td>Cheque</td><td class="money">$500.00</td><td class="col-act"><button class="row-act admin-only" type="button" data-menu="menu-pay-admin" aria-label="Acciones del pago" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                    <tr class="voided"><td>4/10/2027</td><td>DEMO-02</td><td>Tarjeta <span class="tag err" style="margin-left:6px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <label class="section-title" for="f-com" style="display:block">Comentarios</label>
+                <textarea class="field" id="f-com" rows="4">Texto de ejemplo para la demostración. Datos ficticios.</textarea>
+              </div>
+              <dl class="totals">
+                <dt class="grand">Total</dt><dd class="grand">$1,218.00</dd>
+                <dt>Total pago</dt><dd class="minor paid">$500.00</dd>
+                <dt>Balance</dt><dd class="due">$718.00</dd>
+                <span class="note">Calculado en el servidor (BR-REG-04, BR-REG-08)</span>
+              </dl>
+            </div>
+
+            <h3 class="g-sub" style="margin-top:24px">Resumen clave-valor</h3>
+            <div class="block" style="max-width:380px"><div class="block-head"><h3>Convención Demo 2027</h3></div><div class="block-body">
+              <dl class="kv"><dt>Lugar</dt><dd>Hotel Demo Plaza</dd><dt>Comienza</dt><dd>5/6/2027</dd><dt>Termina</dt><dd>5/8/2027</dd><dt>Registros</dt><dd class="money">184</dd><dt>Acompañantes</dt><dd class="money">41</dd><dt>Total</dt><dd class="money">225</dd></dl>
+            </div></div>
+          </section>
+
+          <!-- ============ Roles ============ -->
+          <section class="g-section" id="roles">
+            <h2>Acciones por rol</h2>
+            <p class="lead">Anular y borrar se dibujan solo para ROLE-ADMIN. Con ROLE-STAFF el menú de la fila no los muestra y la tabla de pagos no tiene acción. La columna conserva su ancho, así que la tabla no cambia de forma. El servidor responde 403 de todas formas.</p>
+            <div class="grid cols-2">
+              <div>
+                <div class="role-label">Vista <code>ROLE-ADMIN</code></div>
+                <div class="table-wrap">
+                  <table class="t">
+                    <colgroup><col style="width:88px"><col><col style="width:90px"><col style="width:36px"></colgroup>
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                    <tbody>
+                      <tr><td>4/02/2027</td><td>Cheque DEMO-01</td><td class="money">$500.00</td><td class="col-act"><button class="row-act" type="button" id="btn-pay-admin" data-menu="menu-pay-admin" aria-label="Acciones del pago" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                      <tr class="voided"><td>4/10/2027</td><td>Tarjeta DEMO-02 <span class="tag err" style="margin-left:4px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="g-sub" style="margin-top:12px">Menú de la fila de actividad</div>
+                <div class="menu" style="position:static;display:block;width:220px">
+                  <button type="button"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
+                  <button type="button"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
+                  <hr>
+                  <button type="button" class="danger"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…<span class="admin-mark">admin</span></button>
+                </div>
+                <div class="row" style="margin-top:12px"><button class="btn btn-danger" type="button"><svg class="i"><use href="#i-trash"/></svg>Borrar convencionista</button></div>
+              </div>
+              <div>
+                <div class="role-label">Vista <code>ROLE-STAFF</code></div>
+                <div class="table-wrap">
+                  <table class="t">
+                    <colgroup><col style="width:88px"><col><col style="width:90px"><col style="width:36px"></colgroup>
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                    <tbody>
+                      <tr><td>4/02/2027</td><td>Cheque DEMO-01</td><td class="money">$500.00</td><td class="col-act"></td></tr>
+                      <tr class="voided"><td>4/10/2027</td><td>Tarjeta DEMO-02 <span class="tag err" style="margin-left:4px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="g-sub" style="margin-top:12px">Menú de la fila de actividad</div>
+                <div class="menu" style="position:static;display:block;width:220px">
+                  <button type="button"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
+                  <button type="button"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
+                </div>
+                <p class="field-hint" style="margin-top:12px">Sin «Quitar actividad», sin «Anular pago» y sin «Borrar convencionista». El menú y la tabla conservan su ancho.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Diálogos ============ -->
+          <section class="g-section" id="dialogos">
+            <h2>Diálogos</h2>
+            <p class="lead">Nativos (<code>&lt;dialog&gt;</code>). Esc o clic fuera cierra, el foco vuelve al botón que lo abrió. Abrir un diálogo no mueve la página: la página no tiene barra propia, solo el área de contenido.</p>
+            <div class="row" style="margin-bottom:16px">
+              <button class="btn" type="button" data-open="dlg-evento">Escoger evento</button>
+              <button class="btn" type="button" data-open="dlg-plan">Cambiar plan (confirmar)</button>
+              <button class="btn" type="button" data-open="dlg-pago">Registrar pago</button>
+              <button class="btn btn-danger admin-only" type="button" data-open="dlg-anular">Anular pago</button>
+              <button class="btn" type="button" data-open="dlg-enviar">Enviar 23 correos</button>
+            </div>
+            <div class="grid cols-2">
+              <div class="dlg dlg-preview" style="border:1px solid var(--ink-2);background:#fff">
+                <div class="dlg-head danger"><h2>¿Cambiar el plan?</h2></div>
+                <div class="dlg-body"><p>El registro #1283 tiene 8 actividades del plan P2(B). Cambiar a <b>P1 · Completo</b> las borra y crea las del plan nuevo.</p></div>
+                <div class="dlg-foot"><button class="btn" type="button">Cancelar</button><button class="btn btn-danger-solid" type="button">Sí, cambiar el plan</button></div>
+              </div>
+              <div class="dlg dlg-preview" style="border:1px solid var(--ink-2);background:#fff">
+                <div class="dlg-head"><h2>Enviar correos</h2></div>
+                <div class="dlg-body"><p>Se enviarán <b>23 correos</b> del envío «Taller de mayo». Los correos ya enviados no se repiten.</p></div>
+                <div class="dlg-foot"><span class="left">Modo simulado: no sale ningún correo.</span><button class="btn" type="button">Cancelar</button><button class="btn btn-primary" type="button">Enviar 23 correos</button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Avisos ============ -->
+          <section class="g-section" id="avisos">
+            <h2>Avisos</h2>
+            <div class="stack">
+              <div class="banner info"><svg class="i"><use href="#i-info"/></svg><div><b>Plan cambiado.</b> Se crearon 9 actividades del plan P1 · Completo.</div></div>
+              <div class="banner ok"><svg class="i"><use href="#i-check"/></svg><div><b>Pago registrado.</b> Balance nuevo: $218.00.</div></div>
+              <div class="banner warn"><svg class="i"><use href="#i-alert"/></svg><div><b>El evento está inactivo.</b> No admite registros nuevos.</div></div>
+              <div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>No se pudo guardar.</b> Otra persona cambió este registro. Recargue para ver la versión actual.</div><div class="row"><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-refresh"/></svg>Recargar</button></div></div>
+              <div class="banner mock"><svg class="i"><use href="#i-mail"/></svg><div><b>Modo simulado.</b> Los correos van a la bandeja de salida local; no sale nada (EXT-01).</div></div>
+            </div>
+            <h3 class="g-sub" style="margin-top:24px">Notificación flotante y progreso</h3>
+            <div class="grid cols-2">
+              <div class="stack">
+                <div class="toast static"><svg class="i"><use href="#i-check"/></svg>Registro guardado</div>
+                <div class="toast static err"><svg class="i"><use href="#i-alert"/></svg>No tiene permiso para anular pagos</div>
+                <div class="row"><button class="btn btn-sm" type="button" data-toast="Registro guardado">Probar aviso</button><button class="btn btn-sm" type="button" data-toast="No se pudo guardar" data-kind="err">Probar error</button></div>
+              </div>
+              <div class="stack">
+                <div class="progress-row"><span>Enviando correos…</span><span class="num">14 de 23</span><div class="progress" style="grid-column:1/-1"><i style="width:61%"></i></div></div>
+                <div class="progress-row"><span>Importando notas</span><span class="num">40 de 40</span><div class="progress" style="grid-column:1/-1"><i style="width:100%"></i></div></div>
+                <div class="row"><span class="tag draft">borrador</span><span class="field-hint">Marca de inventario: pantalla dibujada, sin lógica todavía (D-17, D-19).</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Vacíos y errores ============ -->
+          <section class="g-section" id="vacios">
+            <h2>Vacíos y errores</h2>
+            <div class="grid cols-2">
+              <div class="table-wrap">
+                <table class="t">
+                  <thead><tr><th>Evento</th><th>Fecha</th><th class="money">Total</th></tr></thead>
+                  <tbody><tr class="empty"><td colspan="3"><div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin actividades</h4><p>Escoja un plan o añada una actividad.</p><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir actividad</button></div></td></tr></tbody>
+                </table>
+              </div>
+              <div class="table-wrap">
+                <table class="t">
+                  <thead><tr><th>Nombre</th><th>Compañía</th><th>Estatus</th></tr></thead>
+                  <tbody><tr class="empty"><td colspan="3"><div class="empty"><svg class="i"><use href="#i-search"/></svg><h4>Sin resultados para «zzz»</h4><p>Pruebe con otro nombre, compañía o número.</p><button class="btn btn-sm btn-quiet" type="button">Borrar búsqueda</button></div></td></tr></tbody>
+                </table>
+              </div>
+              <div class="table-wrap">
+                <table class="t">
+                  <thead><tr><th>Fecha</th><th>Tipo</th><th class="money">Pago</th></tr></thead>
+                  <tbody><tr class="empty"><td colspan="3"><div class="empty err"><svg class="i"><use href="#i-alert"/></svg><h4>No se pudieron cargar los pagos</h4><p>El servidor no respondió. Los datos del registro no cambiaron.</p><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-refresh"/></svg>Reintentar</button></div></td></tr></tbody>
+                </table>
+              </div>
+              <div class="block"><div class="empty"><svg class="i"><use href="#i-user"/></svg><h4>Sin acompañantes</h4><p>Añadir un acompañante recalcula las cantidades.</p></div></div>
+            </div>
+            <h3 class="g-sub" style="margin-top:24px">Páginas de mensaje</h3>
+            <div class="grid cols-3">
+              <div class="msgpage"><div class="code">403</div><h4>Sin permiso</h4><p>Su rol no permite esta acción. Pida acceso a un administrador.</p><a class="btn btn-sm" href="#">Volver</a></div>
+              <div class="msgpage"><div class="code">404</div><h4>No encontrado</h4><p>El registro no existe o fue borrado.</p><a class="btn btn-sm" href="#">Ir a Registros</a></div>
+              <div class="msgpage"><div class="code">409</div><h4>Conflicto</h4><p>El convencionista tiene registros y no se puede borrar.</p><a class="btn btn-sm" href="#">Ver registros</a></div>
+            </div>
+          </section>
+
+          <!-- ============ Otros ============ -->
+          <section class="g-section" id="otros">
+            <h2>Correo, importar, gráfica, impresión</h2>
+            <h3 class="g-sub">Vista previa de correo y lista de campos</h3>
+            <div class="grid" style="grid-template-columns:minmax(0,1fr) 240px">
+              <iframe class="preview-frame" title="Vista previa del correo" sandbox srcdoc="<body style='font:13px/1.5 sans-serif;margin:16px;color:#1d1c1a'><p>Hola Elena Muestra Ficticia:</p><p>Su matrícula en <b>Taller de Cumplimiento</b> queda confirmada para el 5/6/2027 en Salón A.</p><p>Escuela MBA · datos ficticios</p></body>"></iframe>
+              <ul class="tokens"><li><code>{nombre}</code><span>Elena Muestra Ficticia</span></li><li><code>{curso}</code><span>Taller de Cumplimiento</span></li><li><code>{fecha}</code><span>5/6/2027</span></li><li><code>{lugar}</code><span>Salón A</span></li></ul>
+            </div>
+
+            <h3 class="g-sub">Importar notas: vista previa</h3>
+            <div class="table-wrap">
+              <table class="t">
+                <thead><tr><th>Estudiante</th><th>Curso</th><th>Nota</th><th>Letra</th><th>Resultado</th></tr></thead>
+                <tbody>
+                  <tr><td>Elena Muestra Ficticia</td><td>Taller de Cumplimiento</td><td><span class="diff-old">—</span> → <span class="diff-new">92</span></td><td>A</td><td><span class="tag ok">Aprobado</span></td></tr>
+                  <tr><td>Luis Ejemplo Prueba</td><td>Taller de Cumplimiento</td><td><span class="diff-old">68</span> → <span class="diff-new">74</span></td><td>C</td><td><span class="tag ok">Aprobado</span></td></tr>
+                  <tr><td>Fila 7 del archivo</td><td>—</td><td>81</td><td>—</td><td><span class="tag warn">Sin pareja</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="row end" style="margin-top:8px"><span class="field-hint">2 cambios · 1 sin pareja</span><button class="btn btn-primary" type="button">Aplicar 2 cambios</button></div>
+
+            <h3 class="g-sub">Gráfica de barras (SVG del servidor)</h3>
+            <div class="block block-body">
+              <svg class="chart" viewBox="0 0 640 160" width="100%" height="160" role="img" aria-label="Matrículas por mes, enero a junio">
+                <line class="grid" x1="40" x2="630" y1="20" y2="20"/><line class="grid" x1="40" x2="630" y1="70" y2="70"/>
+                <line class="axis" x1="40" x2="630" y1="120" y2="120"/>
+                <text x="32" y="24" text-anchor="end">40</text><text x="32" y="74" text-anchor="end">20</text><text x="32" y="124" text-anchor="end">0</text>
+                <rect class="bar dim" x="70" y="80" width="56" height="40"/><rect class="bar dim" x="166" y="65" width="56" height="55"/><rect class="bar dim" x="262" y="50" width="56" height="70"/><rect class="bar dim" x="358" y="45" width="56" height="75"/><rect class="bar" x="454" y="28" width="56" height="92"/><rect class="bar dim" x="550" y="90" width="56" height="30"/>
+                <text x="98" y="140" text-anchor="middle">ene</text><text x="194" y="140" text-anchor="middle">feb</text><text x="290" y="140" text-anchor="middle">mar</text><text x="386" y="140" text-anchor="middle">abr</text><text x="482" y="140" text-anchor="middle">may</text><text x="578" y="140" text-anchor="middle">jun</text>
+              </svg>
+            </div>
+
+            <h3 class="g-sub">Impresión: hoja carta y etiquetas</h3>
+            <div class="grid cols-2">
+              <div class="sheet">
+                <h5>Mortgage Bankers Association · demo</h5>
+                <div class="sheet-sub">Lista de facturación · Convención Demo 2027</div>
+                <table class="t">
+                  <thead><tr><th>Actividad</th><th class="num">Qty.</th><th class="money">Total</th></tr></thead>
+                  <tbody><tr><td>Taller de Cumplimiento Afiliado</td><td class="num">1</td><td class="money">$135.00</td></tr><tr><td>Cena de Gala Aniversario</td><td class="num">2</td><td class="money">$220.00</td></tr><tr><td>Hotel Demo Plaza</td><td class="num">2</td><td class="money">$578.00</td></tr></tbody>
+                  <tfoot><tr><td>Balance</td><td></td><td class="money">$718.00</td></tr></tfoot>
+                </table>
+              </div>
+              <div>
+                <div class="labels"><div><b>María Ejemplo</b><br>Cooperativa Muestra</div><div><b>Pedro Prueba</b><br>Cooperativa Muestra</div><div><b>Elena Muestra</b><br>Banco Ejemplo</div><div><b>Luis Ejemplo</b><br>Acme Mortgage Demo</div><div><b>Carmen Demo</b><br>Capital Ficticio Lending</div><div><b>Sofía Ficticia</b><br>Abogados Demo &amp; Asoc.</div></div>
+                <div class="block" style="margin-top:16px"><div class="empty"><svg class="i"><use href="#i-print"/></svg><h4>No hay registros para imprimir</h4><p>El filtro no devolvió registros.</p></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- @partial footer -->
+    <footer class="footer">
+      <span><b>MBA</b> · demostración · datos ficticios</span>
+      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="spacer"></span>
+      <span>Ver como</span>
+      <span class="seg" role="group" aria-label="Rol">
+        <button type="button" data-set-role="admin" aria-pressed="true">ROLE-ADMIN</button>
+        <button type="button" data-set-role="staff" aria-pressed="false">ROLE-STAFF</button>
+      </span>
+      <span>v0.1 · M1</span>
+    </footer>
+    <!-- @endpartial -->
+  </div>
+
+  <!-- Menus (popover, top layer) -->
+  <div class="menu" id="menu-print" popover role="menu">
+    <button type="button" role="menuitem" data-toast="Lista de facturación">Lista de facturación</button>
+    <button type="button" role="menuitem" data-toast="Registros individuos">Registros individuos</button>
+    <button type="button" role="menuitem" data-toast="Registros afiliados">Registros afiliados</button>
+    <button type="button" role="menuitem" data-toast="Cartas a auspiciadores">Cartas a auspiciadores</button>
+    <button type="button" role="menuitem" data-toast="Etiquetas de badge">Etiquetas de badge</button>
+  </div>
+  <div class="menu" id="menu-item-admin" popover role="menu">
+    <button type="button" role="menuitem" data-toast="Editar atributos"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
+    <button type="button" role="menuitem" data-toast="Marcada sin cargo"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
+    <hr class="admin-only">
+    <button type="button" role="menuitem" class="danger admin-only" data-open="dlg-quitar"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…<span class="admin-mark">admin</span></button>
+  </div>
+  <div class="menu" id="menu-row-admin" popover role="menu">
+    <button type="button" role="menuitem" data-toast="Abrir registro"><svg class="i"><use href="#i-file"/></svg>Abrir registro</button>
+    <button type="button" role="menuitem" data-toast="Lista de facturación"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</button>
+    <hr class="admin-only">
+    <button type="button" role="menuitem" class="danger admin-only" data-toast="Solo sin pagos (OP-REG-09)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar registro…<span class="admin-mark">admin</span></button>
+  </div>
+  <div class="menu" id="menu-pay-admin" popover role="menu">
+    <div class="menu-note">Pago DEMO-01 · $500.00</div>
+    <button type="button" role="menuitem" class="danger" data-open="dlg-anular"><svg class="i"><use href="#i-ban"/></svg>Anular pago…<span class="admin-mark">admin</span></button>
+  </div>
+
+  <!-- Dialogs -->
+  <dialog class="dlg wide" id="dlg-evento" aria-labelledby="dlg-evento-t">
+    <div class="dlg-head"><h2 id="dlg-evento-t">Escoger evento</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body">
+      <label class="search" style="margin-bottom:8px"><span class="sr-only">Buscar evento</span><svg class="i"><use href="#i-search"/></svg><input type="search" placeholder="Buscar evento activo" autofocus></label>
+      <div class="table-wrap picker-list">
+        <table class="t">
+          <thead><tr><th>Evento</th><th>Lugar</th><th>Comienza</th><th>Termina</th><th>Estatus</th></tr></thead>
+          <tbody>
+            <tr data-pick="Evento escogido: Convención Demo 2027" tabindex="0" aria-selected="true"><td>Convención Demo 2027</td><td>Hotel Demo Plaza</td><td>5/6/2027</td><td>5/8/2027</td><td><span class="tag ok">Activo</span></td></tr>
+            <tr data-pick="Evento escogido: Foro de Otoño Demo" tabindex="0"><td>Foro de Otoño Demo</td><td>Centro de Convenciones Ejemplo</td><td>10/14/2027</td><td>10/14/2027</td><td><span class="tag ok">Activo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="field-hint">Solo eventos activos (BR-REG-01).</p>
+    </div>
+    <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button></div>
+  </dialog>
+
+  <dialog class="dlg" id="dlg-plan" aria-labelledby="dlg-plan-t">
+    <div class="dlg-head danger"><h2 id="dlg-plan-t">¿Cambiar el plan?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body">
+      <p style="margin-bottom:12px">El registro #1283 tiene <b>8 actividades</b> del plan P2(B). Cambiar a <b>P1 · Completo</b> las borra y crea las del plan nuevo.</p>
+      <div class="form">
+        <label for="dp-plan">Plan nuevo</label>
+        <div class="field-wrap"><select class="field" id="dp-plan"><option>P1 · Completo · $1,640.00</option><option>P2(B) · 15 marzo · $1,218.00</option><option>P3 · Solo seminarios · $310.00</option></select></div>
+      </div>
+    </div>
+    <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="button" data-close data-toast="Plan cambiado: 9 actividades nuevas">Sí, cambiar el plan</button></div>
+  </dialog>
+
+  <dialog class="dlg" id="dlg-pago" aria-labelledby="dlg-pago-t">
+    <form>
+      <div class="dlg-head"><h2 id="dlg-pago-t">Registrar pago</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <div class="dlg-body">
+        <div class="form">
+          <label for="pg-fecha" class="req">Fecha</label><div class="field-wrap"><span class="adorn"><input class="field" id="pg-fecha" value="5/4/2027"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+          <label for="pg-monto" class="req">Pago</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="pg-monto" value="718.00" inputmode="decimal"></span></div>
+          <label for="pg-tipo">Tipo de pago</label><div class="field-wrap"><select class="field" id="pg-tipo"><option>Cheque</option><option>Tarjeta</option><option>Transferencia</option><option>Efectivo</option></select></div>
+          <label for="pg-num">Número</label><div class="field-wrap"><input class="field" id="pg-num" value="DEMO-03"></div>
+        </div>
+      </div>
+      <div class="dlg-foot"><span class="left">Enter guarda · Esc cierra</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Registrar pago</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="dlg" id="dlg-anular" aria-labelledby="dlg-anular-t">
+    <form data-done="Pago anulado">
+      <div class="dlg-head danger"><h2 id="dlg-anular-t">Anular pago DEMO-01</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <div class="dlg-body">
+        <p style="margin-bottom:12px">El pago de <b>$500.00</b> queda tachado y fuera del balance. No se borra (AP-05).</p>
+        <div class="form"><label for="an-razon" class="req">Razón</label><div class="field-wrap"><textarea class="field" id="an-razon" rows="3" required placeholder="Por qué se anula"></textarea></div></div>
+      </div>
+      <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-danger-solid" type="submit">Anular pago</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="dlg" id="dlg-quitar" aria-labelledby="dlg-quitar-t">
+    <div class="dlg-head danger"><h2 id="dlg-quitar-t">¿Quitar la actividad?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><p>Se quita <b>Cena de Gala Aniversario</b> (2 × $110.00) del registro #1283. El total baja a $998.00.</p></div>
+    <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="button" data-close data-toast="Actividad quitada">Quitar</button></div>
+  </dialog>
+
+  <dialog class="dlg" id="dlg-enviar" aria-labelledby="dlg-enviar-t">
+    <div class="dlg-head"><h2 id="dlg-enviar-t">Enviar correos</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><p>Se enviarán <b>23 correos</b> del envío «Taller de mayo». Los correos ya enviados no se repiten.</p></div>
+    <div class="dlg-foot"><span class="left">Modo simulado: no sale ningún correo.</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="button" data-close data-toast="23 correos en cola">Enviar 23 correos</button></div>
+  </dialog>
+</body>
+</html>

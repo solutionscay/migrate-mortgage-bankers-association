@@ -1,0 +1,23 @@
+<header class="topbar">
+  <a class="brand" href="index.html">MBA <small>Convención y Escuela</small></a>
+  <nav class="modules" aria-label="Módulos">
+    <a href="#" data-module="convencion">Convención</a>
+    <a href="#" data-module="escuela">Escuela</a>
+    <a href="#" data-module="correos">Correos</a>
+    <a href="#" data-module="admin" class="admin-only">Admin</a>
+  </nav>
+  <label class="search" role="search">
+    <span class="sr-only">Buscar</span>
+    <svg class="i"><use href="#i-search"/></svg>
+    <input type="search" placeholder="Buscar convencionista, registro, estudiante…" autocomplete="off">
+  </label>
+  <button class="usermenu" type="button" data-menu="menu-user" aria-haspopup="menu" aria-expanded="false">
+    <svg class="i"><use href="#i-user"/></svg><b data-role-name>admin.demo</b><svg class="i i-sm"><use href="#i-chevron-down"/></svg>
+  </button>
+  <div class="menu" id="menu-user" popover role="menu">
+    <div class="menu-note">Sesión: <span data-role-text>ROLE-ADMIN</span></div>
+    <a href="#" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+    <hr>
+    <a href="#" role="menuitem">Salir</a>
+  </div>
+</header>
