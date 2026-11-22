@@ -161,7 +161,8 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 - Data queries: `registration_get` (05). Totals from `v_registration_totals`, item lines from `v_registration_item_lines`.
 - Commands: OP-REG-01 to OP-REG-09. Invariant owners: BR-REG-02 (plan), BR-REG-03 (quantities), BR-REG-06 (attributes), BR-REG-09 (void).
 - Hierarchy: title "Registro #<number> · <name> · <type>" with status badge; left column person block (read-only, link to UI-04) and header fields; right column summary card (Total, Pagos, Balance). Below: Evento and Plan line, then items table, guests list, payments table.
-- States: loading (HTMX indicator on the changed block), empty items ("Sin actividades: escoja un plan o añada una actividad"), validation (inline), forbidden (void button absent for staff; route returns 403), conflict (none; last write wins).
+- States: loading (HTMX indicator on the changed block), empty items ("Sin actividades: escoja un plan o añada una actividad"), saving (footer "Guardando…"; a line change marks the row and the totals block until the server returns them), validation (inline, per field: value kept, red border, message; footer "1 campo sin guardar"; not saved), forbidden (void button absent for staff; route returns 403), conflict (none; last write wins per field).
+- Save: per-field autosave (design system "Save model"); no Edit, Cancel or Guardar button on the page. Line fields (price, qty, no charge, attributes) patch the item and return the row plus the totals block out of band (`PATCH /registrations/{id}/items/{item_id}`).
 - Keyboard: dialogs are native `<dialog>` with focus trap and Esc to close; Enter submits the inline payment form.
 - Destructive actions: plan change with a plan set and item removal open a confirm dialog (05 "Confirmations"). Payment void asks for a reason.
 
@@ -211,6 +212,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 - Commands: OP-EVT-01, OP-EVT-02, OP-EVT-03, OP-SPN-01, OP-SPN-02; print links (OP-RPT-01); accounting CSV (OP-RPT-04).
 - Hierarchy: header (name, place, dates, status, PDF chip) with stat tiles; action bar "Ver registros", "Registro en puerta", "Imprimir ▾" (Lista de facturación, Registros individuos, Registros afiliados, badges, labels, cartas), "Exportar contabilidad (CSV)"; tabs below.
 - States: tab loads with HTMX (`hx-get ...?tab=sponsors`, `hx-push-url`); empty tab hints; delete refused when registrations exist (409 message).
+- Save: per-field autosave (design system "Save model"); no Edit, Cancel or Guardar button on the page. Header fields return the stat tiles out of band.
 
 #### Fields and controls
 
@@ -260,6 +262,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 - Commands: OP-EVT-05, OP-EVT-04 (on event change and "Reconstruir").
 - Hierarchy: title "Plan · <event> · <plan>", event select, name, price override; items table "Detalles" with Incluir checkbox, type, name, place, qty, start, end; price summary.
 - States: event without items -> message "El Evento seleccionado no tiene detalles..." (BR-EVT-06); no event -> "Favor de seleccionar el evento."
+- Save: per-field autosave (design system "Save model"); no Edit, Cancel or Guardar button on the page. Incluir and qty patch the plan item and return the plan price out of band.
 
 #### Fields and controls
 
@@ -295,6 +298,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 - Commands: OP-STU-01 to OP-STU-04, OP-CRT-02, OP-ENR-01 to OP-ENR-03 (through UI-20), print certificate (OP-CRT-03), transcript (`/print/school/transcripcion-de-creditos`).
 - Hierarchy: header (name, company, status badge, affiliate badge when the affiliate is ACTIVO); summary tiles (average, credits, hours, last course date) (BR-STU-06); tabs Certificaciones, Cursos especializados, Seminarios, Cursos cortos, Datos personales.
 - States: new student shows Datos personales only until saved; delete refused with enrollments (409).
+- Save: per-field autosave (design system "Save model"); no Edit, Cancel or Guardar button on the page. The "Nuevo estudiante" dialog keeps Guardar (it creates the record).
 
 #### Fields and controls
 
@@ -351,7 +355,7 @@ No SSN field exists (D-06).
 - Source: `objects/MBS.fmp12/layouts/82-Matricula_de_Curso.txt`, `objects/MBS.fmp12/layouts/103-Matricula_de_Seminario.txt`, `objects/MBS.fmp12/layouts/113-Matricula_de_Curso_Corto.txt`; scripts MBS 37-39, 165, 166. Before screen: none.
 - Data: `enrollment_get`, `calendar_options` (active rows only, BR-CRS-01).
 - Commands: OP-ENR-01 to OP-ENR-05, OP-ENR-08.
-- Hierarchy: dialog (wide). Top: offering select, then date select (HTMX loads options); price card shows member or individual price and why ("Afiliado ACTIVO: precio de socio") (BR-ENR-01). Middle: payer, payment, date of payment, check number, invoice number, notes. Course kind: Notas section with Examen, Primera to Octava, Promedio asignaciones, Asistencia y puntualidad, Promedio final, Puntuación with live letter and pass badge (BR-ENR-03 to BR-ENR-05). Footer: Guardar, Dar de baja, Borrar (confirm; refused with payment).
+- Hierarchy: dialog (wide). Top: offering select, then date select (HTMX loads options); price card shows member or individual price and why ("Afiliado ACTIVO: precio de socio") (BR-ENR-01). Middle: payer, payment, date of payment, check number, invoice number, notes. Course kind: Notas section with Examen, Primera to Octava, Promedio asignaciones, Asistencia y puntualidad, Promedio final, Puntuación with live letter and pass badge (BR-ENR-03 to BR-ENR-05). Footer: Guardar, Dar de baja, Borrar (confirm; refused with payment). The enrollment dialog keeps Guardar: it creates or settles an enrollment (payment, grades) and validates them together.
 
 #### Fields and controls
 
@@ -407,6 +411,7 @@ No SSN field exists (D-06).
 - Commands: OP-MAIL-02, OP-MAIL-03, OP-MAIL-04 (JOB-01), OP-MAIL-05; integration EXT-01.
 - Hierarchy: mock banner when no `RESEND_API_KEY` ("Modo de prueba: ningún correo sale del servidor; vea la bandeja de salida"); batch header (title, sender profile, subject, message editor, attachment chip); counts; e-mail table (name, to, status badge, sent on, error first line, actions Enviar / Ver / Borrar). "Enviar todos" opens a confirm with the count of unsent e-mails, then shows a progress bar that polls every second.
 - States: draft, sending (buttons disabled, progress), done, partial errors (error rows red with the message), forbidden (none: both roles, AP-03).
+- Save: per-field autosave (design system "Save model"); no Edit, Cancel or Guardar button on the page. Batch fields patch only while no e-mail of the batch is sent.
 
 #### Fields and controls
 
@@ -490,7 +495,8 @@ No SSN field exists (D-06).
 | Modal/tab/navigation behavior | Native `<dialog>` for pickers and enrollment; tabs are links with `hx-get` + `hx-push-url`; fixed module tabs in the top bar and nav tabs per module | layouts 32, 33, 58, 65, 82 open as windows (fact) | back button restores the tab |
 | Print/PDF behavior | Print CSS pages; browser print or save as PDF | `decisions.md` | Lista de Facturación prints on letter paper with page breaks |
 | Accessibility target | WCAG 2.2 AA for the meaty screens: labels on every control, focus visible, keyboard path through dialogs, contrast ≥ 4.5:1 | Step 5 default (D-75 not answered) | keyboard walk of UI-06 and UI-20 |
-| JavaScript | htmx (vendored) + `app.js` < 200 lines: dialog open/close, focus return, Esc, `Ctrl+S` submits the current form, confirm-dialog wiring | `decisions.md` | pages work with JS off except dialogs and partial swaps |
+| Save model | Record pages are always editable; no Edit, Cancel or Guardar button. A changed field saves on change/blur: htmx sends only that field (`hx-patch`, `hx-trigger="change"`, 05 "Per-field autosave"); the server validates, saves and returns the field fragment, and for a line field also the server-computed totals (`hx-swap-oob`). Error: the value stays as typed, red border and message, not saved. Esc reverts the field to its saved value before the user leaves it (FileMaker Revert Record). The fixed footer shows "Guardando…", "Guardado h:mm p. m." or "N campo(s) sin guardar" in a fixed-width slot. Last write wins per field; every change leaves an `audit_log` row. Guardar stays only in dialogs that create or settle a record (payment, enrollment, new student, new user) and in submit forms (sign-in, password change). | operator decision (2026-11-21) | `design/registro.html?state=guardando`, `?state=sin-guardar`; T-05-13, T-05-14 |
+| JavaScript | htmx (vendored) + `app.js` < 250 lines: dialog open/close, focus return, Esc (closes a dialog; in a changed field, reverts it), `Ctrl+S` saves the focused field now or submits the dialog form, save-state footer from htmx events, confirm-dialog wiring | `decisions.md`, operator decision (2026-11-21) | pages work with JS off except dialogs and partial swaps |
 
 ## Design milestone (M1) inputs
 

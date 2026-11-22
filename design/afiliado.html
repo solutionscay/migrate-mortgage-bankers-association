@@ -108,7 +108,6 @@
       <div class="actions">
         <span class="tag lg ok">ACTIVO</span>
         <button class="btn btn-danger admin-only" type="button" data-open="dlg-borrar-afi"><svg class="i"><use href="#i-trash"/></svg>Borrar afiliado</button>
-        <button class="btn btn-primary" type="button" data-toast="Afiliado guardado">Guardar</button>
       </div>
     </div>
 
@@ -116,24 +115,24 @@
       <div class="content-inner">
         <form class="grid cols-2" data-done="Afiliado guardado">
           <div class="form">
-            <label for="af-cta"># de Cuenta</label><div class="field-wrap"><input class="field" id="af-cta" value="A-1001"></div>
-            <label for="af-socio" class="req">Afiliado</label><div class="field-wrap"><input class="field" id="af-socio" value="Banco Ejemplo"></div>
-            <label for="af-otro">Otro nombre</label><div class="field-wrap"><input class="field" id="af-otro" value="Banco Ejemplo de PR"></div>
-            <label for="af-neg">Tipo de negocio</label><div class="field-wrap"><input class="field" id="af-neg" value="Banco comercial"></div>
-            <label for="af-mem">Membresía</label><div class="field-wrap"><select class="field" id="af-mem"><option>Regular</option><option>Asociado</option></select></div>
-            <label for="af-tipo">Tipo</label><div class="field-wrap"><select class="field" id="af-tipo"><option>ACTIVO</option><option>INACTIVO</option></select><div class="field-hint">ACTIVO: sus estudiantes pagan precio de socio (BR-AFF-01).</div></div>
+            <label for="af-cta"># de Cuenta</label><div class="field-wrap"><input class="field" id="af-cta" value="A-1001" name="cta" data-saved="A-1001" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-socio" class="req">Afiliado</label><div class="field-wrap"><input class="field" id="af-socio" value="Banco Ejemplo" name="socio" data-saved="Banco Ejemplo" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-otro">Otro nombre</label><div class="field-wrap"><input class="field" id="af-otro" value="Banco Ejemplo de PR" name="otro" data-saved="Banco Ejemplo de PR" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-neg">Tipo de negocio</label><div class="field-wrap"><input class="field" id="af-neg" value="Banco comercial" name="neg" data-saved="Banco comercial" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-mem">Membresía</label><div class="field-wrap"><select class="field" id="af-mem" name="mem" data-saved="Regular" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option>Regular</option><option>Asociado</option></select></div>
+            <label for="af-tipo">Tipo</label><div class="field-wrap"><select class="field" id="af-tipo" name="tipo" data-saved="ACTIVO" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option>ACTIVO</option><option>INACTIVO</option></select><div class="field-hint">ACTIVO: sus estudiantes pagan precio de socio (BR-AFF-01).</div></div>
             <span class="gap"></span>
-            <label for="af-mail">Email</label><div class="field-wrap"><input class="field" id="af-mail" type="email" value="educacion@ejemplo.com"></div>
-            <label for="af-t1">Teléfono 1</label><div class="field-wrap"><input class="field" id="af-t1" value="(787) 555-0300"></div>
-            <label for="af-t2">Teléfono 2</label><div class="field-wrap"><input class="field" id="af-t2" value="(787) 555-0301"></div>
-            <label for="af-fax">Fax</label><div class="field-wrap"><input class="field" id="af-fax" value="(787) 555-0309"></div>
+            <label for="af-mail">Email</label><div class="field-wrap"><input class="field" id="af-mail" type="email" value="educacion@ejemplo.com" name="mail" data-saved="educacion@ejemplo.com" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-t1">Teléfono 1</label><div class="field-wrap"><input class="field" id="af-t1" value="(787) 555-0300" name="t1" data-saved="(787) 555-0300" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-t2">Teléfono 2</label><div class="field-wrap"><input class="field" id="af-t2" value="(787) 555-0301" name="t2" data-saved="(787) 555-0301" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-fax">Fax</label><div class="field-wrap"><input class="field" id="af-fax" value="(787) 555-0309" name="fax" data-saved="(787) 555-0309" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
           </div>
           <div class="form">
-            <label for="af-dir">Dirección</label><div class="field-wrap"><input class="field" id="af-dir" value="Avenida Ficticia 400, Suite 12"></div>
-            <label for="af-pue">Pueblo-Ciudad</label><div class="field-wrap"><input class="field" id="af-pue" value="San Juan"></div>
-            <label>Estado / Código Postal</label><div class="field-wrap inline-fields" style="grid-template-columns:72px 1fr"><input class="field" value="PR" aria-label="Estado"><input class="field" value="00900" aria-label="Código Postal"></div>
+            <label for="af-dir">Dirección</label><div class="field-wrap"><input class="field" id="af-dir" value="Avenida Ficticia 400, Suite 12" name="dir" data-saved="Avenida Ficticia 400, Suite 12" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="af-pue">Pueblo-Ciudad</label><div class="field-wrap"><input class="field" id="af-pue" value="San Juan" name="pue" data-saved="San Juan" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label>Estado / Código Postal</label><div class="field-wrap inline-fields" style="grid-template-columns:72px 1fr"><input class="field" value="PR" aria-label="Estado" name="estado" data-saved="PR" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" value="00900" aria-label="Código Postal" name="codigo_postal" data-saved="00900" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
             <span class="gap"></span>
-            <label for="af-fac">Facturar a</label><div class="field-wrap"><textarea class="field" id="af-fac" rows="3">Depto. de Adiestramiento
+            <label for="af-fac">Facturar a</label><div class="field-wrap"><textarea class="field" id="af-fac" rows="3" name="fac" hx-patch="/affiliates/37" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">Depto. de Adiestramiento
 Banco Ejemplo
 Apartado 0000, San Juan PR 00900</textarea></div>
           </div>
@@ -154,7 +153,7 @@ Apartado 0000, San Juan PR 00900</textarea></div>
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

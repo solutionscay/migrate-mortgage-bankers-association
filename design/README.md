@@ -8,7 +8,7 @@ Open any page from disk. States are reached with the hooks in "State hooks" belo
 
 | File | UI | Screen | Depth | States (how to reach) |
 |---|---|---|---|---|
-| `components.html` | — | Component gallery | all components | every state in place; `?at=<section>`; dialogs via the buttons |
+| `components.html` | — | Component gallery | all components | every state in place; save states `?state=guardando`, `?state=sin-guardar` (section `#autosave`); `?at=<section>`; dialogs via the buttons |
 
 **Inicio and session**
 
@@ -25,7 +25,7 @@ Open any page from disk. States are reached with the hooks in "State hooks" belo
 | `convencionistas.html` | UI-03 | Convencionistas | shell | list, filters, row menu |
 | `convencionista.html` | UI-04 | Convencionista | full | `?state=error`, `?state=vacio`, `?open=dlg-borrar` (409), `?open=dlg-borrar-reg`, `?role=staff` |
 | `registros.html` | UI-05 | Registros | shell | list with event, status and type filters |
-| `registro.html` | UI-06 | Registro | full (meaty) | `?state=vacio`; `?open=` `dlg-evento`, `dlg-plan`, `dlg-plan-confirm`, `dlg-atributos-hotel`, `dlg-atributos-mesa`, `dlg-quitar`, `dlg-quitar-guest`, `dlg-pago`, `dlg-pago-error`, `dlg-anular` (admin); `?role=staff&at=pagos` |
+| `registro.html` | UI-06 | Registro | full (meaty) | `?state=vacio`, `?state=guardando` (qty change, totals refreshing), `?state=sin-guardar` (qty error, footer \"1 campo sin guardar\"); `?open=` `dlg-evento`, `dlg-plan`, `dlg-plan-confirm`, `dlg-atributos-hotel`, `dlg-atributos-mesa`, `dlg-quitar`, `dlg-quitar-guest`, `dlg-pago`, `dlg-pago-error`, `dlg-anular` (admin); `?role=staff&at=pagos` |
 | `registro-puerta.html` | UI-07 | Registro en puerta | shell, tablet | three status buttons per row; works at 820 px |
 | `convenciones.html` | UI-08 | Convenciones | shell | list |
 | `convencion.html` | UI-09 | Convención | full (meaty) | `?tab=tab-act` / `tab-aus` / `tab-fac`; `?open=` `dlg-quitar-act` (409), `dlg-quitar-sp`, `dlg-quitar-bill`, `dlg-borrar-ev` (admin); `?menu=btn-print`, `?menu=btn-ev-more` |
@@ -44,7 +44,7 @@ Open any page from disk. States are reached with the hooks in "State hooks" belo
 | `afiliados.html` | UI-16 | Afiliados | shell | list, print links |
 | `afiliado.html` | UI-17 | Afiliado | shell | `?open=dlg-borrar-afi`; `?role=staff` |
 | `ofrecimiento.html` | UI-18 | Ofrecimientos | shell | `?tab=tab-cal` / `tab-det` |
-| `fecha-curso.html` | UI-19 | Fecha del curso | shell (dialog) | dialog opens on load (`<body data-open="dlg-fecha">`) |
+| `fecha-curso.html` | UI-19 | Fecha del curso | shell (dialog) | dialog opens on load (`<body data-open="dlg-fecha">`), autosave with Cerrar; `?state=guardando` |
 | `matricula.html` | UI-20 | Matrícula | full (meaty, dialog) | opens `dlg-mat` on load; `?open=` `dlg-mat-ind`, `dlg-mat-err`, `dlg-mat-pago`, `dlg-mat-sem`, `dlg-mat-sinfecha`, `dlg-mat-borrar` |
 | `matriculas.html` | UI-21 | Matrículas | shell | list with grades, export and import |
 | `importar-notas.html` | UI-22 | Importar notas | shell (3 steps) | preview; `?open=dlg-aplicar` |
@@ -78,6 +78,7 @@ Open any page from disk. States are reached with the hooks in "State hooks" belo
 - The FileMaker solid teal buttons (Evento, Plan) become a white block with a teal left rule and teal text (`.pick`).
 - One quiet row action (`.row-act`, "⋯") at the end of a row opens a menu. A child row without money keeps "Quitar" for both roles (`.act-remove`, AP-06). Void and delete of a row with money (`.row-money`) appear only for ROLE-ADMIN (`.act-void`, `.act-delete` with `.admin-only`, AP-05). The column keeps its width in both role views.
 - No FileMaker chrome: no record navigator, layout picker or found-set bar.
+- No Save button on record pages, as in FileMaker: each field saves when the user leaves it (see "Saving"). Guardar stays only in dialogs that create or settle a record.
 
 ## Fixed shell
 
@@ -109,7 +110,7 @@ design/
   *.html                 35 page designs (UI-01 to UI-35), see "Pages"
   partials/              shared shell: head, icons (SVG sprite), topbar, nav, footer
   assets/app.css         tokens, shell, components
-  assets/app.js          active nav, role view, dialogs, row menus, tabs, toasts, Ctrl+S (vanilla, no framework)
+  assets/app.js          active nav, role view, dialogs, row menus, tabs, toasts, save state, Esc revert, Ctrl+S (vanilla, no framework)
   assets/fonts/          IBM Plex Sans woff2 (Regular, Medium, SemiBold, Bold) and OFL.txt
   tools/sync_partials.py
   tools/page-template.html  starting point for a new page (sync_partials skips tools/)
@@ -128,11 +129,39 @@ Screenshot: `design/tools/shoot.sh <page.html> "<query>" <name>` writes `design/
 The footer has a "Ver como" switch for ROLE-ADMIN and ROLE-STAFF. It only changes what the page draws. The server guards every route.
 
 
+## Saving (per-field autosave)
+
+Record pages are always editable. There is no Edit, Cancel or Guardar button on them (operator decision, 2026-11-21).
+
+- **When a field saves.** A changed field saves on change (on blur for text). htmx sends only that field: `hx-patch="/registrations/1283" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"`, and `name` is the column. The server validates, saves and returns the field fragment. Routes: `migration/05_api_design.md` "Per-field autosave (PATCH)".
+- **Line fields.** Price, qty, no charge and attributes use `hx-target="closest tr"`. The response brings the row plus the totals block out of band (`id="totales"`, `hx-swap-oob`). Totals always come from the server.
+- **Error.** The response is 422 with the field fragment. The value stays as typed, with a red border and a message under the field (for a line field, in a row below). It is not saved. The wrapper carries `data-unsaved`.
+- **Esc.** Esc reverts a changed field to its saved value (`data-saved`, else the HTML value) before the user leaves it. In a dialog, Esc on an unchanged field still closes the dialog.
+- **Footer.** The footer slot (`partials/footer.html`, `.save-state`) shows the save state:
+  - "Guardando…" on `htmx:beforeRequest`;
+  - "Guardado h:mm p. m." after a successful swap;
+  - "N campo(s) sin guardar", the count of `[data-unsaved]`.
+
+  The slot has a fixed width, so the footer never moves.
+- **Concurrency.** Last write wins, per field. Every change writes an `audit_log` row.
+- **Ctrl+S.** Ctrl+S saves the focused field at once. In a dialog form it submits the form.
+- **Static pages.** They have no server and no htmx. app.js shows the same footer cycle locally on change. `?state=guardando` and `?state=sin-guardar` draw the states.
+
+Guardar stays in the dialogs that create or settle a record:
+- payment (`registro.html` `dlg-pago`);
+- enrollment (`matricula.html`);
+- new student (`estudiante.html` `dlg-nuevo`);
+- user password (`admin-usuarios.html` `dlg-clave`);
+- the submit forms of sign-in and password change (`login.html`, `cambiar-contrasena.html`).
+
+The attribute dialogs (`registro.html` `dlg-atributos-*`) and the calendar-row dialog (`fecha-curso.html`) edit an existing record. They autosave too and close with Cerrar.
+
 ## State hooks (`assets/app.js`)
 
 | Hook | Effect |
 |---|---|
 | `?role=staff` | ROLE-STAFF view (the footer "Ver como" switch does the same). `.admin-only` hides; `.staff-only` shows (the 403 page on admin pages) |
+| `?state=guardando`, `?state=sin-guardar` | save states: the footer shows "Guardando…" or "N campo(s) sin guardar" (counts the visible invalid fields); pages draw the matching field and row states |
 | `?state=NAME` | sets `<body data-state="NAME">`; only elements whose `data-st` lists NAME show. With no state, elements that list `base` show. Elements without `data-st` always show. Without JS the `base` view shows |
 | `?tab=<tab id>` | selects that tab of its tablist |
 | `?open=<dialog id>` | opens that `<dialog>` on load; else `<body data-open="<dialog id>">` opens the page's own dialog |
@@ -155,6 +184,8 @@ All 1440x900, headless Chromium, made with `tools/shoot.sh` unless noted.
 | `screenshots/components-scrolled.png` | `components.html?at=detalle` |
 | `screenshots/components-dialog.png` | `components.html?at=formulario&open=dlg-plan` |
 | `screenshots/components-roles.png` | `components.html?at=roles` |
+| `screenshots/components-guardado.png` | `components.html?at=autosave` |
+| `screenshots/components-sin-guardar.png` | `components.html?at=autosave&state=sin-guardar` |
 | `screenshots/login.png` | `login.html` |
 | `screenshots/login-error.png` | `login.html?state=error` |
 | `screenshots/index.png` | `index.html` |
@@ -174,6 +205,9 @@ All 1440x900, headless Chromium, made with `tools/shoot.sh` unless noted.
 | `screenshots/registro-plan-confirm.png` | `registro.html?open=dlg-plan-confirm` |
 | `screenshots/registro-pago-error.png` | `registro.html?open=dlg-pago-error` |
 | `screenshots/registro-atributos.png` | `registro.html?open=dlg-atributos-hotel` |
+| `screenshots/registro-guardando.png` | `registro.html?state=guardando` |
+| `screenshots/registro-sin-guardar.png` | `registro.html?state=sin-guardar` |
+| `screenshots/registro-atributos-guardando.png` | `registro.html?open=dlg-atributos-hotel&state=guardando` |
 | `screenshots/registro-anular.png` | `registro.html?open=dlg-anular&at=pagos` |
 | `screenshots/registro-puerta.png` | `registro-puerta.html` |
 | `screenshots/registro-puerta-tablet.png` | `registro-puerta.html` at 820x1180 |
@@ -209,6 +243,7 @@ All 1440x900, headless Chromium, made with `tools/shoot.sh` unless noted.
 | `screenshots/ofrecimiento.png` | `ofrecimiento.html` |
 | `screenshots/ofrecimiento-detalles.png` | `ofrecimiento.html?tab=tab-det` |
 | `screenshots/fecha-curso.png` | `fecha-curso.html` |
+| `screenshots/fecha-curso-guardando.png` | `fecha-curso.html?state=guardando` |
 | `screenshots/matricula.png` | `matricula.html` |
 | `screenshots/matricula-individual.png` | `matricula.html?open=dlg-mat-ind` |
 | `screenshots/matricula-errores.png` | `matricula.html?open=dlg-mat-err` |

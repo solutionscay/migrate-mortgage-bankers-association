@@ -107,7 +107,6 @@
       <h1 class="title"><b>Suscripción de Préstamos FHA</b> <span class="sub">· curso especializado · 3 créditos · 45 horas</span></h1>
       <div class="actions">
         <a class="btn" href="matriculas.html"><svg class="i"><use href="#i-list"/></svg>Matrículas</a>
-        <button class="btn btn-primary" type="button" data-toast="Curso guardado">Guardar</button>
       </div>
     </div>
 
@@ -146,17 +145,17 @@
         <div class="tabpanel" role="tabpanel" id="tp-det" aria-labelledby="tab-det" hidden>
           <form class="block-body grid cols-2" data-done="Curso guardado">
             <div class="form">
-              <label for="cu-nom" class="req">Curso</label><div class="field-wrap"><input class="field" id="cu-nom" value="Suscripción de Préstamos FHA"></div>
-              <label for="cu-desc">Descripción</label><div class="field-wrap"><textarea class="field" id="cu-desc" rows="4">Guías de suscripción FHA para préstamos residenciales: capacidad de pago, crédito, colateral y documentación. Texto de ejemplo.</textarea></div>
-              <label for="cu-req">Requisitos</label><div class="field-wrap"><textarea class="field" id="cu-req" rows="3">Análisis de Crédito Residencial o experiencia equivalente.</textarea></div>
+              <label for="cu-nom" class="req">Curso</label><div class="field-wrap"><input class="field" id="cu-nom" value="Suscripción de Préstamos FHA" name="nom" data-saved="Suscripción de Préstamos FHA" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+              <label for="cu-desc">Descripción</label><div class="field-wrap"><textarea class="field" id="cu-desc" rows="4" name="desc" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">Guías de suscripción FHA para préstamos residenciales: capacidad de pago, crédito, colateral y documentación. Texto de ejemplo.</textarea></div>
+              <label for="cu-req">Requisitos</label><div class="field-wrap"><textarea class="field" id="cu-req" rows="3" name="req" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">Análisis de Crédito Residencial o experiencia equivalente.</textarea></div>
             </div>
             <div class="form">
-              <label for="cu-cred">Créditos</label><div class="field-wrap"><input class="field num" id="cu-cred" value="3" style="width:96px"></div>
-              <label for="cu-hrs">Horas</label><div class="field-wrap"><input class="field num" id="cu-hrs" value="45" style="width:96px"></div>
-              <label for="cu-quo">Quórum</label><div class="field-wrap"><input class="field num" id="cu-quo" value="12" style="width:96px"></div>
+              <label for="cu-cred">Créditos</label><div class="field-wrap"><input class="field num" id="cu-cred" value="3" style="width:96px" name="cred" data-saved="3" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+              <label for="cu-hrs">Horas</label><div class="field-wrap"><input class="field num" id="cu-hrs" value="45" style="width:96px" name="hrs" data-saved="45" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+              <label for="cu-quo">Quórum</label><div class="field-wrap"><input class="field num" id="cu-quo" value="12" style="width:96px" name="quo" data-saved="12" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
               <span class="gap"></span>
-              <label for="cu-pm">Precio afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pm" value="350.00"></span></div>
-              <label for="cu-pi">Precio no afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pi" value="425.00"></span><div class="field-hint">Una fecha nueva copia estos precios una vez (BR-CRS-02).</div></div>
+              <label for="cu-pm">Precio afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pm" value="350.00" name="pm" data-saved="350.00" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
+              <label for="cu-pi">Precio no afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pi" value="425.00" name="pi" data-saved="425.00" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span><div class="field-hint">Una fecha nueva copia estos precios una vez (BR-CRS-02).</div></div>
             </div>
           </form>
         </div>
@@ -166,7 +165,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

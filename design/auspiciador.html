@@ -106,7 +106,7 @@
       <div class="crumbs"><a href="convenciones.html">Convenciones</a><span class="sep">/</span><a href="convencion.html">Convención Demo 2027</a><span class="sep">/</span><span>Auspiciadores</span><span class="sep">/</span><span>Acme Mortgage Demo</span></div>
       <h1 class="title"><b>Auspiciador</b> · Acme Mortgage Demo <span class="title-tag"><span class="tag info lg">Platino</span></span></h1>
       <div class="actions">
-        <a class="btn" href="convencion.html"><svg class="i"><use href="#i-chevron-left"/></svg>Volver</a><button class="btn btn-primary" type="button" data-toast="Auspiciador guardado">Guardar</button>
+        <a class="btn" href="convencion.html"><svg class="i"><use href="#i-chevron-left"/></svg>Volver</a>
       </div>
     </div>
 
@@ -114,22 +114,22 @@
       <div class="content-inner">
         <div class="grid cols-2">
           <div class="form">
-            <label for="s-nombre" class="req">Auspiciador</label><div class="field-wrap"><input class="field" id="s-nombre" value="Acme Mortgage Demo"></div>
-            <label for="s-cat">Categoría</label><div class="field-wrap"><select class="field" id="s-cat"><option selected>Platino</option><option>Oro</option><option>Plata</option><option>Bronce</option></select></div>
-            <label for="s-contacto">Contacto</label><div class="field-wrap"><input class="field" id="s-contacto" value="Ana Ejemplo"></div>
-            <label for="s-titulo">Título</label><div class="field-wrap"><input class="field" id="s-titulo" value="Sra." style="width:120px"></div>
-            <label for="s-saludo">Saludo</label><div class="field-wrap"><input class="field" id="s-saludo" value="Estimada señora Ejemplo:"></div>
-            <label for="s-tel">Teléfono</label><div class="field-wrap"><input class="field" id="s-tel" value="787-555-0112" inputmode="tel"></div>
-            <label for="s-email">E-mail</label><div class="field-wrap"><input class="field" id="s-email" value="ana.ejemplo@ejemplo.com" inputmode="email"></div>
+            <label for="s-nombre" class="req">Auspiciador</label><div class="field-wrap"><input class="field" id="s-nombre" value="Acme Mortgage Demo" name="nombre" data-saved="Acme Mortgage Demo" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="s-cat">Categoría</label><div class="field-wrap"><select class="field" id="s-cat" name="cat" data-saved="Platino" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option selected>Platino</option><option>Oro</option><option>Plata</option><option>Bronce</option></select></div>
+            <label for="s-contacto">Contacto</label><div class="field-wrap"><input class="field" id="s-contacto" value="Ana Ejemplo" name="contacto" data-saved="Ana Ejemplo" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="s-titulo">Título</label><div class="field-wrap"><input class="field" id="s-titulo" value="Sra." style="width:120px" name="titulo" data-saved="Sra." hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="s-saludo">Saludo</label><div class="field-wrap"><input class="field" id="s-saludo" value="Estimada señora Ejemplo:" name="saludo" data-saved="Estimada señora Ejemplo:" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="s-tel">Teléfono</label><div class="field-wrap"><input class="field" id="s-tel" value="787-555-0112" inputmode="tel" name="tel" data-saved="787-555-0112" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="s-email">E-mail</label><div class="field-wrap"><input class="field" id="s-email" value="ana.ejemplo@ejemplo.com" inputmode="email" name="email" data-saved="ana.ejemplo@ejemplo.com" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
             <span class="gap"></span>
-            <label for="s-dir">Dirección</label><div class="field-wrap"><input class="field" id="s-dir" value="Avenida Demo 400, Suite 2"></div>
-            <label>Ciudad/Estado/Zip</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 56px 80px"><input class="field" value="Pueblo Demo" aria-label="Ciudad"><input class="field" value="PR" aria-label="Estado"><input class="field" value="00000" aria-label="Zip"></div>
+            <label for="s-dir">Dirección</label><div class="field-wrap"><input class="field" id="s-dir" value="Avenida Demo 400, Suite 2" name="dir" data-saved="Avenida Demo 400, Suite 2" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label>Ciudad/Estado/Zip</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 56px 80px"><input class="field" value="Pueblo Demo" aria-label="Ciudad" name="ciudad" data-saved="Pueblo Demo" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" value="PR" aria-label="Estado" name="estado" data-saved="PR" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" value="00000" aria-label="Zip" name="zip" data-saved="00000" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
           </div>
           <div>
             <div class="form">
-              <label for="s-pedido">Pedido</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" value="10,000.00" id="s-pedido"></span></div>
-              <label for="s-prometido">Prometido</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" id="s-prometido" placeholder="0.00"></span></div>
-              <label for="s-recibido">Recibido</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" value="10,000.00" id="s-recibido"></span></div>
+              <label for="s-pedido">Pedido</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" value="10,000.00" id="s-pedido" name="pedido" data-saved="10,000.00" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
+              <label for="s-prometido">Prometido</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" id="s-prometido" placeholder="0.00" name="prometido" data-saved="" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
+              <label for="s-recibido">Recibido</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" value="10,000.00" id="s-recibido" name="recibido" data-saved="10,000.00" hx-patch="/sponsors/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
               <span class="gap"></span>
               <span class="label">Logo</span><div class="field-wrap"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>logo-acme-demo.png<button class="x" type="button" aria-label="Quitar logo"><svg class="i i-sm"><use href="#i-x"/></svg></button></span></div>
               <span class="label">Convención</span><div class="field-wrap"><div class="pick pick-fixed">Convención Demo 2027 <span class="meta">5/6/2027 – 5/8/2027</span></div></div>
@@ -150,7 +150,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

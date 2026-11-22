@@ -106,7 +106,7 @@
       <div class="crumbs"><a href="convencionistas.html">Convención</a><span class="sep">/</span><a href="convencionistas.html">Convencionistas</a><span class="sep">/</span><span>María Ejemplo Demo</span></div>
       <h1 class="title"><b>Convencionista</b> · María Ejemplo Demo</h1>
       <div class="actions">
-        <a class="btn" href="registros.html"><svg class="i"><use href="#i-list"/></svg>Ver registros</a><button class="btn btn-danger admin-only" type="button" data-open="dlg-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar</button><button class="btn btn-primary" type="button" data-toast="Convencionista guardado">Guardar</button>
+        <a class="btn" href="registros.html"><svg class="i"><use href="#i-list"/></svg>Ver registros</a><button class="btn btn-danger admin-only" type="button" data-open="dlg-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar</button>
       </div>
     </div>
 
@@ -114,23 +114,23 @@
       <div class="content-inner">
         
         <div class="error-summary" data-st="error" role="alert" style="margin-bottom:16px">
-          <b>Revise 2 campos antes de guardar.</b>
+          <b>2 campos sin guardar.</b> Corrija el valor o pulse Esc en el campo para volver al valor guardado.
           <ul><li><a href="#p-apellido">Apellido</a>: escriba el apellido.</li><li><a href="#p-email">E-mail</a>: la dirección no es válida.</li></ul>
         </div>
         <form class="grid cols-2" data-done="Convencionista guardado">
           <div class="form">
-            <label for="p-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="p-nombre" value="María"></div>
-            <label for="p-apellido" class="req">Apellido</label><div class="field-wrap"><input class="field" data-st="base vacio" id="p-apellido" value="Ejemplo Demo"><input class="field" data-st="error" value="" aria-invalid="true" aria-label="Apellido (error)"><div class="field-error" data-st="error"><svg class="i i-sm"><use href="#i-alert"/></svg>Escriba el apellido.</div></div>
-            <label for="p-comp">Compañía</label><div class="field-wrap"><input class="field" id="p-comp" list="dl-comp" value="Cooperativa Muestra"><datalist id="dl-comp"><option>Cooperativa Muestra</option><option>Banco Ejemplo</option><option>Acme Mortgage Demo</option><option>Capital Ficticio Lending</option></datalist></div>
-            <label for="p-tel">Teléfono</label><div class="field-wrap"><input class="field" id="p-tel" value="787-555-0148" inputmode="tel"></div>
-            <label for="p-tel2">Teléfono personal</label><div class="field-wrap"><input class="field" id="p-tel2" value="787-555-0277" inputmode="tel"></div>
-            <label for="p-fax">Fax</label><div class="field-wrap"><input class="field" id="p-fax" value="787-555-0149" inputmode="tel"></div>
+            <label for="p-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="p-nombre" value="María" name="nombre" data-saved="María" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="p-apellido" class="req">Apellido</label><div class="field-wrap"><input class="field" data-st="base vacio" id="p-apellido" value="Ejemplo Demo" name="apellido" data-saved="Ejemplo Demo" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" data-st="error" value="" aria-invalid="true" aria-label="Apellido (error)" name="apellido_error" data-saved="" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><div class="field-error" data-st="error"><svg class="i i-sm"><use href="#i-alert"/></svg>Escriba el apellido.</div></div>
+            <label for="p-comp">Compañía</label><div class="field-wrap"><input class="field" id="p-comp" list="dl-comp" value="Cooperativa Muestra" name="comp" data-saved="Cooperativa Muestra" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><datalist id="dl-comp"><option>Cooperativa Muestra</option><option>Banco Ejemplo</option><option>Acme Mortgage Demo</option><option>Capital Ficticio Lending</option></datalist></div>
+            <label for="p-tel">Teléfono</label><div class="field-wrap"><input class="field" id="p-tel" value="787-555-0148" inputmode="tel" name="tel" data-saved="787-555-0148" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="p-tel2">Teléfono personal</label><div class="field-wrap"><input class="field" id="p-tel2" value="787-555-0277" inputmode="tel" name="tel2" data-saved="787-555-0277" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="p-fax">Fax</label><div class="field-wrap"><input class="field" id="p-fax" value="787-555-0149" inputmode="tel" name="fax" data-saved="787-555-0149" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
           </div>
           <div class="form">
-            <label for="p-dir">Dirección</label><div class="field-wrap"><input class="field" id="p-dir" value="Calle Ficticia 123"></div>
-            <label>Ciudad/Estado/Zip</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 56px 80px"><input class="field" value="Ciudad Ejemplo" aria-label="Ciudad"><input class="field" value="PR" aria-label="Estado"><input class="field" value="00000" aria-label="Zip" inputmode="numeric"></div>
-            <label for="p-email">E-mail</label><div class="field-wrap"><input class="field" data-st="base vacio" id="p-email" value="maria@ejemplo.com" inputmode="email"><input class="field" data-st="error" value="maria@ejemplo" aria-invalid="true" aria-label="E-mail (error)"><div class="field-error" data-st="error"><svg class="i i-sm"><use href="#i-alert"/></svg>La dirección no es válida.</div></div>
-            <label for="p-badge">Nombre badge</label><div class="field-wrap"><input class="field" id="p-badge" value="María"></div>
+            <label for="p-dir">Dirección</label><div class="field-wrap"><input class="field" id="p-dir" value="Calle Ficticia 123" name="dir" data-saved="Calle Ficticia 123" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label>Ciudad/Estado/Zip</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 56px 80px"><input class="field" value="Ciudad Ejemplo" aria-label="Ciudad" name="ciudad" data-saved="Ciudad Ejemplo" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" value="PR" aria-label="Estado" name="estado" data-saved="PR" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" value="00000" aria-label="Zip" inputmode="numeric" name="zip" data-saved="00000" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="p-email">E-mail</label><div class="field-wrap"><input class="field" data-st="base vacio" id="p-email" value="maria@ejemplo.com" inputmode="email" name="email" data-saved="maria@ejemplo.com" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" data-st="error" value="maria@ejemplo" aria-invalid="true" aria-label="E-mail (error)" name="e_mail_error" data-saved="maria@ejemplo" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><div class="field-error" data-st="error"><svg class="i i-sm"><use href="#i-alert"/></svg>La dirección no es válida.</div></div>
+            <label for="p-badge">Nombre badge</label><div class="field-wrap"><input class="field" id="p-badge" value="María" name="badge" data-saved="María" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
           </div>
         </form>
 
@@ -163,7 +163,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

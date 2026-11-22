@@ -107,7 +107,6 @@
       <h1 class="title"><b>Suscripción de Préstamos FHA</b> <span class="sub">· curso especializado · 3 créditos · 45 horas</span></h1>
       <div class="actions">
         <a class="btn" href="matriculas.html"><svg class="i"><use href="#i-list"/></svg>Matrículas</a>
-        <button class="btn btn-primary" type="button" data-toast="Curso guardado">Guardar</button>
       </div>
     </div>
 
@@ -146,17 +145,17 @@
         <div class="tabpanel" role="tabpanel" id="tp-det" aria-labelledby="tab-det" hidden>
           <form class="block-body grid cols-2" data-done="Curso guardado">
             <div class="form">
-              <label for="cu-nom" class="req">Curso</label><div class="field-wrap"><input class="field" id="cu-nom" value="Suscripción de Préstamos FHA"></div>
-              <label for="cu-desc">Descripción</label><div class="field-wrap"><textarea class="field" id="cu-desc" rows="4">Guías de suscripción FHA para préstamos residenciales: capacidad de pago, crédito, colateral y documentación. Texto de ejemplo.</textarea></div>
-              <label for="cu-req">Requisitos</label><div class="field-wrap"><textarea class="field" id="cu-req" rows="3">Análisis de Crédito Residencial o experiencia equivalente.</textarea></div>
+              <label for="cu-nom" class="req">Curso</label><div class="field-wrap"><input class="field" id="cu-nom" value="Suscripción de Préstamos FHA" name="nom" data-saved="Suscripción de Préstamos FHA" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+              <label for="cu-desc">Descripción</label><div class="field-wrap"><textarea class="field" id="cu-desc" rows="4" name="desc" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">Guías de suscripción FHA para préstamos residenciales: capacidad de pago, crédito, colateral y documentación. Texto de ejemplo.</textarea></div>
+              <label for="cu-req">Requisitos</label><div class="field-wrap"><textarea class="field" id="cu-req" rows="3" name="req" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">Análisis de Crédito Residencial o experiencia equivalente.</textarea></div>
             </div>
             <div class="form">
-              <label for="cu-cred">Créditos</label><div class="field-wrap"><input class="field num" id="cu-cred" value="3" style="width:96px"></div>
-              <label for="cu-hrs">Horas</label><div class="field-wrap"><input class="field num" id="cu-hrs" value="45" style="width:96px"></div>
-              <label for="cu-quo">Quórum</label><div class="field-wrap"><input class="field num" id="cu-quo" value="12" style="width:96px"></div>
+              <label for="cu-cred">Créditos</label><div class="field-wrap"><input class="field num" id="cu-cred" value="3" style="width:96px" name="cred" data-saved="3" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+              <label for="cu-hrs">Horas</label><div class="field-wrap"><input class="field num" id="cu-hrs" value="45" style="width:96px" name="hrs" data-saved="45" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+              <label for="cu-quo">Quórum</label><div class="field-wrap"><input class="field num" id="cu-quo" value="12" style="width:96px" name="quo" data-saved="12" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
               <span class="gap"></span>
-              <label for="cu-pm">Precio afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pm" value="350.00"></span></div>
-              <label for="cu-pi">Precio no afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pi" value="425.00"></span><div class="field-hint">Una fecha nueva copia estos precios una vez (BR-CRS-02).</div></div>
+              <label for="cu-pm">Precio afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pm" value="350.00" name="pm" data-saved="350.00" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
+              <label for="cu-pi">Precio no afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="cu-pi" value="425.00" name="pi" data-saved="425.00" hx-patch="/offerings/course/12" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span><div class="field-hint">Una fecha nueva copia estos precios una vez (BR-CRS-02).</div></div>
             </div>
           </form>
         </div>
@@ -166,7 +165,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">
@@ -190,16 +189,16 @@
   <button type="button" role="menuitem" class="danger act-remove" data-toast="Día quitado"><svg class="i"><use href="#i-trash"/></svg>Quitar día…</button>
   </div>
   <dialog class="dlg wide" id="dlg-fecha" aria-labelledby="dlg-fecha-t">
-    <form data-done="Fecha guardada"><div class="dlg-head"><h2 id="dlg-fecha-t">Fecha del curso · 9/14/2026</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <form><div class="dlg-head"><h2 id="dlg-fecha-t">Fecha del curso · 9/14/2026</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
     <div class="dlg-body"><div class="grid cols-2" style="gap:16px 24px">
         <div class="form">
-          <label for="fc-st">Estatus</label><div class="field-wrap"><select class="field" id="fc-st" autofocus><option>Pendiente</option><option selected>Confirmado</option><option>Completado</option><option>Cancelado</option></select></div>
-          <label for="fc-sem">Semestre</label><div class="field-wrap"><input class="field" id="fc-sem" value="Ago–Dic 2026"></div>
-          <label for="fc-prof">Profesor</label><div class="field-wrap"><select class="field" id="fc-prof"><option>Prof. Ana Ejemplo Rivera</option><option>Lcdo. Jorge Muestra Vega</option><option>CPA Irma Demo Santos</option></select></div>
+          <label for="fc-st">Estatus</label><div class="field-wrap"><select class="field" id="fc-st" autofocus name="st" data-saved="Confirmado" hx-patch="/calendar/course/88" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option>Pendiente</option><option selected>Confirmado</option><option>Completado</option><option>Cancelado</option></select></div>
+          <label for="fc-sem">Semestre</label><div class="field-wrap"><input class="field" id="fc-sem" value="Ago–Dic 2026" name="sem" data-saved="Ago–Dic 2026" hx-patch="/calendar/course/88" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+          <label for="fc-prof">Profesor</label><div class="field-wrap"><select class="field" id="fc-prof" name="prof" data-saved="Prof. Ana Ejemplo Rivera" hx-patch="/calendar/course/88" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option>Prof. Ana Ejemplo Rivera</option><option>Lcdo. Jorge Muestra Vega</option><option>CPA Irma Demo Santos</option></select></div>
         </div>
         <div class="form">
-          <label for="fc-pm">Precio socio</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="fc-pm" value="350.00"></span></div>
-          <label for="fc-pi">Precio individual</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="fc-pi" value="425.00"></span></div>
+          <label for="fc-pm">Precio socio</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="fc-pm" value="350.00" name="pm" data-saved="350.00" hx-patch="/calendar/course/88" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
+          <label for="fc-pi">Precio individual</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="fc-pi" value="425.00" name="pi" data-saved="425.00" hx-patch="/calendar/course/88" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
           <label>Matrícula</label><div class="field-wrap"><div class="value">18 de quórum 12 · se necesitan 0</div></div>
         </div>
       </div>
@@ -214,7 +213,7 @@
         </table>
       </div>
       <p class="field-hint" style="margin-top:6px">Un Día de Fiesta sale en las cartas como «No habrá clases el …» (BR-CRS-06). Cursos cortos: hasta 15 fechas.</p></div>
-    <div class="dlg-foot"><span class="left">La fecha no se borra: use Cancelado (AP-07)</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div></form>
+    <div class="dlg-foot"><span class="left">Cada campo se guarda al salir de él · la fecha no se borra: use Cancelado (AP-07)</span><button class="btn btn-primary" type="button" data-close>Cerrar</button></div></form>
   </dialog>
 </body>
 </html>

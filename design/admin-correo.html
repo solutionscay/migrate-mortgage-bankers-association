@@ -106,7 +106,7 @@
       <div class="crumbs"><a href="index.html">Inicio</a><span class="sep">/</span><a href="admin-usuarios.html">Admin</a><span class="sep">/</span><span>Plantillas y remitentes</span></div>
       <h1 class="title"><b class="admin-only">Plantillas y remitentes</b><span class="admin-only sub"> · 3 plantillas · 4 remitentes</span><b class="staff-only">Sin permiso</b></h1>
       <div class="actions">
-        <span class="admin-only ma-acts"><a class="btn" href="vista-previa.html"><svg class="i"><use href="#i-mail"/></svg>Vista previa</a><button class="btn btn-primary" type="submit" form="tpl-form">Guardar plantilla</button></span>
+        <span class="admin-only ma-acts"><a class="btn" href="vista-previa.html"><svg class="i"><use href="#i-mail"/></svg>Vista previa</a></span>
       </div>
     </div>
 
@@ -126,9 +126,9 @@
               <div class="block-head"><h3>Matrícula confirmada</h3></div>
               <div class="block-body"><div class="grid ma-tpl-edit">
                 <div class="form">
-                  <label for="tp-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="tp-nombre" value="Matrícula confirmada"></div>
-                  <label for="tp-asunto" class="req">Asunto</label><div class="field-wrap"><input class="field" id="tp-asunto" value="Confirmación de su matrícula"></div>
-                  <label for="tp-html" class="req">HTML</label><div class="field-wrap"><textarea class="field ma-code" id="tp-html" rows="7">&lt;p&gt;Hola &lt;SCI_NAME&gt;:&lt;/p&gt;
+                  <label for="tp-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="tp-nombre" value="Matrícula confirmada" name="nombre" data-saved="Matrícula confirmada" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+                  <label for="tp-asunto" class="req">Asunto</label><div class="field-wrap"><input class="field" id="tp-asunto" value="Confirmación de su matrícula" name="asunto" data-saved="Confirmación de su matrícula" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+                  <label for="tp-html" class="req">HTML</label><div class="field-wrap"><textarea class="field ma-code" id="tp-html" rows="7" name="html" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">&lt;p&gt;Hola &lt;SCI_NAME&gt;:&lt;/p&gt;
 &lt;SCI_BODY&gt;
 &lt;p&gt;&lt;SCI_USER&gt;&lt;br&gt;
 &lt;SCI_TITLE&gt;&lt;/p&gt;
@@ -143,7 +143,7 @@
             <table class="t">
               <colgroup><col style="width:260px"><col style="width:240px"><col><col style="width:130px"><col style="width:36px"></colgroup>
               <thead><tr><th>E-mail</th><th>Nombre (&lt;SCI_USER&gt;)</th><th>Título (&lt;SCI_TITLE&gt;)</th><th class="c">Predeterminado</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
-              <tbody><tr><td>escuela@ejemplo.com</td><td>Escuela MBA Demo</td><td>Coordinación académica</td><td class="c"><label class="check"><input type="radio" name="pr-def" checked aria-label="Predeterminado"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>registro@ejemplo.com</td><td>Registro Demo</td><td>Oficina de registro</td><td class="c"><label class="check"><input type="radio" name="pr-def" aria-label="Predeterminado"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>convencion@ejemplo.com</td><td>Convención Demo</td><td>Comité de convención</td><td class="c"><label class="check"><input type="radio" name="pr-def" aria-label="Predeterminado"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>direccion@ejemplo.com</td><td>Dirección Ejemplo</td><td>Dirección ejecutiva</td><td class="c"><label class="check"><input type="radio" name="pr-def" aria-label="Predeterminado"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+              <tbody><tr><td>escuela@ejemplo.com</td><td>Escuela MBA Demo</td><td>Coordinación académica</td><td class="c"><label class="check"><input type="radio" name="pr-def" checked aria-label="Predeterminado" data-saved="on" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest tr" hx-swap="outerHTML"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>registro@ejemplo.com</td><td>Registro Demo</td><td>Oficina de registro</td><td class="c"><label class="check"><input type="radio" name="pr-def" aria-label="Predeterminado" data-saved="off" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest tr" hx-swap="outerHTML"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>convencion@ejemplo.com</td><td>Convención Demo</td><td>Comité de convención</td><td class="c"><label class="check"><input type="radio" name="pr-def" aria-label="Predeterminado" data-saved="off" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest tr" hx-swap="outerHTML"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>direccion@ejemplo.com</td><td>Dirección Ejemplo</td><td>Dirección ejecutiva</td><td class="c"><label class="check"><input type="radio" name="pr-def" aria-label="Predeterminado" data-saved="off" hx-patch="/admin/mail/templates/1" hx-trigger="change" hx-target="closest tr" hx-swap="outerHTML"></label></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-profile" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
                 <tr class="add-row"><td><input class="field" aria-label="E-mail nuevo" value="escuela@ejemplo.com" aria-invalid="true" aria-describedby="pr-err"></td><td><input class="field" aria-label="Nombre" value="Escuela Demo"></td><td><input class="field" aria-label="Título" placeholder="Título"></td><td></td><td class="col-act"><button class="btn btn-sm btn-icon" type="button" aria-label="Añadir remitente"><svg class="i i-sm"><use href="#i-plus"/></svg></button></td></tr>
               </tbody>
             </table>
@@ -157,7 +157,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

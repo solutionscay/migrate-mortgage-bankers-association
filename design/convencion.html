@@ -115,14 +115,14 @@
         
         <div class="ev-head">
           <div class="form">
-            <label for="e-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="e-nombre" value="Convención Demo 2027"></div>
-            <label for="e-lugar">Lugar</label><div class="field-wrap"><input class="field" id="e-lugar" value="Hotel Demo Plaza"></div>
+            <label for="e-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="e-nombre" value="Convención Demo 2027" name="nombre" data-saved="Convención Demo 2027" hx-patch="/events/3" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="e-lugar">Lugar</label><div class="field-wrap"><input class="field" id="e-lugar" value="Hotel Demo Plaza" name="lugar" data-saved="Hotel Demo Plaza" hx-patch="/events/3" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
             <span class="label">PDF</span><div class="field-wrap"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>programa-convencion-2027.pdf<button class="x" type="button" aria-label="Quitar PDF"><svg class="i i-sm"><use href="#i-x"/></svg></button></span></div>
           </div>
           <div class="form">
-            <label for="e-ini">Comienza</label><div class="field-wrap"><span class="adorn"><input class="field" value="5/6/2027" inputmode="numeric" id="e-ini"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
-            <label for="e-fin">Termina</label><div class="field-wrap"><span class="adorn"><input class="field" value="5/8/2027" inputmode="numeric" id="e-fin"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
-            <label for="e-st">Estatus</label><div class="field-wrap"><select class="field" id="e-st"><option selected>Activo</option><option>Inactivo</option></select></div>
+            <label for="e-ini">Comienza</label><div class="field-wrap"><span class="adorn"><input class="field" value="5/6/2027" inputmode="numeric" id="e-ini" name="ini" data-saved="5/6/2027" hx-patch="/events/3" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+            <label for="e-fin">Termina</label><div class="field-wrap"><span class="adorn"><input class="field" value="5/8/2027" inputmode="numeric" id="e-fin" name="fin" data-saved="5/8/2027" hx-patch="/events/3" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+            <label for="e-st">Estatus</label><div class="field-wrap"><select class="field" id="e-st" name="st" data-saved="Activo" hx-patch="/events/3" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option selected>Activo</option><option>Inactivo</option></select></div>
           </div>
           <div class="ev-stats"><div class="ev-stat"><div class="k">Registros</div><div class="v">184</div></div><div class="ev-stat"><div class="k">Acompañantes</div><div class="v">41</div></div><div class="ev-stat"><div class="k">Total</div><div class="v">225</div></div><div class="ev-stat"><div class="k">Facturado</div><div class="v money">$214,380.00</div></div><div class="ev-stat"><div class="k">Pagado</div><div class="v money">$171,240.00</div></div><div class="ev-stat"><div class="k">Balance</div><div class="v money">$43,140.00</div></div></div>
         </div>
@@ -212,7 +212,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

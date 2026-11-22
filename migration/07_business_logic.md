@@ -238,10 +238,10 @@ Each operation row gives its policy (08). Each rule cites its object file and st
 | Rule/operation | Server-domain/query/job/adapter/client | Interface | Transaction/concurrency | Authorization | Audit | Semantic tests |
 |---|---|---|---|---|---|---|
 | OP-REG-03 (BR-REG-02) | server-domain | `POST /registrations/{id}/plan` (UI-06) | One transaction: delete items, insert items, update registration | AP-03, AP-09 | audit_log `registration.plan_changed` | T-07-01 |
-| OP-REG-06 (BR-REG-03) | server-domain | `POST /registrations/{id}/guests`, `POST /registrations/{id}/guests/{guest_id}`, `DELETE /registrations/{id}/guests/{guest_id}` (UI-06) | One transaction: guest change + qty update of all items | AP-03, AP-06 | none | T-07-02 |
+| OP-REG-06 (BR-REG-03) | server-domain | `POST /registrations/{id}/guests`, `PATCH /registrations/{id}/guests/{guest_id}`, `DELETE /registrations/{id}/guests/{guest_id}` (UI-06) | One transaction: guest change + qty update of all items | AP-03, AP-06 | none | T-07-02 |
 | BR-REG-04, -05, -08 | server-query (views) | read in registration page | read-only | AP-03 | none | T-07-03 |
 | OP-REG-08 (BR-REG-09) | server-domain | `POST /payments/{id}/void` (UI-06) | single update | AP-05 | `payment.void` with reason | T-07-04 |
-| OP-EVT-04 (BR-EVT-06) | server-domain | `POST /plans/{id}/build`; `POST /plans/{id}` on event change (UI-13) | one transaction; INSERT only missing pairs (UNIQUE) | AP-03 | none | T-07-05 |
+| OP-EVT-04 (BR-EVT-06) | server-domain | `POST /plans/{id}/build`; `PATCH /plans/{id}` on event change (UI-13) | one transaction; INSERT only missing pairs (UNIQUE) | AP-03 | none | T-07-05 |
 | BR-EVT-04, -05 | server-query (views) | event page | read-only | AP-03 | none | T-07-06 |
 | OP-STU-01/02 (BR-STU-01) | server-domain | `POST /students`, `POST /students/{id}/duplicate` (UI-15) | one transaction: student + certification rows | AP-03 | none | T-07-07 |
 | BR-STU-03, BR-STU-06, BR-CRT-02..04 | server-query (views) | student page, reports | read-only | AP-03 | none | T-07-08, T-07-09 |

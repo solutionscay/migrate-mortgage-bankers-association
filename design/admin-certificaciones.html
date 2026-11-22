@@ -106,7 +106,7 @@
       <div class="crumbs"><a href="index.html">Inicio</a><span class="sep">/</span><a href="admin-usuarios.html">Admin</a><span class="sep">/</span><span>Certificaciones y profesores</span></div>
       <h1 class="title"><b class="admin-only">Certificaciones y profesores</b><span class="admin-only sub"> · <span class="tag draft">borrador</span></span><b class="staff-only">Sin permiso</b></h1>
       <div class="actions">
-        <span class="admin-only ma-acts"><button class="btn btn-primary" type="submit" form="crt-form">Guardar</button></span>
+        
       </div>
     </div>
 
@@ -124,13 +124,13 @@
             <form class="block" id="crt-form" data-done="Certificación guardada">
               <div class="block-head"><h3>Originador Hipotecario Certificado</h3><span class="tag draft">borrador</span></div>
               <div class="block-body stack">
-                <div class="form"><label for="ct-n" class="req">Nombre</label><div class="field-wrap"><input class="field" id="ct-n" value="Originador Hipotecario Certificado"></div></div>
+                <div class="form"><label for="ct-n" class="req">Nombre</label><div class="field-wrap"><input class="field" id="ct-n" value="Originador Hipotecario Certificado" name="n" data-saved="Originador Hipotecario Certificado" hx-patch="/admin/certifications/2" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div></div>
                 <div class="table-wrap"><table class="t"><colgroup><col><col style="width:130px"><col style="width:36px"></colgroup>
                   <thead><tr><th>Curso</th><th>Tipo</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
                   <tbody><tr><td>Taller de Cumplimiento</td><td><span class="tag info">Requisito</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Seminario de Ética Profesional</td><td><span class="tag info">Requisito</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Originación de Préstamos I</td><td><span class="tag info">Requisito</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Originación de Préstamos II</td><td><span class="tag info">Requisito</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Leyes Federales de Préstamos</td><td><span class="tag info">Requisito</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Avalúos para Originadores</td><td><span class="tag plain">Electiva</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Servicio al Cliente Hipotecario</td><td><span class="tag plain">Electiva</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr><tr><td>Repaso NMLS</td><td><span class="tag plain">Electiva</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
                   <tr class="add-row"><td><select class="field" aria-label="Curso"><option>Escoja un curso…</option><option>Finanzas Personales para Clientes</option></select></td><td><select class="field" aria-label="Tipo"><option>Requisito</option><option>Electiva</option></select></td><td class="col-act"><button class="btn btn-sm btn-icon" type="button" aria-label="Añadir curso"><svg class="i i-sm"><use href="#i-plus"/></svg></button></td></tr>
                   </tbody></table></div>
-                <div class="form"><label for="ct-otros">Otros requisitos</label><div class="field-wrap"><textarea class="field" id="ct-otros" rows="2">Licencia vigente de la OCIF y 2 años de experiencia en originación.</textarea></div></div>
+                <div class="form"><label for="ct-otros">Otros requisitos</label><div class="field-wrap"><textarea class="field" id="ct-otros" rows="2" name="otros" hx-patch="/admin/certifications/2" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML">Licencia vigente de la OCIF y 2 años de experiencia en originación.</textarea></div></div>
               </div>
             </form>
             <div class="block">
@@ -146,7 +146,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

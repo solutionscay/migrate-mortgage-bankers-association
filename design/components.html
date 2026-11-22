@@ -123,6 +123,7 @@
           <a href="#botones">Botones</a>
           <a href="#campos">Campos</a>
           <a href="#formulario">Formulario de registro</a>
+          <a href="#autosave">Guardado por campo</a>
           <a href="#estatus">Etiquetas y estatus</a>
           <a href="#pestanas">Pestañas</a>
           <a href="#listas">Búsqueda y listas</a>
@@ -303,7 +304,7 @@
             <p class="lead">Etiquetas alineadas a la derecha junto al campo, como en FileMaker. El bloque teal sólido del evento y del plan pasa a un bloque blanco con regla teal a la izquierda y texto teal.</p>
 
             <div class="error-summary" role="alert" style="margin-bottom:16px">
-              <b>Revise 2 campos antes de guardar.</b>
+              <b>2 campos sin guardar.</b>
               <ul><li><a href="#f-badge">Nombre badge</a>: escriba el nombre del badge.</li><li><a href="#f-cp">Costeado por</a>: escoja una opción.</li></ul>
             </div>
 
@@ -336,6 +337,32 @@
                 <div class="field-wrap"><button class="pick pick-unset" type="button" data-open="dlg-evento"><svg class="i"><use href="#i-plus"/></svg>Escoger plan</button></div>
               </div>
             </form>
+          </section>
+
+          <!-- ============ Guardado por campo ============ -->
+          <section class="g-section" id="autosave">
+            <h2>Guardado por campo</h2>
+            <p class="lead">Como en FileMaker, una ficha no tiene botón Guardar. Cada campo se guarda al salir de él: htmx envía solo ese campo (<code>hx-patch</code>, <code>hx-trigger="change"</code>), el servidor valida, guarda y devuelve el fragmento del campo. Esc devuelve el campo a su valor guardado antes de salir. Guardar queda solo en los diálogos que crean o liquidan algo (pago, matrícula, estudiante nuevo, usuario nuevo).</p>
+
+            <h3 class="g-sub">Estado en el pie (ancho fijo: el pie no se mueve)</h3>
+            <div class="stack save-demo">
+              <div class="footer"><span class="save-state" data-save="saved"><i class="save-mark"></i><span class="save-text">Guardado 4:42 p. m.</span></span><span class="muted-on-dark">guardado: hora del último campo guardado</span></div>
+              <div class="footer"><span class="save-state" data-save="saving"><i class="save-mark"></i><span class="save-text">Guardando…</span></span><span class="muted-on-dark">htmx:beforeRequest de un campo</span></div>
+              <div class="footer"><span class="save-state" data-save="error"><i class="save-mark"></i><span class="save-text">1 campo sin guardar</span></span><span class="muted-on-dark">respuesta 422: cuenta los campos con error</span></div>
+            </div>
+            <p class="field-hint">En esta página: <code>?state=guardando</code> y <code>?state=sin-guardar</code> cambian el pie real.</p>
+
+            <h3 class="g-sub">Campo: guardado, guardando, con error</h3>
+            <div class="state-grid">
+              <div class="form" style="grid-template-columns:96px minmax(0,1fr)"><label for="as-1">Guardado</label><div class="field-wrap"><input class="field" id="as-1" name="guest_name_badges" value="Pedro Prueba" data-saved="Pedro Prueba" hx-patch="/registrations/1283" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div></div>
+              <div class="form" style="grid-template-columns:96px minmax(0,1fr)"><label for="as-2">Guardando</label><div class="field-wrap"><input class="field is-saving" id="as-2" name="guest_name_badges" value="Pedro y Ana" data-saved="Pedro Prueba" hx-patch="/registrations/1283" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><div class="field-hint">.htmx-request mientras corre el PATCH</div></div></div>
+              <div class="form" style="grid-template-columns:96px minmax(0,1fr)"><label for="as-3">Con error</label><div class="field-wrap" data-st="base guardando"><input class="field" id="as-3" name="email" value="maria@ejemplo" data-saved="maria@ejemplo.com" aria-invalid="true" aria-describedby="as-3e" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><div class="field-error" id="as-3e"><svg class="i i-sm"><use href="#i-alert"/></svg>No se guardó: la dirección no es válida. Esc vuelve al valor guardado.</div></div><div class="field-wrap" data-st="sin-guardar"><input class="field" name="email" value="maria@ejemplo" data-saved="maria@ejemplo.com" aria-invalid="true" aria-label="E-mail (sin guardar)" hx-patch="/people/214" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>No se guardó: la dirección no es válida. Esc vuelve al valor guardado.</div></div></div>
+            </div>
+
+            <h3 class="g-sub">Atributos en las plantillas</h3>
+            <div class="block block-body"><code class="code-line">&lt;input class="field" name="guest_name_badges" value="Pedro Prueba" data-saved="Pedro Prueba" hx-patch="/registrations/1283" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"&gt;</code>
+              <p class="field-hint" style="margin-top:8px">Partidas: <code>hx-target="closest tr"</code>; la respuesta trae la fila y el bloque de totales con <code>hx-swap-oob="true"</code> (<code>id="totales"</code>). Los totales siempre vienen del servidor. Error: 422 con el fragmento del campo, el valor tal como se escribió y <code>data-unsaved</code> en el contenedor. Concurrencia: gana la última escritura, por campo. Cada cambio deja una fila en <code>audit_log</code>.</p>
+            </div>
           </section>
 
           <!-- ============ Estatus ============ -->
@@ -700,7 +727,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

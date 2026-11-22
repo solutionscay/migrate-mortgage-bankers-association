@@ -127,13 +127,25 @@
       const next = tabs[(tabs.indexOf(tab) + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length];
       selectTab(next); next.focus();
     }
-    // Ctrl+S / Cmd+S submits the form that holds the focus.
+    // Ctrl+S / Cmd+S: in a create/settle dialog it submits the form; on a record field it saves
+    // that field now (same as leaving it). Record pages have no Guardar button.
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
       e.preventDefault();
-      const form = document.activeElement && document.activeElement.closest("form");
-      if (form) form.requestSubmit(); else mbaToast("Nada que guardar");
+      const el = document.activeElement;
+      if (el && el.matches("[hx-patch]")) el.dispatchEvent(new Event("change", { bubbles: true }));
+      else if (el && el.closest("dialog form")) el.closest("form").requestSubmit();
+      else mbaToast("Cada campo se guarda al salir de él");
     }
-  });
+    // Esc reverts a changed field to its saved value before the user leaves it (FileMaker Revert Record).
+    if (e.key === "Escape" && e.target.matches && e.target.matches("[hx-patch]")) {
+      const el = e.target, saved = savedOf(el);
+      if (currentOf(el) !== saved) {
+        e.preventDefault(); e.stopPropagation();
+        if (el.type === "checkbox" || el.type === "radio") el.checked = saved === "on"; else el.value = saved;
+        clearError(el);
+      }
+    }
+  }, true);
 
   // Demo forms do not post anywhere.
   document.addEventListener("submit", (e) => {
@@ -141,6 +153,43 @@
     const d = e.target.closest("dialog");
     if (d) d.close();
     mbaToast(e.target.dataset.done || "Guardado");
+  });
+
+  // ---- Per-field autosave: footer save state from htmx events ----
+  const savedOf = (el) => (el.dataset.saved !== undefined ? el.dataset.saved : el.defaultValue);
+  const currentOf = (el) => (el.type === "checkbox" || el.type === "radio" ? (el.checked ? "on" : "off") : el.value);
+  const clock = () => new Date().toLocaleTimeString("es-PR", { hour: "numeric", minute: "2-digit" }).replace(/\s?([ap])\.?\s?m\.?/i, " $1. m.");
+  function setSave(kind, n) {
+    const slot = $("footer.footer .save-state");
+    if (!slot) return;
+    slot.dataset.save = kind;
+    $(".save-text", slot).textContent =
+      kind === "saving" ? "Guardando…" :
+      kind === "error" ? `${n} campo${n === 1 ? "" : "s"} sin guardar` : `Guardado ${clock()}`;
+  }
+  const unsaved = () => $$("[data-unsaved]").length;
+  function settle() { const n = unsaved(); if (n) setSave("error", n); else setSave("saved"); }
+  function clearError(el) {
+    el.removeAttribute("aria-invalid");
+    const wrap = el.closest(".field-wrap, tr, .status-slot");
+    if (wrap) {
+      wrap.removeAttribute("data-unsaved"); $$(".field-error", wrap).forEach((m) => m.remove());
+      const next = wrap.nextElementSibling;   // a line item shows its message in the row below
+      if (next && next.classList.contains("row-error")) next.remove();
+    }
+    settle();
+  }
+  window.mbaSave = setSave;
+  document.addEventListener("htmx:beforeRequest", (e) => { if (e.target.matches("[hx-patch]")) setSave("saving"); });
+  // The server's 422 field fragment carries data-unsaved on its wrapper (htmx.config.responseHandling
+  // swaps 422); a 200 fragment does not. After any swap, count what is left.
+  document.addEventListener("htmx:afterSettle", settle);
+  document.addEventListener("htmx:responseError", settle);
+  // Static design pages have no server and no htmx: show the same cycle locally.
+  document.addEventListener("change", (e) => {
+    if (window.htmx || !e.target.matches || !e.target.matches("[hx-patch]")) return;
+    setSave("saving");
+    setTimeout(() => { e.target.dataset.saved = currentOf(e.target); settle(); }, 600);
   });
 
   // A fixed-position menu would drift from its button, so scrolling its container or resizing closes it.
@@ -171,6 +220,10 @@
     // Hooks: ?state=<name>, ?tab=<tab id>, ?scroll=<px> or ?at=<element id>, ?open=<dialog id>
     // (else <body data-open="dialog id">), ?menu=<button id>.
     setState(params.get("state"));
+    // Static save states: ?state=guardando shows "Guardando…"; any visible invalid field counts as unsaved.
+    if (params.get("state")) $$("[hx-patch][aria-invalid=true]").filter((el) => el.offsetParent).forEach((el) =>
+      (el.closest(".field-wrap, tr, .status-slot") || el).setAttribute("data-unsaved", ""));
+    if (params.get("state") === "guardando") setSave("saving"); else if (unsaved()) settle();
     const wanted = params.get("tab") && document.getElementById(params.get("tab"));
     $$("[role=tablist]").forEach((l) => {
       const s = (wanted && l.contains(wanted) && wanted) || $("[aria-selected=true]", l) || $("[role=tab]", l);

@@ -106,7 +106,7 @@
       <div class="crumbs"><a href="index.html">Inicio</a><span class="sep">/</span><a href="admin-usuarios.html">Admin</a><span class="sep">/</span><span>Configuración</span></div>
       <h1 class="title"><b class="admin-only">Configuración</b><span class="admin-only sub"> · organización, escuela, correo y textos</span><b class="staff-only">Sin permiso</b></h1>
       <div class="actions">
-        <span class="admin-only ma-acts"><button class="btn btn-primary" type="submit" form="cfg-form">Guardar</button></span>
+        
       </div>
     </div>
 
@@ -117,25 +117,25 @@
           <form id="cfg-form" data-done="Configuración guardada">
           <div class="tabs" role="tablist" aria-label="Secciones de configuración"><button type="button" role="tab" id="tab-org" aria-controls="panel-org" aria-selected="true">Organización</button><button type="button" role="tab" id="tab-esc" aria-controls="panel-esc" aria-selected="false">Escuela</button><button type="button" role="tab" id="tab-cor" aria-controls="panel-cor" aria-selected="false">Correo</button><button type="button" role="tab" id="tab-ses" aria-controls="panel-ses" aria-selected="false">Sesión</button><button type="button" role="tab" id="tab-doc" aria-controls="panel-doc" aria-selected="false">Plantillas de documentos</button><button type="button" role="tab" id="tab-val" aria-controls="panel-val" aria-selected="false">Listas de valores</button></div>
           <div class="tabpanel" role="tabpanel" id="panel-org" aria-labelledby="tab-org"><div class="block-body ma-panel"><div class="form ma-form-wide">
-            <label for="cf-org" class="req">Nombre</label><div class="field-wrap"><input class="field" id="cf-org" value="Asociación de Banqueros Hipotecarios Demo"></div>
-            <label for="cf-dir">Dirección</label><div class="field-wrap"><input class="field" id="cf-dir" value="Calle Ejemplo 100, Suite 2, San Juan, PR 00900"></div>
-            <label for="cf-tel">Teléfono</label><div class="field-wrap"><input class="field" id="cf-tel" value="(787) 555-0142"></div>
+            <label for="cf-org" class="req">Nombre</label><div class="field-wrap"><input class="field" id="cf-org" value="Asociación de Banqueros Hipotecarios Demo" name="org" data-saved="Asociación de Banqueros Hipotecarios Demo" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="cf-dir">Dirección</label><div class="field-wrap"><input class="field" id="cf-dir" value="Calle Ejemplo 100, Suite 2, San Juan, PR 00900" name="dir" data-saved="Calle Ejemplo 100, Suite 2, San Juan, PR 00900" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="cf-tel">Teléfono</label><div class="field-wrap"><input class="field" id="cf-tel" value="(787) 555-0142" name="tel" data-saved="(787) 555-0142" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
             <label>Logo</label><div class="field-wrap"><div class="row"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>logo-demo.png · 38 KB<button class="x" type="button" aria-label="Quitar logo">×</button></span><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-upload"/></svg>Cambiar</button></div></div>
             <div class="gap"></div>
-            <label for="cf-f1">Firmante 1</label><div class="field-wrap"><div class="inline-fields ma-two"><input class="field" id="cf-f1" value="Carmen Demo Ficticio"><input class="field" aria-label="Título del firmante 1" value="Presidenta"></div></div>
-            <label for="cf-f2">Firmante 2</label><div class="field-wrap"><div class="inline-fields ma-two"><input class="field" id="cf-f2" value="Rafael Prueba Muestra"><input class="field" aria-label="Título del firmante 2" value="Director de la Escuela"></div><div class="field-hint">Los firmantes salen en cartas y certificados (BR-SYS-03).</div></div>
+            <label for="cf-f1">Firmante 1</label><div class="field-wrap"><div class="inline-fields ma-two"><input class="field" id="cf-f1" value="Carmen Demo Ficticio" name="f1" data-saved="Carmen Demo Ficticio" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" aria-label="Título del firmante 1" value="Presidenta" name="titulo_del_firmante_1" data-saved="Presidenta" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div></div>
+            <label for="cf-f2">Firmante 2</label><div class="field-wrap"><div class="inline-fields ma-two"><input class="field" id="cf-f2" value="Rafael Prueba Muestra" name="f2" data-saved="Rafael Prueba Muestra" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><input class="field" aria-label="Título del firmante 2" value="Director de la Escuela" name="titulo_del_firmante_2" data-saved="Director de la Escuela" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div><div class="field-hint">Los firmantes salen en cartas y certificados (BR-SYS-03).</div></div>
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-esc" aria-labelledby="tab-esc" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
-            <label for="cf-nmls">Tarifa NMLS por hora</label><div class="field-wrap"><span class="adorn ma-short"><span class="pre">$</span><input class="field money" id="cf-nmls" value="1.50"></span></div>
-            <label for="cf-csbs1">CSBS: id de proveedor</label><div class="field-wrap"><input class="field ma-short" id="cf-csbs1" value="DEMO-0000"></div>
-            <label for="cf-csbs2">CSBS: estado</label><div class="field-wrap"><input class="field ma-short" id="cf-csbs2" value="PR"></div>
+            <label for="cf-nmls">Tarifa NMLS por hora</label><div class="field-wrap"><span class="adorn ma-short"><span class="pre">$</span><input class="field money" id="cf-nmls" value="1.50" name="nmls" data-saved="1.50" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></span></div>
+            <label for="cf-csbs1">CSBS: id de proveedor</label><div class="field-wrap"><input class="field ma-short" id="cf-csbs1" value="DEMO-0000" name="csbs1" data-saved="DEMO-0000" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
+            <label for="cf-csbs2">CSBS: estado</label><div class="field-wrap"><input class="field ma-short" id="cf-csbs2" value="PR" name="csbs2" data-saved="PR" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"></div>
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-cor" aria-labelledby="tab-cor" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
-            <label for="cf-tpl">Plantilla para envíos nuevos</label><div class="field-wrap"><select class="field" id="cf-tpl"><option>Matrícula confirmada</option><option>Recordatorio de curso</option><option>Aviso general</option></select><div class="field-hint">Remitentes y plantillas: <a href="admin-correo.html">Plantillas y remitentes</a>.</div></div>
+            <label for="cf-tpl">Plantilla para envíos nuevos</label><div class="field-wrap"><select class="field" id="cf-tpl" name="tpl" data-saved="Matrícula confirmada" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><option>Matrícula confirmada</option><option>Recordatorio de curso</option><option>Aviso general</option></select><div class="field-hint">Remitentes y plantillas: <a href="admin-correo.html">Plantillas y remitentes</a>.</div></div>
             <label>Proveedor</label><div class="field-wrap"><div class="value">mock · sin clave de Resend en el servidor</div><div class="field-hint">La clave vive solo en el entorno del servidor. Esta página no la muestra ni la guarda (AP-13).</div></div>
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-ses" aria-labelledby="tab-ses" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
-            <label for="cf-idle">Minutos sin uso</label><div class="field-wrap"><input class="field num ma-short" id="cf-idle" value="10" inputmode="numeric"><div class="field-hint">Después la sesión cierra y pide entrar otra vez (BR-AUTH-02).</div></div>
+            <label for="cf-idle">Minutos sin uso</label><div class="field-wrap"><input class="field num ma-short" id="cf-idle" value="10" inputmode="numeric" name="idle" data-saved="10" hx-patch="/admin/settings" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"><div class="field-hint">Después la sesión cierra y pide entrar otra vez (BR-AUTH-02).</div></div>
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-doc" aria-labelledby="tab-doc" hidden>
             <table class="t"><colgroup><col><col style="width:140px"><col style="width:140px"><col style="width:100px"></colgroup>
@@ -153,7 +153,7 @@
     <!-- @partial footer -->
     <footer class="footer">
       <span><b>MBA</b> · demostración · datos ficticios</span>
-      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="save-state" data-save="saved" role="status" aria-live="polite"><i class="save-mark" aria-hidden="true"></i><span class="save-text">Guardado 4:42 p. m.</span></span>
       <span class="spacer"></span>
       <span>Ver como</span>
       <span class="seg" role="group" aria-label="Rol">

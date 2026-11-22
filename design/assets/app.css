@@ -193,6 +193,14 @@ main.content {
 .footer .seg { display: inline-flex; border: 1px solid var(--charcoal-3); }
 .footer .seg button { height: 20px; padding: 0 var(--s-2); background: none; border: 0; color: var(--on-charcoal-dim); font-size: var(--fs-xs); cursor: pointer; }
 .footer .seg button[aria-pressed="true"] { background: var(--charcoal-3); color: var(--on-charcoal); }
+/* Save state slot (per-field autosave). Fixed width and height: a state change never moves the footer. */
+.save-state { display: inline-flex; align-items: center; gap: 6px; width: 190px; height: 20px; overflow: hidden; white-space: nowrap; color: var(--on-charcoal-dim); }
+.save-mark { flex: none; width: 8px; height: 8px; background: var(--ok-line); }
+.save-state[data-save="saving"] .save-mark { background: var(--teal); animation: save-pulse 1s steps(2, jump-none) infinite; }
+.save-state[data-save="saving"] .save-text { color: var(--on-charcoal); }
+.save-state[data-save="error"] .save-mark { background: #f3b6ab; }
+.save-state[data-save="error"] .save-text { color: #f3b6ab; font-weight: 600; }
+@keyframes save-pulse { 50% { opacity: .35; } }
 
 /* ---------- Breadcrumbs and titles ---------- */
 .crumbs { display: flex; gap: 6px; align-items: center; font-size: var(--fs-sm); color: var(--muted); }
@@ -264,7 +272,17 @@ select.field {
 .field[aria-invalid="true"]:focus { outline-color: var(--err-ink); }
 .field-error { display: flex; gap: 4px; align-items: center; color: var(--err-ink); font-size: var(--fs-sm); line-height: 18px; padding-top: 2px; }
 .field-hint { color: var(--muted); font-size: var(--fs-sm); line-height: 18px; padding-top: 2px; }
-
+/* Autosave field states: htmx adds .htmx-request while the PATCH runs; .is-saving draws the same state statically */
+.field.is-saving, .field.htmx-request { border-color: var(--teal); background: var(--teal-tint); }
+.t tr:has(.field.is-saving:not(.st-off)) td, .t tr:has(.field.htmx-request) td { background: var(--teal-tint); }
+.t td.edit .field.is-saving, .t td.edit .field.htmx-request { border-color: var(--teal); background: var(--white); }
+.t td.edit .field[aria-invalid="true"] { border-color: var(--err-ink); background: var(--white); }
+.totals .refresh-note { color: var(--teal-ink); }
+.save-demo .footer { justify-content: flex-start; }
+.save-demo .muted-on-dark { color: var(--on-charcoal-dim); }
+.code-line { display: block; font-size: var(--fs-sm); color: var(--ink-2); white-space: normal; overflow-wrap: anywhere; }
+body[data-state="guardando"] #totales dd, #totales.htmx-swapping dd { color: var(--muted); border-style: dashed; }
+.t tr.row-error td { height: auto; padding: 4px var(--s-2); white-space: normal; background: var(--err-bg); color: var(--err-ink); font-size: var(--fs-sm); border-bottom: 1px solid var(--err-line); }
 /* Adorned fields: money ($ prefix), date (calendar button), search */
 .adorn { position: relative; display: block; }
 .adorn > .pre { position: absolute; left: 0; top: 0; bottom: 0; width: 24px; display: flex; align-items: center; justify-content: center; color: var(--muted); border-right: 1px solid var(--stone-300); pointer-events: none; }

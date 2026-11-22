@@ -20,7 +20,8 @@ Full list of print pages (one route per print layout): `05_api_design_appendix.m
 ## Route conventions
 
 - **Pages and fragments.** Every screen of `06` has a `GET` page route. With `HX-Request`, the handler returns only the main fragment (or the named target, for example one tab). Without it, the same handler wraps the fragment in the base layout. Every URL works on reload and with the back button.
-- **Methods.** Reads are `GET`. Creates and changes are `POST`. Deletes are `DELETE` from HTMX (`hx-delete`). A form without HTMX sends `POST` with `_method=DELETE`; a small middleware rewrites it.
+- **Methods.** Reads are `GET`. Creates and commands are `POST`. A change to one field of an existing record is `PATCH` (per-field autosave, below). Deletes are `DELETE` from HTMX (`hx-delete`). A form without HTMX sends `POST` with `_method=DELETE`; a small middleware rewrites it.
+- **Per-field autosave.** Record pages have no Save button (operator decision 2026-11-21: the FileMaker model). Each editable field sends `hx-patch` with `hx-trigger="change"` when the user leaves it, with that one field only. Contract: section "Per-field autosave (PATCH)".
 - **Responses to writes.** A write from a full page answers `303 See Other` to the page. A write from HTMX answers the changed fragment, plus out-of-band swaps (`hx-swap-oob`) for figures that depend on it (for example registration totals after an item change). A create answers `HX-Redirect` to the new record.
 - **Input.** axum `Form` into a typed struct (serde, `deny_unknown_fields`). Money arrives as dollar text and is parsed to integer cents (04 convention). Dates arrive as ISO `YYYY-MM-DD`. A bad value re-renders the form with a field error (422).
 - **Offering kind.** School routes take `{kind}` = `course` | `seminar` | `short-course`. The handler maps the kind to the three table families of `04` (`courses`/`calendar_course`/`enrollments_course`, `seminars`/`calendar_seminar`/`enrollments_seminars`, `short_courses`/`calendar_short_course`/`enrollments_short_course`). An unknown kind is 404.
@@ -30,7 +31,7 @@ Full list of print pages (one route per print layout): `05_api_design_appendix.m
 
 ## Route catalog
 
-Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragment only), `action` (write), `file` (download), `print` (print-CSS page), `static`. Every route except `GET /login`, `POST /login` and `/assets/*` needs a valid session (AP-01). Every `POST` and `DELETE` needs the CSRF token (AP-02).
+Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragment only), `action` (write), `file` (download), `print` (print-CSS page), `static`. Every route except `GET /login`, `POST /login` and `/assets/*` needs a valid session (AP-01). Every `POST`, `PATCH` and `DELETE` needs the CSRF token (AP-02).
 
 ### AUTH and SYS
 
@@ -53,32 +54,31 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/admin/users` | page | query `user_list` | UI-29 | AP-08 | |
 | POST | `/admin/users` | action | OP-AUTH-04 | UI-29 | AP-08 | Create user with role and first password. |
 | GET | `/admin/users/{id}` | partial | query `user_list` | UI-29 | AP-08 | Edit row. |
-| POST | `/admin/users/{id}` | action | OP-AUTH-04 | UI-29 | AP-08, AP-11 | Role, active, display name. Disable or role change deletes the user's sessions; last active admin is protected (AP-11). |
+| PATCH | `/admin/users/{id}` | action | OP-AUTH-04 | UI-29 | AP-08, AP-11 | Role, active, display name. Disable or role change deletes the user's sessions; last active admin is protected (AP-11). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/admin/users/{id}/password` | action | OP-AUTH-04 | UI-29 | AP-08 | Set a new password. |
 | GET | `/admin/settings` | page | query `settings_get` | UI-30 | AP-08 | `app_settings` keys; the logo upload. |
-| POST | `/admin/settings` | action | OP-SYS-01 | UI-30 | AP-08 | BR-SYS-03. |
+| PATCH | `/admin/settings` | action | OP-SYS-01 | UI-30 | AP-08 | BR-SYS-03. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/admin/templates/{code}` | page | query `document_template_get` | UI-30 | AP-08 | Letter, certificate and policy texts (D-18). |
-| POST | `/admin/templates/{code}` | action | OP-SYS-02 | UI-30 | AP-08 | Sanitized HTML (allow-list). |
+| PATCH | `/admin/templates/{code}` | action | OP-SYS-02 | UI-30 | AP-08 | Sanitized HTML (allow-list). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/admin/value-lists` | page | query `value_list_get` | UI-30 | AP-08 | `value_list_items` grouped by list. |
 | POST | `/admin/value-lists` | action | OP-SYS-01 | UI-30 | AP-08 | Add, rename or reorder an item. A value that a CHECK constraint names cannot be removed (BR list in 07 "Validation and reference values"). |
 | GET | `/admin/certifications` | page | query `certification_list` | UI-32 | AP-08 | |
 | POST | `/admin/certifications` | action | OP-CRT-01 | UI-32 | AP-08 | |
 | GET | `/admin/certifications/{id}` | page | query `certification_get` | UI-32 | AP-08 | Requirements portal (BR-CRT-01). |
-| POST | `/admin/certifications/{id}` | action | OP-CRT-01 | UI-32 | AP-08 | |
+| PATCH | `/admin/certifications/{id}` | action | OP-CRT-01 | UI-32 | AP-08 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/admin/certifications/{id}/requirements` | action | OP-CRT-01 | UI-32 | AP-08 | Add a required course or elective. |
 | DELETE | `/admin/certifications/{id}/requirements/{req_id}` | action | OP-CRT-01 | UI-32 | AP-08 | |
 | GET | `/admin/professors` | page | query `professor_list` | UI-32 | AP-08 | |
 | POST | `/admin/professors` | action | OP-CRS-04 | UI-32 | AP-08 | |
-| POST | `/admin/professors/{id}` | action | OP-CRS-04 | UI-32 | AP-08 | |
+| PATCH | `/admin/professors/{id}` | action | OP-CRS-04 | UI-32 | AP-08 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/admin/mail/templates` | page | query `mail_template_list` | UI-31 | AP-08 | |
 | POST | `/admin/mail/templates` | action | OP-MAIL-06 | UI-31 | AP-08 | |
 | GET | `/admin/mail/templates/{id}` | page | query `mail_template_get` | UI-31 | AP-08 | |
-| POST | `/admin/mail/templates/{id}` | action | OP-MAIL-06 | UI-31 | AP-08 | |
+| PATCH | `/admin/mail/templates/{id}` | action | OP-MAIL-06 | UI-31 | AP-08 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/admin/mail/templates/{id}/preview` | page | OP-MAIL-06 | UI-27 | AP-08 | Was layout `Template Preview`. |
 | GET | `/admin/mail/profiles` | page | query `mail_profile_list` | UI-31 | AP-08 | |
 | POST | `/admin/mail/profiles` | action | OP-MAIL-07 | UI-31 | AP-08 | Duplicate e-mail refused (BR-MAIL-09). |
-| POST | `/admin/mail/profiles/{email}` | action | OP-MAIL-07 | UI-31 | AP-08 | Name, title, default flag (one default). |
-
+| PATCH | `/admin/mail/profiles/{email}` | action | OP-MAIL-07 | UI-31 | AP-08 | Name, title, default flag (one default). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 ### PPL and REG (convention)
 
 | Method | Path | Kind | Operation | Screen | Policy | Notes |
@@ -87,12 +87,12 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/people/new` | page | none | UI-04 | AP-03 | |
 | POST | `/people` | action | OP-PPL-01 | UI-04 | AP-03 | |
 | GET | `/people/{id}` | page | query `person_get` | UI-04 | AP-03 | Person with registrations portal. |
-| POST | `/people/{id}` | action | OP-PPL-01 | UI-04 | AP-03 | |
+| PATCH | `/people/{id}` | action | OP-PPL-01 | UI-04 | AP-03 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/people/{id}` | action | OP-PPL-02 | UI-04 | AP-04 | Refused when the person has registrations (BR-PPL-02). |
 | POST | `/people/{id}/registrations` | action | OP-REG-01 | UI-04 | AP-03 | "Añadir Registro": creates the registration, `HX-Redirect` to UI-06. |
 | GET | `/registrations` | page | query `registration_list` | UI-05 | AP-03 | `?event=`, `?status=`, `?q=`, `?view=`. |
 | GET | `/registrations/{id}` | page | query `registration_get` | UI-06 | AP-03 | Header, items, guests, payments, totals from `v_registration_totals`. |
-| POST | `/registrations/{id}` | action | OP-REG-01 | UI-06 | AP-03 | Header edit: status, `costeado_por`, comments, guest badges text. Same form as the create. |
+| PATCH | `/registrations/{id}` | action | OP-REG-01 | UI-06 | AP-03 | Header fields: status, `costeado_por`, comments, guest badge text. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/registrations/{id}/event-picker` | partial | OP-REG-02 | UI-06 | AP-03 | Dialog of events with status Activo (was layout `Eventos Activos`). Not offered when the registration already has an event. Empty: "Al momento no hay eventos activos." (BR-REG-01, audit fix). |
 | POST | `/registrations/{id}/event` | action | OP-REG-02 | UI-06 | AP-03 | Writes only this registration (changed, AMB-07-01). |
 | GET | `/registrations/{id}/plan-picker` | partial | OP-REG-03 | UI-06 | AP-03 | Dialog of the event's plans (was layout `Planes Activos`). |
@@ -100,9 +100,9 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | POST | `/registrations/{id}/items` | action | OP-REG-04 | UI-06 | AP-06 | Add one event item of the same event. Returns items portal + totals (OOB). |
 | DELETE | `/registrations/{id}/items/{item_id}` | action | OP-REG-04 | UI-06 | AP-06 | Two-step confirm. |
 | GET | `/registrations/{id}/items/{item_id}/attributes` | partial | OP-REG-05 | UI-06 | AP-03 | Dialog by item type: hotel (reservation, extra nights) or seating (table) (BR-REG-06). |
-| POST | `/registrations/{id}/items/{item_id}/attributes` | action | OP-REG-05 | UI-06 | AP-03 | |
+| PATCH | `/registrations/{id}/items/{item_id}` | action | OP-REG-05 | UI-06 | AP-03 | Line fields: price, qty, no charge, attributes (hotel reservation and nights, table). Returns the row and the totals block out of band (`hx-swap-oob`, `id="totales"`). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/registrations/{id}/guests` | action | OP-REG-06 | UI-06 | AP-06 | Add guest; recompute `ticket_qty` of all items (BR-REG-03) in the same transaction. |
-| POST | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-03 | Badge edit, `hx-trigger="change"` (replaces OnObjectExit, layout 29 key 56). |
+| PATCH | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-03 | Badge edit, `hx-trigger="change"` (replaces OnObjectExit, layout 29 key 56). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-06 | Recompute `ticket_qty`. |
 | POST | `/registrations/{id}/payments` | action | OP-REG-07 | UI-06 | AP-03 | Amount > 0. |
 | POST | `/payments/{id}/void` | action | OP-REG-08 | UI-06 | AP-05 | ROLE-ADMIN; reason required (BR-REG-09). |
@@ -119,26 +119,26 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/events/new` | page | none | UI-09 | AP-03 | |
 | POST | `/events` | action | OP-EVT-01 | UI-09 | AP-03 | Status Activo, end date defaults to start (BR-EVT-01, BR-EVT-02). |
 | GET | `/events/{id}` | page | query `event_get` | UI-09 | AP-03 | `?tab=items|sponsors|billing`; totals from `v_event_totals`. |
-| POST | `/events/{id}` | action | OP-EVT-02 | UI-09 | AP-03 | Header save; totals stay live. |
+| PATCH | `/events/{id}` | action | OP-EVT-02 | UI-09 | AP-03 | Header field; event totals return out of band. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/events/{id}` | action | OP-EVT-01 | UI-09 | AP-04 | Refused when the event has registrations. |
 | POST | `/events/{id}/pdf` | action | OP-EVT-01 | UI-09 | AP-03 | Attach the event PDF (`events.pdf_file_uuid`). |
 | DELETE | `/events/{id}/pdf` | action | OP-EVT-01 | UI-09 | AP-03 | |
 | POST | `/events/{id}/items` | action | OP-EVT-03 | UI-09 | AP-03 | "Añadir Evento"; `sort_order` = count + 1 (BR-EVT-03). |
 | GET | `/event-items/{id}` | page | query `event_item_get` | UI-10 | AP-03 | With the registration items that use it. |
-| POST | `/event-items/{id}` | action | OP-EVT-03 | UI-09, UI-10 | AP-03 | |
+| PATCH | `/event-items/{id}` | action | OP-EVT-03 | UI-09, UI-10 | AP-03 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/event-items/{id}` | action | OP-EVT-03 | UI-09 | AP-06 | FK refusal shows a message. |
 | POST | `/events/{id}/sponsors` | action | OP-SPN-01 | UI-09 | AP-03 | |
 | GET | `/sponsors/{id}` | page | query `sponsor_get` | UI-11 | AP-03 | |
-| POST | `/sponsors/{id}` | action | OP-SPN-01 | UI-11 | AP-03 | |
+| PATCH | `/sponsors/{id}` | action | OP-SPN-01 | UI-11 | AP-03 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/sponsors/{id}` | action | OP-SPN-01 | UI-09 | AP-06 | |
 | POST | `/events/{id}/billing` | action | OP-SPN-02 | UI-09 | AP-03 | Upload a billing file (D-16). |
 | DELETE | `/billing/{id}` | action | OP-SPN-02 | UI-09 | AP-06 | |
 | GET | `/plans` | page | query `plan_list` | UI-12 | AP-03 | `?event=`. |
 | POST | `/plans` | action | OP-EVT-05 | UI-12 | AP-03 | |
 | GET | `/plans/{id}` | page | query `plan_get` | UI-13 | AP-03 | Price from `v_package_price` (BR-EVT-05). |
-| POST | `/plans/{id}` | action | OP-EVT-05 | UI-13 | AP-03 | Name, price override, event. When the event changes, the handler runs OP-EVT-04 in the same transaction (was the OnObjectSave trigger, layout 40 key 21). |
+| PATCH | `/plans/{id}` | action | OP-EVT-05 | UI-13 | AP-03 | Name, price override, event. When the event changes, the handler runs OP-EVT-04 in the same transaction (was the OnObjectSave trigger, layout 40 key 21). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/plans/{id}/build` | action | OP-EVT-04 | UI-13 | AP-03 | Adds missing plan items only (BR-EVT-06). |
-| POST | `/plan-items/{id}/toggle` | action | OP-EVT-05 | UI-13 | AP-03 | Active flag; returns the row and the plan price (OOB). |
+| PATCH | `/plan-items/{id}` | action | OP-EVT-05 | UI-13 | AP-03 | Active flag; returns the row and the plan price (OOB). Active flag and qty; returns the row and the plan price out of band. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/plan-items/{id}` | action | OP-EVT-05 | UI-13 | AP-06 | |
 | DELETE | `/plans/{id}` | action | OP-EVT-05 | UI-12, UI-13 | AP-04 | ROLE-ADMIN; refused when a registration uses the plan. |
 
@@ -150,17 +150,17 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/students/new` | page | none | UI-15 | AP-03 | |
 | POST | `/students` | action | OP-STU-01 | UI-15 | AP-03 | Student + one `student_certifications` row per certification (BR-STU-01). |
 | GET | `/students/{id}` | page | query `student_get` | UI-15 | AP-03 | `?tab=certifications|courses|seminars|short-courses|details`. |
-| POST | `/students/{id}` | action | OP-STU-03 | UI-15 | AP-03 | Affiliate by key (BR-STU-02). |
+| PATCH | `/students/{id}` | action | OP-STU-03 | UI-15 | AP-03 | Affiliate by key (BR-STU-02). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/students/{id}/duplicate` | action | OP-STU-02 | UI-15 | AP-03 | |
 | DELETE | `/students/{id}` | action | OP-STU-04 | UI-15 | AP-04 | Refused when enrollments exist (BR-STU-07). |
 | POST | `/students/{id}/interests` | action | OP-STU-03 | UI-15 | AP-06 | Add or remove a certification of interest, up to 6 (BR-STU-05). |
-| POST | `/student-certifications/{id}` | action | OP-CRT-02 | UI-15 | AP-03 | Graduation date and note (BR-CRT-04). |
+| PATCH | `/student-certifications/{id}` | action | OP-CRT-02 | UI-15 | AP-03 | Graduation date and note (BR-CRT-04). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/affiliates/options` | partial | query `affiliate_options` | UI-15 | AP-03 | Typeahead for the student form (`?q=`). |
 | GET | `/affiliates` | page | query `affiliate_list` | UI-16 | AP-03 | |
 | GET | `/affiliates/new` | page | none | UI-17 | AP-03 | |
 | POST | `/affiliates` | action | OP-AFF-01 | UI-17 | AP-03 | |
 | GET | `/affiliates/{id}` | page | query `affiliate_get` | UI-17 | AP-03 | With its students. |
-| POST | `/affiliates/{id}` | action | OP-AFF-01 | UI-17 | AP-03 | |
+| PATCH | `/affiliates/{id}` | action | OP-AFF-01 | UI-17 | AP-03 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/affiliates/{id}` | action | OP-AFF-01 | UI-17 | AP-04 | Unlinks students (BR-AFF-02). |
 
 ### CRS and ENR (school)
@@ -170,11 +170,11 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/offerings/{kind}` | page | query `offering_list` | UI-18 | AP-03 | |
 | POST | `/offerings/{kind}` | action | OP-CRS-01 | UI-18 | AP-03 | |
 | GET | `/offerings/{kind}/{id}` | page | query `offering_get` | UI-18 | AP-03 | Calendar tab with summary counts from `v_calendar_*_summary` (BR-CRS-03). |
-| POST | `/offerings/{kind}/{id}` | action | OP-CRS-01 | UI-18 | AP-03 | |
+| PATCH | `/offerings/{kind}/{id}` | action | OP-CRS-01 | UI-18 | AP-03 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/offerings/{kind}/{id}` | action | OP-CRS-01 | UI-18 | AP-04 | Refused when calendar rows or enrollments exist. |
 | POST | `/offerings/{kind}/{id}/calendar` | action | OP-CRS-02 | UI-18 | AP-03 | "Abrir Curso": new row Pendiente with copied prices (BR-CRS-02). |
 | GET | `/calendar/{kind}/{id}` | partial | query `calendar_get` | UI-19 | AP-03 | Dialog: status, prices, professor, class dates. |
-| POST | `/calendar/{kind}/{id}` | action | OP-CRS-02 | UI-19 | AP-03, AP-07 | No delete route exists; status Cancelado instead (BR-CRS-05). |
+| PATCH | `/calendar/{kind}/{id}` | action | OP-CRS-02 | UI-19 | AP-03, AP-07 | No delete route exists; status Cancelado instead (BR-CRS-05). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/calendar/{kind}/{id}/dates` | action | OP-CRS-03 | UI-19 | AP-03 | Course: `calendar_course_dates`; short course: `calendar_short_course_dates` (max 15). |
 | DELETE | `/calendar/{kind}/{id}/dates/{date_id}` | action | OP-CRS-03 | UI-19 | AP-06 | |
 | GET | `/calendar/{kind}/{id}/enrollments` | page | OP-CRS-05 | UI-21 | AP-03 | Empty: message. |
@@ -183,7 +183,8 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/calendar-options/{kind}` | partial | query `calendar_options` | UI-20 | AP-03 | `?offering=&student=`: active calendar rows only (BR-CRS-01) with the price this student pays (BR-ENR-01). |
 | POST | `/students/{id}/enrollments/{kind}` | action | OP-ENR-01, OP-ENR-02, OP-ENR-03 | UI-20 | AP-03 | One op per kind; price stored at pick time. |
 | GET | `/enrollments/{kind}/{id}` | page | query `enrollment_get` | UI-20 | AP-03 | Opens as a dialog from UI-15, as a page from a link. |
-| POST | `/enrollments/{kind}/{id}` | action | OP-ENR-04, OP-ENR-08 | UI-20 | AP-03 | Payment, payer, notes; grades on course enrollments (BR-ENR-03). |
+| POST | `/enrollments/{kind}/{id}` | action | OP-ENR-04, OP-ENR-08 | UI-20 | AP-03 | Payment, payer, notes; grades on course enrollments (BR-ENR-03). | The UI-20 dialog keeps this `POST` with Guardar: an enrollment is a settle form (payment, grades) validated as a whole.
+| PATCH | `/enrollments/{kind}/{id}` | action | OP-ENR-04, OP-ENR-08 | UI-15, UI-21 | AP-03 | Line fields edited in a list (grades, payment date, notes). Per-field autosave: one field per request, returns the field fragment. |
 | POST | `/enrollments/{kind}/{id}/cancel` | action | OP-ENR-05 | UI-20 | AP-05 | Status BAJA or Canceló. |
 | DELETE | `/enrollments/{kind}/{id}` | action | OP-ENR-05 | UI-15, UI-20 | AP-05 | Two-step confirm; refused when a payment exists (BR-ENR-08). |
 | GET | `/enrollments/{kind}` | page | query `enrollment_list` | UI-21 | AP-03 | `?calendar=`, `?status=`, `?q=`. |
@@ -210,7 +211,7 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 |---|---|---|---|---|---|---|
 | GET | `/mail/batches` | page | query `batch_list` | UI-25 | AP-03 | Counts from `v_mail_batch_counts`. |
 | GET | `/mail/batches/{id}` | page | query `batch_get` | UI-26 | AP-03 | Batch header + one row per e-mail with a status badge (BR-MAIL-05). |
-| POST | `/mail/batches/{id}` | action | OP-MAIL-02 | UI-26 | AP-03 | Title, message, sender profile. |
+| PATCH | `/mail/batches/{id}` | action | OP-MAIL-02 | UI-26 | AP-03 | Title, message, sender profile. Only while no e-mail of the batch is sent (AP-06). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/mail/batches/{id}/attachment` | action | OP-MAIL-02 | UI-26 | AP-03 | |
 | DELETE | `/mail/batches/{id}/attachment` | action | OP-MAIL-02 | UI-26 | AP-03 | |
 | DELETE | `/mail/emails/{id}` | action | OP-MAIL-02 | UI-26 | AP-06 | Only while `sent = 0`. |
@@ -230,7 +231,7 @@ One row per operation of `07`. The route column names the route that calls it; t
 
 | Domain/use case | Operation | Route | Input | Output (HTML) | Object files | Transaction/effects | Policy | Errors |
 |---|---|---|---|---|---|---|---|---|
-| REG: create registration from person | OP-REG-01 | `POST /people/{id}/registrations`; header edit `POST /registrations/{id}` | person id; header fields | redirect to UI-06 | `objects/MBA.fmp12/scripts/21-people_create_registration.txt`, `objects/MBA.fmp12/scripts/33-registration_newRecord.txt` | one insert; next `registration_number` in the same transaction | AP-03 | NotFound, Validation |
+| REG: create registration from person | OP-REG-01 | `POST /people/{id}/registrations`; header edit `PATCH /registrations/{id}` (per field) | person id; header fields | redirect to UI-06 | `objects/MBA.fmp12/scripts/21-people_create_registration.txt`, `objects/MBA.fmp12/scripts/33-registration_newRecord.txt` | one insert; next `registration_number` in the same transaction | AP-03 | NotFound, Validation |
 | REG: select event | OP-REG-02 | `POST /registrations/{id}/event` | event id | header fragment | `objects/MBA.fmp12/scripts/42-registrations.selectEvent-select.txt` | single update of this registration | AP-03 | NoActiveEvent, NotFound |
 | REG: select plan | OP-REG-03 | `POST /registrations/{id}/plan` | plan id, `confirm` | items portal + totals (OOB) | `objects/MBA.fmp12/scripts/45-registrations.selectPackage-select.txt` | one transaction: delete this registration's items, insert active plan items, update registration | AP-03, AP-09 | ConfirmRequired, PlanNotOfEvent |
 | REG: add/remove item | OP-REG-04 | `POST /registrations/{id}/items`, `DELETE .../items/{item_id}` | event item id | items portal + totals | `objects/MBA.fmp12/layouts/29-Registro.txt` | single insert/delete | AP-06 | ItemNotOfEvent, ConfirmRequired |
@@ -241,22 +242,22 @@ One row per operation of `07`. The route column names the route that calls it; t
 | REG: cancel/delete registration | OP-REG-09 | `POST /registrations/{id}/cancel`, `DELETE /registrations/{id}` | `confirm` | redirect | `objects/MBA.fmp12/relationships/4-registration_payments.txt` | update, or delete with cascade of items and guests | AP-05, AP-06 | HasPayments |
 | REG: door check-in | OP-REG-10 | `POST /registrations/{id}/attendance` | status | row | `objects/MBA.fmp12/layouts/55-Registro_Puerta.txt` | single update | AP-03 | Validation |
 | EVT: event CRUD and PDF | OP-EVT-01 | `/events`, `/events/{id}`, `/events/{id}/pdf` | event fields, file | page | `objects/MBA.fmp12/scripts/26-event_newRecord.txt`, `objects/MBA.fmp12/scripts/13-event.deletePDF.txt` | single statement | AP-03, AP-04 | HasRegistrations |
-| EVT: save event | OP-EVT-02 | `POST /events/{id}` | event fields | header + totals | `objects/MBA.fmp12/scripts/15-event.save.txt` | single update | AP-03 | Validation |
-| EVT: event items | OP-EVT-03 | `POST /events/{id}/items`, `/event-items/{id}` | item fields | items portal | `objects/MBA.fmp12/scripts/25-event_create_event_item.txt` | single statement | AP-03, AP-06 | InUse (FK) |
-| EVT: build plan items | OP-EVT-04 | `POST /plans/{id}/build`; `POST /plans/{id}` on event change | plan id | plan items portal | `objects/MBA.fmp12/scripts/50-package_select_event.txt` | one transaction; insert missing pairs only | AP-03 | NoEvent, EventHasNoItems |
+| EVT: save event | OP-EVT-02 | `PATCH /events/{id}` | one event field | field + totals (OOB) | `objects/MBA.fmp12/scripts/15-event.save.txt` | single update | AP-03 | Validation |
+| EVT: event items | OP-EVT-03 | `POST /events/{id}/items`, `PATCH /event-items/{id}` | item fields | items portal | `objects/MBA.fmp12/scripts/25-event_create_event_item.txt` | single statement | AP-03, AP-06 | InUse (FK) |
+| EVT: build plan items | OP-EVT-04 | `POST /plans/{id}/build`; `PATCH /plans/{id}` on event change | plan id | plan items portal | `objects/MBA.fmp12/scripts/50-package_select_event.txt` | one transaction; insert missing pairs only | AP-03 | NoEvent, EventHasNoItems |
 | EVT: plans and plan items | OP-EVT-05 | `/plans...`, `/plan-items/{id}...` | plan fields | page / row | `objects/MBA.fmp12/scripts/48-package_create_item.txt`, `objects/MBA.fmp12/scripts/49-package_active.txt` | single statement | AP-03, AP-04, AP-06 | InUse |
 | SPN: sponsors | OP-SPN-01 | `/events/{id}/sponsors`, `/sponsors/{id}` | sponsor fields | sponsors tab | `objects/MBA.fmp12/layouts/45-Auspiciadores.txt` | single statement | AP-03, AP-06 | Validation |
 | SPN: billing files | OP-SPN-02 | `POST /events/{id}/billing`, `DELETE /billing/{id}` | file | billing tab | `objects/MBA.fmp12/layouts/35-Convencion.txt` | insert `stored_files` + `billing` in one transaction | AP-03, AP-06 | FileTooLarge |
-| PPL: create/edit person | OP-PPL-01 | `POST /people`, `POST /people/{id}` | person fields | page | `objects/MBA.fmp12/scripts/22-people_newRecord.txt` | single statement | AP-03 | Validation |
+| PPL: create/edit person | OP-PPL-01 | `POST /people`, `PATCH /people/{id}` | person fields | page | `objects/MBA.fmp12/scripts/22-people_newRecord.txt` | single statement | AP-03 | Validation |
 | PPL: delete person | OP-PPL-02 | `DELETE /people/{id}` | `confirm` | redirect | `objects/MBA.fmp12/custom-menus/36-people.records.txt` | single delete | AP-04 | HasRegistrations |
 | AFF: affiliates | OP-AFF-01 | `/affiliates...` | affiliate fields | page | `objects/MBS.fmp12/layouts/48-Afiliado.txt` | delete: unlink students + delete in one transaction | AP-03, AP-04 | Validation |
 | STU: create student | OP-STU-01 | `POST /students` | student fields | redirect | `objects/MBS.fmp12/scripts/33-student_new_record.txt`, `objects/MBS.fmp12/scripts/34-student_create_certification_records_student_uuid.txt` | one transaction: student + certification rows | AP-03 | Validation |
 | STU: duplicate student | OP-STU-02 | `POST /students/{id}/duplicate` | none | redirect | `objects/MBS.fmp12/scripts/35-student_duplicate_record.txt` | one transaction | AP-03 | NotFound |
-| STU: edit student | OP-STU-03 | `POST /students/{id}`, `POST /students/{id}/interests` | fields, interest | page / interests partial | `objects/MBS.fmp12/layouts/43-Estudiante.txt` | single statement | AP-03, AP-06 | MaxInterests (6) |
+| STU: edit student | OP-STU-03 | `PATCH /students/{id}`, `POST /students/{id}/interests` | fields, interest | page / interests partial | `objects/MBS.fmp12/layouts/43-Estudiante.txt` | single statement | AP-03, AP-06 | MaxInterests (6) |
 | STU: delete student | OP-STU-04 | `DELETE /students/{id}` | `confirm` | redirect | product decision (D-09) | delete with cascade of certification rows and interests | AP-04 | HasEnrollments |
 | STU: quick find | OP-STU-05 | `GET /students?q=` | text | list, redirect or message | `objects/MBS.fmp12/scripts/45-student_quick_find.txt` | read | AP-03 | none |
 | CRS: offerings | OP-CRS-01 | `/offerings/{kind}...` | offering fields | page | `objects/MBS.fmp12/layouts/57-Cursos_Especializados.txt`, `objects/MBS.fmp12/layouts/60-Seminarios.txt`, `objects/MBS.fmp12/layouts/64-Cursos_Cortos.txt` | single statement | AP-03, AP-04 | InUse |
-| CRS: calendar rows | OP-CRS-02 | `POST /offerings/{kind}/{id}/calendar`, `POST /calendar/{kind}/{id}` | status, prices, professor | calendar portal | `objects/MBS.fmp12/scripts/52-course_add_date.txt` | single statement; prices copied at insert | AP-03, AP-07 | Validation |
+| CRS: calendar rows | OP-CRS-02 | `POST /offerings/{kind}/{id}/calendar`, `PATCH /calendar/{kind}/{id}` | status, prices, professor | calendar portal | `objects/MBS.fmp12/scripts/52-course_add_date.txt` | single statement; prices copied at insert | AP-03, AP-07 | Validation |
 | CRS: class dates | OP-CRS-03 | `/calendar/{kind}/{id}/dates...` | date, day type | dates list | `objects/MBS.fmp12/layouts/58-Fechas_de_Curso.txt`, `objects/MBS.fmp12/layouts/65-Fechas_del_Curso_Corto.txt` | single statement | AP-03, AP-06 | MaxDates (15) |
 | CRS: professors | OP-CRS-04 | `/admin/professors...` | name | list | `objects/MBS.fmp12/layouts/66-Tabla_de_Profesores.txt` | single statement | AP-08 | Validation |
 | CRS: enrollment list of a row | OP-CRS-05 | `GET /calendar/{kind}/{id}/enrollments` | none | page | `objects/MBS.fmp12/scripts/54-course_view_enrollments.txt` | read | AP-03 | Empty (message) |
@@ -269,10 +270,10 @@ One row per operation of `07`. The route column names the route that calls it; t
 | ENR: import grades | OP-ENR-07 | `POST /grades/import`, `POST /grades/import/{token}/apply` | XLSX | preview, then result | `objects/MBS.fmp12/scripts/128-enroll_course_import_registro_de_notas.txt` | apply in one transaction | AP-09 | BadFile, TokenExpired |
 | ENR: grades by hand | OP-ENR-08 | `POST /enrollments/course/{id}` | grade fields | dialog | `objects/MBS.fmp12/layouts/82-Matricula_de_Curso.txt` | single update | AP-03 | ScoreOutOfRange |
 | CRT: certifications | OP-CRT-01 | `/admin/certifications...` | fields | page | `objects/MBS.fmp12/layouts/59-Certificaciones.txt` | single statement | AP-08 | InUse |
-| CRT: graduation | OP-CRT-02 | `POST /student-certifications/{id}` | date, note | certifications tab | `objects/MBS.fmp12/layouts/43-Estudiante.txt` | single update | AP-03 | Validation |
+| CRT: graduation | OP-CRT-02 | `PATCH /student-certifications/{id}` | date, note | certifications tab | `objects/MBS.fmp12/layouts/43-Estudiante.txt` | single update | AP-03 | Validation |
 | CRT: certificate | OP-CRT-03 | `GET /print/school/certificado-graduacion?student_certification=` | id | print page | `objects/MBS.fmp12/scripts/48-students_print_certification.txt` | read | AP-10 | NotGraduated |
 | MAIL: batch from calendar row | OP-MAIL-01 | `POST /calendar/{kind}/{id}/mail` | none | redirect UI-26 | `objects/MBS.fmp12/scripts/173-sciSendMai.caller_module.txt`, `objects/MBS_SendMail.fmp12/scripts/1-g.createEmails_contact_ids.txt` | one transaction: batch + e-mails | AP-03 | NoEnrollments |
-| MAIL: edit batch | OP-MAIL-02 | `POST /mail/batches/{id}...` | title, message, profile, file | header | `objects/MBS_SendMail.fmp12/scripts/21-email.attachment.txt` | single statement | AP-03, AP-06 | AlreadySent |
+| MAIL: edit batch | OP-MAIL-02 | `PATCH /mail/batches/{id}`, `POST .../attachment` | title, message, profile, file | header | `objects/MBS_SendMail.fmp12/scripts/21-email.attachment.txt` | single statement | AP-03, AP-06 | AlreadySent |
 | MAIL: send one | OP-MAIL-03 | `POST /mail/emails/{id}/send` | none | row | `objects/MBS_SendMail.fmp12/scripts/8-email.send.txt` | EXT-01 call, then update the row; no transaction across the call | AP-03 | ProviderError (stored, BR-MAIL-04) |
 | MAIL: send all | OP-MAIL-04 | `POST /mail/batches/{id}/send-all` | `confirm` | progress partial | `objects/MBS_SendMail.fmp12/scripts/18-email.buttonAll.txt` | JOB-01, one e-mail at a time | AP-09 | ConfirmRequired, AlreadyRunning |
 | MAIL: preview | OP-MAIL-05 | `GET /mail/emails/{id}/preview` | none | page | `objects/MBS_SendMail.fmp12/scripts/7-emails.previewTemplate.txt` | read | AP-03 | none |
@@ -288,8 +289,8 @@ One row per operation of `07`. The route column names the route that calls it; t
 | AUTH: sign out | OP-AUTH-02 | `POST /logout` | none | redirect | `objects/MBA.fmp12/scripts/2-Re-Login.txt` | session delete | AP-01 | none |
 | AUTH: change own password | OP-AUTH-03 | `POST /account/password` | current, new | page | privilege sets (`allowModifyPassword`) | single update; other sessions of the user deleted | AP-12 | WrongPassword, WeakPassword |
 | AUTH: manage users | OP-AUTH-04 | `/admin/users...` | fields | page | `objects/MBA.fmp12/privilege-sets/1-Full_Access.txt` | single statement + session revoke | AP-08, AP-11 | LastAdmin |
-| SYS: settings | OP-SYS-01 | `POST /admin/settings`, `POST /admin/value-lists` | key/values | page | product decision (D-18, D-25, D-14, D-20) | one transaction | AP-08 | Validation |
-| SYS: document templates | OP-SYS-02 | `POST /admin/templates/{code}` | HTML | page | product decision (D-18) | single update | AP-08 | Validation |
+| SYS: settings | OP-SYS-01 | `PATCH /admin/settings`, `POST /admin/value-lists` | key/values | page | product decision (D-18, D-25, D-14, D-20) | one transaction | AP-08 | Validation |
+| SYS: document templates | OP-SYS-02 | `PATCH /admin/templates/{code}` | HTML | page | product decision (D-18) | single update | AP-08 | Validation |
 | SYS: seed demo data | OP-SYS-03 | none (CLI `mba-seed`) | seed, size | database file | product decision (D-02) | one transaction per table group | AP-14 | none |
 | SYS: files | OP-SYS-04 | `POST /files`, `GET /files/{uuid}` | multipart | file chip / bytes | containers (04 appendix) | insert `stored_files`, write file to `data/files/` | AP-03 | FileTooLarge, EmptyFile |
 
@@ -346,13 +347,46 @@ Every query selects only the columns its template shows. No route returns a whol
 
 Bulk operations: three exist (OP-REG-03, OP-MAIL-04, OP-ENR-07). Each takes its scope from the server (registration id, batch id, matched serials in the stored preview), never from a client list of ids (AP-09). No `Replace Field Contents` translation is exposed: MBS script 18 is retired (D-04).
 
+## Per-field autosave (PATCH)
+
+Operator decision (2026-11-21): the app keeps the FileMaker model. Record pages are always editable and have no Edit, Cancel or Save button; each field saves when the user leaves it. Guardar stays only in dialogs that create or settle a record (new student, enrollment, payment, new user, sign-in, password change, grade import apply).
+
+| Concern | Contract |
+|---|---|
+| Request | `PATCH /<resource>/{id}` from `hx-patch`, `hx-trigger="change"`, body = exactly one field (`campo=valor`, form-encoded). A body with zero or several fields, or a field outside the allow list of the command, is 422. CSRF token in the `X-CSRF-Token` header (htmx `hx-headers` on `<body>`). |
+| Success | 200 with the field fragment (`hx-target="closest .field-wrap"`, `hx-swap="outerHTML"`) showing the saved, normalised value. A line field (`hx-target="closest tr"`) returns the row plus every figure that depends on it out of band: registration totals (`#totales`), plan price, sponsor sums, event totals. Totals are always computed on the server (views of `04`); the browser never sends or computes them. |
+| Validation error | 422 with the same field fragment in its error state: the value as typed, `aria-invalid="true"`, the Spanish message, and `data-unsaved` on the wrapper. Nothing is written. htmx `responseHandling` swaps 422. The footer counts `[data-unsaved]` ("1 campo sin guardar"). |
+| Domain refusal | 409 with a message fragment, as for other commands (for example an e-mail of a sent batch, AP-06). |
+| Revert | Esc in a changed field restores its saved value (`data-saved`) before the user leaves it; no request is sent (FileMaker Revert Record). |
+| Save state | The fixed footer slot shows "Guardando…" (htmx `beforeRequest`), "Guardado h:mm p. m." (after a 200 swap) or "N campo(s) sin guardar". The slot has a fixed width; the page never moves. |
+| Concurrency | Last write wins per field: each `PATCH` updates one column in one `BEGIN IMMEDIATE` transaction. Two users editing different fields of one record do not overwrite each other. |
+| Audit | One `audit_log` row per saved field: action `field.change`, table, row id, field, old value, new value, actor, request id. Masked fields (passwords) are never patched; they use their own `POST` routes. |
+| Policy | Same policy as the page (AP-03, AP-08 for admin records); the handler checks the field against the role (for example `role` and `active` on users are ROLE-ADMIN only). |
+
+Superseded routes (replaced by the `PATCH` rows of the catalog; no whole-record save route remains):
+
+| Superseded | Replaced by |
+|---|---|
+| `POST /people/{id}` | `PATCH /people/{id}` |
+| `POST /registrations/{id}` (header form) | `PATCH /registrations/{id}` |
+| `POST /registrations/{id}/items/{item_id}/attributes` | `PATCH /registrations/{id}/items/{item_id}` (attributes, price, qty, no charge) |
+| `POST /registrations/{id}/guests/{guest_id}` | `PATCH /registrations/{id}/guests/{guest_id}` |
+| `POST /events/{id}`, `POST /event-items/{id}`, `POST /sponsors/{id}` | `PATCH` on the same paths |
+| `POST /plans/{id}`, `POST /plan-items/{id}/toggle` | `PATCH /plans/{id}`, `PATCH /plan-items/{id}` |
+| `POST /students/{id}`, `POST /student-certifications/{id}`, `POST /affiliates/{id}` | `PATCH` on the same paths |
+| `POST /offerings/{kind}/{id}`, `POST /calendar/{kind}/{id}` | `PATCH` on the same paths |
+| `POST /mail/batches/{id}` | `PATCH /mail/batches/{id}` |
+| `POST /admin/users/{id}`, `/admin/settings`, `/admin/templates/{code}`, `/admin/certifications/{id}`, `/admin/professors/{id}`, `/admin/mail/templates/{id}`, `/admin/mail/profiles/{email}` | `PATCH` on the same paths |
+
+Kept as `POST`: creates, commands and settle forms (`POST /registrations/{id}/payments`, `POST /payments/{id}/void`, `POST /students/{id}/enrollments/{kind}`, `POST /enrollments/{kind}/{id}` from the UI-20 dialog, `POST /admin/users`, `POST /admin/users/{id}/password`, `POST /account/password`, `POST /login`, imports and send-all).
+
 ## Identity and account operations
 
 | Operation | Provider/owner | Flow | Authorization | Audit/negative tests |
 |---|---|---|---|---|
 | Invite/reset/map user | local `users` table (D-50) | ROLE-ADMIN creates the user with a first password and tells the user out of band. No e-mail invite. No mapping of FileMaker accounts (D-07, demo). | AP-08 | `auth.user_created`; staff -> 403 |
-| Activate/disable account | local | `POST /admin/users/{id}` with `active`. Disable deletes the user's sessions. | AP-08, AP-11 | last active admin protected |
-| Assign/revoke roles | local | `POST /admin/users/{id}` with `role` (`admin` or `staff`). Sessions deleted on change. | AP-08, AP-11 | `auth.role_changed` |
+| Activate/disable account | local | `PATCH /admin/users/{id}` with `active`. Disable deletes the user's sessions. | AP-08, AP-11 | last active admin protected |
+| Assign/revoke roles | local | `PATCH /admin/users/{id}` with `role` (`admin` or `staff`). Sessions deleted on change. | AP-08, AP-11 | `auth.role_changed` |
 | Provision/rotate service principal | none | No service principal. The seed tool runs from the server shell (OP-SYS-03). `RESEND_API_KEY` is an environment variable; rotation out of scope (demo). | AP-14 | none |
 
 Local password change exists because discovery selected local accounts (D-50): OP-AUTH-03.
@@ -416,13 +450,13 @@ A FileMaker "show dialog, then continue" step that guards a write becomes a two-
 
 | Concern | Contract |
 |---|---|
-| Validation/domain errors | `enum DomainError` with stable codes (`Validation{field}`, `NotFound`, `ConfirmRequired`, `HasPayments`, `HasRegistrations`, `HasEnrollments`, `InUse`, `CalendarNotActive`, `NoActiveEvent`, `NoEnrollments`, `ProviderError`, `LastAdmin`). Forms re-render with Spanish field messages (422). Domain refusals show a message fragment (409). |
+| Validation/domain errors | `enum DomainError` with stable codes (`Validation{field}`, `NotFound`, `ConfirmRequired`, `HasPayments`, `HasRegistrations`, `HasEnrollments`, `InUse`, `CalendarNotActive`, `NoActiveEvent`, `NoEnrollments`, `ProviderError`, `LastAdmin`). Forms re-render with Spanish field messages (422); a field `PATCH` answers 422 with its field fragment. Domain refusals show a message fragment (409). |
 | Authentication/authorization denial | No session: redirect to sign-in. Wrong role: 403 with a generic message; no hint which record exists. Sign-in errors never say which part failed (BR-AUTH-01). |
-| Conflict/locking/retry | SQLite WAL, one writer; each command is one `BEGIN IMMEDIATE` transaction with `busy_timeout` 5 s. Last write wins on plain form edits (inference: small staff, D-49 default). |
+| Conflict/locking/retry | SQLite WAL, one writer; each command is one `BEGIN IMMEDIATE` transaction with `busy_timeout` 5 s. Last write wins per field: each autosave `PATCH` writes one column (operator decision 2026-11-21; was per form, D-49 default). |
 | Partial external failure/compensation | Mail: the provider call is outside the transaction; the row update after it records success or error. No compensation needed. |
 | Idempotency | Two-step confirms; serial numbers taken inside the insert transaction; EXT-01 idempotency key = e-mail uuid; JOB-01 skips sent rows. |
 | Rate/size/pagination limits | Lists 50 rows per page. Uploads max 20 MB (`stored_files`). Grade import max 5,000 rows. Request body max 25 MB. |
-| Audit actor/reason/correlation | `audit_log` rows for void, delete, plan change, import, send-all, user and settings changes; `created_by`/`modified_by` on every row (BR-SYS-02). Each request gets an `x-request-id` that the log lines carry. |
+| Audit actor/reason/correlation | `audit_log` rows for every saved field (`field.change`), void, delete, plan change, import, send-all, user and settings changes; `created_by`/`modified_by` on every row (BR-SYS-02). Each request gets an `x-request-id` that the log lines carry. |
 | Sensitive-field logging/masking | `tracing` never logs form bodies of `/login`, `/account/password`, `/admin/users/*/password`. `RESEND_API_KEY` is read once at start and kept out of `Debug` output. |
 
 ## Traceability and tests
@@ -443,6 +477,9 @@ Each operation row above names its object files. Tests (the semantic fixtures T-
 | T-05-10 | `POST /mail/batches/{id}/send-all` twice | second call -> 409 while JOB-01 runs; sent e-mails skipped |
 | T-05-11 | `GET /calendar-options/{kind}` | inactive rows absent; affiliate student sees the member price |
 | T-05-12 | `POST /grades/import/{token}/apply` with another user's token | 404 |
+| T-05-13 | `PATCH /registrations/{id}/items/{item_id}` with `qty=3` | 200: row with the new total and `#totales` out of band; one `audit_log` `field.change` row |
+| T-05-14 | `PATCH /registrations/{id}/items/{item_id}` with `qty=0` | 422: field fragment with the typed value and the message; nothing written; totals unchanged |
+| T-05-15 | `PATCH /people/{id}` with two fields | 422; nothing written |
 | T-05-13 | all templates | no response body contains the value of `RESEND_API_KEY` or `password_hash` |
 | T-05-14 | `GET /print/*`, `GET /exports/*` | the export applies the same filter as the list (AP-10) |
 | T-05-15 | HTMX vs full page | the same `GET` returns a fragment with `HX-Request` and a full page without it |
@@ -464,4 +501,4 @@ Each operation row above names its object files. Tests (the semantic fixtures T-
 | OD-05-02 | Send-all as a background job with polling (JOB-01), or one long request | JOB-01 with a 1 s poll | OP-MAIL-04, UI-26 |
 | OD-05-03 | Grades file format | XLSX in and out (D-23). The source export is XLSX; the source import gives no file type (BR-ENR-06, audit fix) | OP-ENR-06, OP-ENR-07 |
 | OD-05-04 | Print to PDF on the server | no: browser print to PDF (`decisions.md`) | UI-34, UI-35 |
-| OD-05-05 | Header edit of a registration uses OP-REG-01's form | yes; 07 has no separate edit operation | `POST /registrations/{id}` |
+| OD-05-05 | Header edit of a registration uses OP-REG-01's form | superseded (2026-11-21): per-field `PATCH /registrations/{id}`; no header form | `PATCH /registrations/{id}` |
