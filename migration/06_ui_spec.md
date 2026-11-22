@@ -100,7 +100,7 @@ The full per-object maps of the meaty screens are in `06_ui_spec_appendix.md` §
 | `objects/MBS.fmp12/layouts/57-Cursos_Especializados.txt` | 66 | button | Borrar | script 164 with access 0 (always denied) | none | no delete control; status select with Cancelado (BR-CRS-05) |
 | `objects/MBS.fmp12/layouts/57-Cursos_Especializados.txt` | 75 | button | mail icon | script 173 (module ce) | none | "Enviar correo" on each calendar row → `POST /calendar/course/{id}/mail` |
 
-Navigation that a script builds from a parameter: `global.navigation ( module )` (MBA script 8) and the `global.load*` scripts (MBS 10 to 15) pick the target layout by name or by the current view. The target shell has a fixed sidebar per module, so no computed navigation remains.
+Navigation that a script builds from a parameter: `global.navigation ( module )` (MBA script 8) and the `global.load*` scripts (MBS 10 to 15) pick the target layout by name or by the current view. The target shell has fixed nav tabs per module under the top bar, so no computed navigation remains.
 
 ## Navigation and workflows
 
@@ -130,7 +130,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 ### UI-02 Inicio y estructura (shell and home)
 
 - Readiness: behavior-ready. Route: `GET /`.
-- Shell: top bar (app name, user menu with "Cambiar contraseña" and "Salir"), left sidebar with three groups: Convención (Convencionistas, Registros, Convenciones, Planes), Escuela (Estudiantes, Afiliados, Cursos especializados, Seminarios, Cursos cortos, Matrículas, Reportes), Correos (Envíos, Bandeja de salida). Admin group for ROLE-ADMIN only (visibility only; AP-08 guards the routes).
+- Shell: top bar (app name, user menu with "Cambiar contraseña" and "Salir"), module tabs in the top bar and a nav tab bar per module: Convención (Convencionistas, Registros, Convenciones, Planes), Escuela (Estudiantes, Afiliados, Cursos especializados, Seminarios, Cursos cortos, Matrículas, Reportes), Correos (Envíos, Bandeja de salida). Admin module tab for ROLE-ADMIN only (visibility only; AP-08 guards the routes).
 - Home: three module tiles with counts (active events, active students, draft batches). Source: the four nav buttons on every MBA layout (`global.navigation`, MBA script 8) and the MBS nav buttons (scripts 10 to 15); file triggers open MBA on Convención and MBS on the student list (BR-SYS-01).
 - Session expiry after 10 idle minutes redirects to UI-01 (BR-AUTH-02).
 
@@ -487,14 +487,14 @@ No SSN field exists (D-06).
 | Typography/color/spacing | One CSS file, system font stack, 14 px base for data screens, neutral grays with one accent color; status colors green / red / amber / neutral with text labels (never color alone) | product decision (Step 5 default, D-74 not answered) | design pages in M1 approved by the operator |
 | Breakpoints/input devices | Desktop first (≥ 1280 px); usable down to 1024 px; UI-07 door check-in works on a tablet (≥ 768 px) | inference: office staff on desktops (D-72 default) | manual check at 1280, 1024, 768 |
 | Data-density/table behavior | Dense tables (32 px rows), sticky header, 50 rows per page, sortable where the source sorted | FileMaker list layouts (fact) | lists render 50 rows |
-| Modal/tab/navigation behavior | Native `<dialog>` for pickers and enrollment; tabs are links with `hx-get` + `hx-push-url`; fixed sidebar per module | layouts 32, 33, 58, 65, 82 open as windows (fact) | back button restores the tab |
+| Modal/tab/navigation behavior | Native `<dialog>` for pickers and enrollment; tabs are links with `hx-get` + `hx-push-url`; fixed module tabs in the top bar and nav tabs per module | layouts 32, 33, 58, 65, 82 open as windows (fact) | back button restores the tab |
 | Print/PDF behavior | Print CSS pages; browser print or save as PDF | `decisions.md` | Lista de Facturación prints on letter paper with page breaks |
 | Accessibility target | WCAG 2.2 AA for the meaty screens: labels on every control, focus visible, keyboard path through dialogs, contrast ≥ 4.5:1 | Step 5 default (D-75 not answered) | keyboard walk of UI-06 and UI-20 |
 | JavaScript | htmx (vendored) + `app.js` < 200 lines: dialog open/close, focus return, Esc, `Ctrl+S` submits the current form, confirm-dialog wiring | `decisions.md` | pages work with JS off except dialogs and partial swaps |
 
 ## Design milestone (M1) inputs
 
-The design milestone produces static HTML design pages under `design/` (shape of migrate-karbonfm `design/`): shared partials (head, sidebar, top bar), one CSS file, a component set (`design/components.html`), and a page shell for every kept screen (UI-01 to UI-35; full list in `03_migration_plan.md` "M1 page list"), with the same synthetic data as the mockups. The table below lists the pages drawn in full. The promo video (M2, episode 1) is made from the design pages and compares each before mockup with its design page.
+The design milestone produces static HTML design pages under `design/` (shape of migrate-karbonfm `design/`): shared partials (head, top bar with module tabs, nav tabs, footer), one CSS file, a component set (`design/components.html`), and a page shell for every kept screen (UI-01 to UI-35; full list in `03_migration_plan.md` "M1 page list"), with the same synthetic data as the mockups. The table below lists the pages drawn in full. The promo video (M2, episode 1) is made from the design pages and compares each before mockup with its design page.
 
 | Design page | Screen | Before screen |
 |---|---|---|

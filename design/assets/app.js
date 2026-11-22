@@ -10,7 +10,7 @@
   // ---- Active module and nav tab (a template variable in the real app) ----
   function markCurrent() {
     const b = document.body.dataset;
-    $$("[data-module]").forEach((a) => a.toggleAttribute("aria-current", a.dataset.module === b.module));
+    $$(".modules [data-module]").forEach((a) => a.toggleAttribute("aria-current", a.dataset.module === b.module));
     $$(".nav [data-nav]").forEach((a) => {
       if (a.dataset.nav === b.nav) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -148,20 +148,39 @@
     const btn = $("[data-menu][aria-expanded=true]");
     if (btn && e.target.contains && e.target.contains(btn)) closeMenus();
   }, true);
+  // Headless screenshots resize the window once; with ?menu= that resize must not close the menu.
   let size = innerWidth + "x" + innerHeight;
-  addEventListener("resize", () => { const s = innerWidth + "x" + innerHeight; if (s !== size) { size = s; closeMenus(); } });
+  addEventListener("resize", () => {
+    const s = innerWidth + "x" + innerHeight;
+    if (s !== size) { size = s; if (!params.get("menu")) closeMenus(); }
+  });
+
+  // Page states: <body data-state="NAME"> shows only the [data-st] elements that list NAME;
+  // with no state, only those that list "base". Elements without data-st always show.
+  function setState(name) {
+    if (name) document.body.dataset.state = name; else delete document.body.dataset.state;
+    $$("[data-st]").forEach((el) => el.classList.toggle("st-off", !!name && !el.dataset.st.split(/\s+/).includes(name)));
+  }
+  window.mbaState = setState;
 
   document.addEventListener("DOMContentLoaded", () => {
     markCurrent();
     let role = params.get("role");
     if (!role) { try { role = localStorage.getItem("mba-role"); } catch (_) {} }
     setRole(role === "staff" ? "staff" : "admin");
-    $$("[role=tablist]").forEach((l) => { const s = $("[aria-selected=true]", l) || $("[role=tab]", l); if (s) selectTab(s); });
-    // Screenshot hooks: ?scroll=<px> or ?at=<element id> scrolls the content area, ?open=<dialog id>, ?menu=<button id>.
+    // Hooks: ?state=<name>, ?tab=<tab id>, ?scroll=<px> or ?at=<element id>, ?open=<dialog id>
+    // (else <body data-open="dialog id">), ?menu=<button id>.
+    setState(params.get("state"));
+    const wanted = params.get("tab") && document.getElementById(params.get("tab"));
+    $$("[role=tablist]").forEach((l) => {
+      const s = (wanted && l.contains(wanted) && wanted) || $("[aria-selected=true]", l) || $("[role=tab]", l);
+      if (s) selectTab(s);
+    });
     const main = $("main.content");
     if (main && params.get("scroll")) main.scrollTop = parseInt(params.get("scroll"), 10) || 0;
     if (main && params.get("at")) { const t = document.getElementById(params.get("at")); if (t) main.scrollTop = t.offsetTop - 24; }
-    if (params.get("open")) openDialog(params.get("open"));
+    const dlg = params.get("open") || document.body.dataset.open;
+    if (dlg) openDialog(dlg);
     if (params.get("menu")) { const b = document.getElementById(params.get("menu")); if (b) toggleMenu(b); }
   });
 })();

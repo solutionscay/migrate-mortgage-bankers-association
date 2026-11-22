@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- @partial head -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <link href="assets/app.css" rel="stylesheet">
+  <script src="assets/app.js" defer></script>
+  <!-- @endpartial -->
+  <title>Convención Demo 2027 · MBA</title>
+</head>
+<body data-module="convencion" data-nav="convenciones" data-role="admin">
+  <!-- @partial icons -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3.5 3.5"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 16 16"><path d="M10 3.5L5.5 8l4.5 4.5"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></symbol>
+    <symbol id="i-sort" viewBox="0 0 16 16"><path d="M8 13V3M4.5 6.5L8 3l3.5 3.5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 16 16"><path d="M2.5 3.5h11v10h-11zM2.5 6.5h11M5.5 2v3M10.5 2v3"/></symbol>
+    <symbol id="i-more" viewBox="0 0 16 16"><path d="M3 8h.01M8 8h.01M13 8h.01" stroke-width="2.4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2l6.5 12h-13zM8 6.5v3.5M8 12v.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16"><path d="M2.5 2.5h11v11h-11zM8 7v4M8 5v.01"/></symbol>
+    <symbol id="i-print" viewBox="0 0 16 16"><path d="M4.5 6V2.5h7V6M4.5 11.5h-2v-5.5h11v5.5h-2M4.5 9.5h7v4h-7z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 13.5c.6-2.5 2.6-4 5-4s4.4 1.5 5 4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 16 16"><path d="M2.5 4.5h11M6 4.5V2.5h4v2M4 4.5l.7 9h6.6l.7-9"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.2 11.8l7.6-7.6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 16 16"><path d="M10.5 2.5l3 3-8 8h-3v-3z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 16 16"><path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 10.5v3h11v-3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 16 16"><path d="M2 3.5h12v9H2zM2 3.5l6 5 6-5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9zM9.5 1.5v3h3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 16 16"><path d="M3.5 7.5h9v6.5h-9zM5.5 7.5V5a2.5 2.5 0 015 0v2.5"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4.5H2zM2 9h3.5l1 1.5h3l1-1.5H14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 16 16"><path d="M13 3v3.5H9.5M3 13V9.5h3.5M12.5 6.5A5 5 0 004 5M3.5 9.5A5 5 0 0012 11"/></symbol>
+    <symbol id="i-list" viewBox="0 0 16 16"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01" /></symbol>
+    <symbol id="i-table" viewBox="0 0 16 16"><path d="M2 3h12v10H2zM2 6.5h12M2 10h12M6.5 3v10"/></symbol>
+    <symbol id="i-send" viewBox="0 0 16 16"><path d="M14 2L7 9M14 2l-4.5 12-2.5-5-5-2.5z"/></symbol>
+  </svg>
+  <!-- @endpartial -->
+  <div class="app">
+    <!-- @partial topbar -->
+    <header class="topbar">
+      <a class="brand" href="index.html">MBA <small>Convención y Escuela</small></a>
+      <nav class="modules" aria-label="Módulos">
+        <a href="convencionistas.html" data-module="convencion">Convención</a>
+        <a href="estudiantes.html" data-module="escuela">Escuela</a>
+        <a href="envios.html" data-module="correos">Correos</a>
+        <a href="admin-usuarios.html" data-module="admin" class="admin-only">Admin</a>
+      </nav>
+      <label class="search" role="search">
+        <span class="sr-only">Buscar</span>
+        <svg class="i"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Buscar convencionista, registro, estudiante…" autocomplete="off">
+      </label>
+      <button class="usermenu" type="button" data-menu="menu-user" aria-haspopup="menu" aria-expanded="false">
+        <svg class="i"><use href="#i-user"/></svg><b data-role-name>admin.demo</b><svg class="i i-sm"><use href="#i-chevron-down"/></svg>
+      </button>
+      <div class="menu" id="menu-user" popover role="menu">
+        <div class="menu-note">Sesión: <span data-role-text>ROLE-ADMIN</span></div>
+        <a href="cambiar-contrasena.html" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+        <hr>
+        <a href="login.html" role="menuitem">Salir</a>
+      </div>
+    </header>
+    <!-- @endpartial -->
+    <!-- @partial nav -->
+    <nav class="nav" aria-label="Secciones">
+      <div class="nav-group" data-group="inicio">
+        <a href="index.html" data-nav="inicio">Inicio</a>
+        <a href="cambiar-contrasena.html" data-nav="cambiar-contrasena">Cambiar contraseña</a>
+      </div>
+      <div class="nav-group" data-group="convencion">
+        <a href="convencionistas.html" data-nav="convencionistas">Convencionistas</a>
+        <a href="registros.html" data-nav="registros">Registros</a>
+        <a href="convenciones.html" data-nav="convenciones">Convenciones</a>
+        <a href="planes-lista.html" data-nav="planes">Planes</a>
+      </div>
+      <div class="nav-group" data-group="escuela">
+        <a href="estudiantes.html" data-nav="estudiantes">Estudiantes</a>
+        <a href="afiliados.html" data-nav="afiliados">Afiliados</a>
+        <a href="ofrecimiento.html" data-nav="ofrecimientos">Ofrecimientos</a>
+        <a href="matriculas.html" data-nav="matriculas">Matrículas</a>
+        <a href="importar-notas.html" data-nav="importar-notas">Importar notas</a>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <a href="panel-matriculas.html" data-nav="panel-matriculas">Panel</a>
+      </div>
+      <div class="nav-group" data-group="correos">
+        <a href="envios.html" data-nav="envios">Envíos</a>
+        <a href="bandeja-salida.html" data-nav="bandeja-salida">Bandeja de salida</a>
+      </div>
+      <div class="nav-group admin-only" data-group="admin">
+        <a href="admin-usuarios.html" data-nav="admin-usuarios">Usuarios</a>
+        <a href="admin-configuracion.html" data-nav="admin-configuracion">Configuración</a>
+        <a href="admin-correo.html" data-nav="admin-correo">Plantillas y remitentes</a>
+        <a href="admin-certificaciones.html" data-nav="admin-certificaciones">Certificaciones y profesores</a>
+      </div>
+      <a class="nav-aux" href="components.html" data-nav="componentes">Componentes</a>
+    </nav>
+    <!-- @endpartial -->
+
+    <div class="pagebar">
+      <div class="crumbs"><a href="convencionistas.html">Convención</a><span class="sep">/</span><a href="convenciones.html">Convenciones</a><span class="sep">/</span><span>Convención Demo 2027</span></div>
+      <h1 class="title"><b>Convención</b> · Convención Demo 2027 <span class="title-tag"><span class="tag ok lg">Activo</span></span></h1>
+      <div class="actions">
+        <a class="btn btn-quiet" href="registros.html">Ver registros</a><a class="btn" href="registro-puerta.html"><svg class="i"><use href="#i-check"/></svg>Registro en puerta</a><span class="split"><a class="btn" href="lista-facturacion.html"><svg class="i"><use href="#i-print"/></svg>Imprimir</a><button class="btn" type="button" id="btn-print" data-menu="menu-print" aria-haspopup="menu" aria-expanded="false" aria-label="Más impresos"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button></span><button class="btn btn-icon" type="button" id="btn-ev-more" data-menu="menu-ev-more" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones"><svg class="i"><use href="#i-more"/></svg></button>
+      </div>
+    </div>
+
+    <main class="content" id="main">
+      <div class="content-inner">
+        
+        <div class="ev-head">
+          <div class="form">
+            <label for="e-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="e-nombre" value="Convención Demo 2027"></div>
+            <label for="e-lugar">Lugar</label><div class="field-wrap"><input class="field" id="e-lugar" value="Hotel Demo Plaza"></div>
+            <span class="label">PDF</span><div class="field-wrap"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>programa-convencion-2027.pdf<button class="x" type="button" aria-label="Quitar PDF"><svg class="i i-sm"><use href="#i-x"/></svg></button></span></div>
+          </div>
+          <div class="form">
+            <label for="e-ini">Comienza</label><div class="field-wrap"><span class="adorn"><input class="field" value="5/6/2027" inputmode="numeric" id="e-ini"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+            <label for="e-fin">Termina</label><div class="field-wrap"><span class="adorn"><input class="field" value="5/8/2027" inputmode="numeric" id="e-fin"><button class="post" type="button" aria-label="Abrir calendario"><svg class="i"><use href="#i-calendar"/></svg></button></span></div>
+            <label for="e-st">Estatus</label><div class="field-wrap"><select class="field" id="e-st"><option selected>Activo</option><option>Inactivo</option></select></div>
+          </div>
+          <div class="ev-stats"><div class="ev-stat"><div class="k">Registros</div><div class="v">184</div></div><div class="ev-stat"><div class="k">Acompañantes</div><div class="v">41</div></div><div class="ev-stat"><div class="k">Total</div><div class="v">225</div></div><div class="ev-stat"><div class="k">Facturado</div><div class="v money">$214,380.00</div></div><div class="ev-stat"><div class="k">Pagado</div><div class="v money">$171,240.00</div></div><div class="ev-stat"><div class="k">Balance</div><div class="v money">$43,140.00</div></div></div>
+        </div>
+
+        <div class="tabs ev-tabs" role="tablist" aria-label="Convención">
+          <a href="#" role="tab" aria-selected="true" aria-controls="tp-act" id="tab-act">Actividades<span class="tab-count">12</span></a>
+          <a href="#" role="tab" aria-selected="false" aria-controls="tp-aus" id="tab-aus">Auspiciadores<span class="tab-count">14</span></a>
+          <a href="#" role="tab" aria-selected="false" aria-controls="tp-fac" id="tab-fac">Facturación<span class="tab-count">5</span></a>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-act" aria-labelledby="tab-act">
+<table class="t">
+<colgroup><col style="width:92px"><col style="width:84px"><col style="width:92px"><col style="width:84px"><col style="width:100px"><col><col style="width:150px"><col style="width:50px"><col style="width:100px"><col style="width:36px"></colgroup>
+<thead>
+          <tr class="group"><th colspan="2" class="g">COMIENZA</th><th colspan="2" class="g">TERMINA</th><th colspan="6"></th></tr><tr><th>Fecha</th><th>Hora</th><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Nombre</th><th>Lugar/Salón</th><th class="num">Qty</th><th class="money">Precio</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+<tr><td>5/5/2027</td><td>4:00 PM</td><td>5/6/2027</td><td>12:00 PM</td><td>Hotel</td><td><a href="actividad.html">Hotel Demo Plaza</a></td><td class="muted">—</td><td class="num">1</td><td class="money">$289.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/6/2027</td><td>4:00 PM</td><td>5/7/2027</td><td>12:00 PM</td><td>Hotel</td><td><a href="actividad.html">Hotel Demo Plaza</a></td><td class="muted">—</td><td class="num">1</td><td class="money">$289.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/6/2027</td><td>8:30 AM</td><td>5/6/2027</td><td>5:00 PM</td><td>Seminario</td><td><a href="actividad.html">Taller de Cumplimiento Afiliado</a></td><td class="">Salón A</td><td class="num">1</td><td class="money">$135.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/6/2027</td><td>8:30 AM</td><td>5/6/2027</td><td>5:00 PM</td><td>Seminario</td><td><a href="actividad.html">Taller de Cumplimiento No Afiliado</a></td><td class="">Salón A</td><td class="num">1</td><td class="money">$175.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/6/2027</td><td>6:00 PM</td><td>5/6/2027</td><td>8:00 PM</td><td>Cocktail</td><td><a href="actividad.html">Coctel de Bienvenida</a></td><td class="">Terraza Demo</td><td class="num">1</td><td class="money">$55.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/7/2027</td><td>7:00 AM</td><td>5/7/2027</td><td>9:00 AM</td><td>Desayuno</td><td><a href="actividad.html">Desayuno de Networking</a></td><td class="">Salón B</td><td class="num">1</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/7/2027</td><td>9:00 AM</td><td>5/7/2027</td><td>12:00 PM</td><td>Foro</td><td><a href="actividad.html">Panel de Tendencias del Mercado</a></td><td class="">Gran Salón</td><td class="num">1</td><td class="money">$0.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/7/2027</td><td>12:30 PM</td><td>5/7/2027</td><td>3:00 PM</td><td>Almuerzo</td><td><a href="actividad.html">Almuerzo de Reconocimientos</a></td><td class="">Gran Salón A, B</td><td class="num">1</td><td class="money">$140.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/7/2027</td><td>4:00 PM</td><td>5/8/2027</td><td>12:00 PM</td><td>Hotel</td><td><a href="actividad.html">Hotel Demo Plaza</a></td><td class="muted">—</td><td class="num">1</td><td class="money">$289.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/7/2027</td><td>7:00 PM</td><td>5/7/2027</td><td>11:00 PM</td><td>Cena</td><td><a href="actividad.html">Cena de Gala Aniversario</a></td><td class="">Gran Salón</td><td class="num">1</td><td class="money">$110.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/8/2027</td><td>8:00 AM</td><td>5/8/2027</td><td>10:00 AM</td><td>Desayuno</td><td><a href="actividad.html">Desayuno de Clausura</a></td><td class="">Terraza Demo</td><td class="num">1</td><td class="money">$45.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/6/2027</td><td>4:00 PM</td><td>5/8/2027</td><td>12:00 PM</td><td>Hotel</td><td><a href="actividad.html">Hotel Demo Plaza</a></td><td class="muted">—</td><td class="num">1</td><td class="money">$578.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr class="add-row"><td colspan="10"><a class="btn btn-sm btn-primary" href="actividad.html"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir actividad</a></td></tr>
+</tbody>
+<tfoot><tr><td colspan="8" style="text-align:right">Total</td><td class="money">$2,105.00</td><td></td></tr></tfoot>
+</table>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-aus" aria-labelledby="tab-aus" hidden>
+          <div class="toolbar plain-toolbar">
+            <button class="btn btn-sm" type="button" data-toast="Lista de auspiciadores"><svg class="i i-sm"><use href="#i-print"/></svg>Lista de auspiciadores</button>
+            <button class="btn btn-sm" type="button" data-toast="Etiquetas de cartas"><svg class="i i-sm"><use href="#i-print"/></svg>Etiquetas de cartas</button>
+            <button class="btn btn-sm" type="button" data-toast="Solicitudes de auspicio (ES)"><svg class="i i-sm"><use href="#i-print"/></svg>Solicitudes (ES)</button>
+            <button class="btn btn-sm" type="button" data-toast="Solicitudes de auspicio (EN)"><svg class="i i-sm"><use href="#i-print"/></svg>Solicitudes (EN)</button>
+            <span class="spacer"></span>
+            <span class="sp-sum">Prometido + recibido <b>$37,000.00</b></span>
+          </div>
+<table class="t">
+<colgroup><col><col style="width:104px"><col><col style="width:120px"><col style="width:112px"><col style="width:112px"><col style="width:112px"><col style="width:36px"></colgroup>
+<thead><tr><th>Auspiciador</th><th>Tipo</th><th>Contacto</th><th>Teléfono</th><th class="money">Pedido</th><th class="money">Recibido</th><th class="money">Prometido</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+<tr><td><a href="auspiciador.html">Acme Mortgage Demo</a></td><td>Platino</td><td>Sra. Ana Ejemplo</td><td>787-555-0112</td><td class="money">$10,000.00</td><td class="money">$10,000.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Banco Ejemplo</a></td><td>Oro</td><td>Sr. Juan Pérez Demo</td><td>787-555-0127</td><td class="money">$5,000.00</td><td class="money"></td><td class="money">$5,000.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Capital Ficticio Lending</a></td><td>Plata</td><td>Lcda. Mengana Prueba</td><td>787-555-0133</td><td class="money">$2,500.00</td><td class="money">$2,500.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Bufete Fulano &amp; Mengano</a></td><td>Bronce</td><td>Lcdo. Fulano de Tal</td><td>787-555-0141</td><td class="money">$500.00</td><td class="money">$500.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Cooperativa Muestra</a></td><td>Plata</td><td>Sra. María Ejemplo</td><td>787-555-0148</td><td class="money">$2,500.00</td><td class="money"></td><td class="money">$2,500.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Título Demo Services</a></td><td>Oro</td><td>Sr. Zutano Muestra</td><td>787-555-0156</td><td class="money">$5,000.00</td><td class="money">$5,000.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Tasaciones Ejemplo</a></td><td>Bronce</td><td>Ing. Carla Demo</td><td>787-555-0163</td><td class="money">$500.00</td><td class="money"></td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Crédito Prueba FCU</a></td><td>Plata</td><td>Sr. Tomás Ejemplo</td><td>787-555-0170</td><td class="money">$2,500.00</td><td class="money">$2,500.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Avalúos Demo Partners</a></td><td>Bronce</td><td>Sra. Laura Muestra</td><td>787-555-0178</td><td class="money">$500.00</td><td class="money">$500.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Hipotecas Ficticias, LLC</a></td><td>Oro</td><td>Sr. Pedro Prueba</td><td>787-555-0185</td><td class="money">$5,000.00</td><td class="money"></td><td class="money">$5,000.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Seguros Ejemplo</a></td><td>Plata</td><td>Sra. Beatriz Demo</td><td>787-555-0191</td><td class="money">$2,500.00</td><td class="money"></td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Abogados Demo &amp; Asoc.</a></td><td>Bronce</td><td>Lcdo. Mario Ejemplo</td><td>787-555-0104</td><td class="money">$500.00</td><td class="money"></td><td class="money">$500.00</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Financiera Ficticia</a></td><td>Plata</td><td>Sr. Ricardo Muestra</td><td>787-555-0109</td><td class="money">$2,500.00</td><td class="money">$2,500.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="auspiciador.html">Préstamos Prueba Inc.</a></td><td>Bronce</td><td>Sra. Paola Demo</td><td>787-555-0119</td><td class="money">$500.00</td><td class="money">$500.00</td><td class="money"></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr class="add-row"><td><input class="field" placeholder="Auspiciador nuevo" aria-label="Auspiciador nuevo"></td><td><select class="field" aria-label="Tipo"><option>Platino</option><option>Oro</option><option>Plata</option><option selected>Bronce</option></select></td><td><input class="field" placeholder="Contacto" aria-label="Contacto"></td><td></td><td><input class="field money" placeholder="0.00" aria-label="Pedido"></td><td colspan="3"><button class="btn btn-sm btn-primary" type="button" style="width:100%" data-toast="Auspiciador añadido"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></td></tr>
+</tbody>
+<tfoot><tr><td colspan="4" style="text-align:right">Totales</td><td class="money">$40,000.00</td><td class="money">$24,000.00</td><td class="money">$13,000.00</td><td></td></tr></tfoot>
+</table>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-fac" aria-labelledby="tab-fac" hidden>
+          <div class="toolbar plain-toolbar">
+            <span class="field-hint">PDF de la lista de facturación enviados a contabilidad (OP-SPN-02).</span>
+            <span class="spacer"></span>
+            <button class="btn btn-sm" type="button" data-toast="PDF subido"><svg class="i i-sm"><use href="#i-upload"/></svg>Subir PDF</button>
+            <a class="btn btn-sm btn-primary" href="lista-facturacion.html"><svg class="i i-sm"><use href="#i-print"/></svg>Generar lista de facturación</a>
+          </div>
+<table class="t">
+<colgroup><col style="width:200px"><col><col style="width:36px"></colgroup>
+<thead><tr><th>Fecha de reporte</th><th>PDF</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+<tr><td>5/04/2027 4:42:18 PM</td><td><a href="lista-facturacion.html"><svg class="i i-sm"><use href="#i-file"/></svg> Lista_Facturacion_2027-05-04.pdf</a></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-bill" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>5/03/2027 9:15:02 AM</td><td><a href="lista-facturacion.html"><svg class="i i-sm"><use href="#i-file"/></svg> Lista_Facturacion_2027-05-03.pdf</a></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-bill" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>4/26/2027 11:07:45 AM</td><td><a href="lista-facturacion.html"><svg class="i i-sm"><use href="#i-file"/></svg> Lista_Facturacion_2027-04-26.pdf</a></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-bill" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>4/19/2027 3:28:51 PM</td><td><a href="lista-facturacion.html"><svg class="i i-sm"><use href="#i-file"/></svg> Lista_Facturacion_2027-04-19.pdf</a></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-bill" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td>4/12/2027 10:02:33 AM</td><td><a href="lista-facturacion.html"><svg class="i i-sm"><use href="#i-file"/></svg> Lista_Facturacion_2027-04-12.pdf</a></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-bill" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+</tbody>
+</table>
+        </div>
+      </div>
+    </main>
+
+    <!-- @partial footer -->
+    <footer class="footer">
+      <span><b>MBA</b> · demostración · datos ficticios</span>
+      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="spacer"></span>
+      <span>Ver como</span>
+      <span class="seg" role="group" aria-label="Rol">
+        <button type="button" data-set-role="admin" aria-pressed="true">ROLE-ADMIN</button>
+        <button type="button" data-set-role="staff" aria-pressed="false">ROLE-STAFF</button>
+      </span>
+      <span>v0.1 · M1</span>
+    </footer>
+    <!-- @endpartial -->
+  </div>
+
+  <div class="menu" id="menu-print" popover role="menu">
+    <a href="lista-facturacion.html" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</a>
+    <button type="button" role="menuitem" data-toast="Registros individuos"><svg class="i"><use href="#i-print"/></svg>Registros individuos</button>
+    <button type="button" role="menuitem" data-toast="Registros afiliados"><svg class="i"><use href="#i-print"/></svg>Registros afiliados</button>
+    <button type="button" role="menuitem" data-toast="Badges"><svg class="i"><use href="#i-print"/></svg>Badges</button>
+    <button type="button" role="menuitem" data-toast="Etiquetas"><svg class="i"><use href="#i-print"/></svg>Etiquetas</button>
+    <button type="button" role="menuitem" data-toast="Cartas a auspiciadores"><svg class="i"><use href="#i-print"/></svg>Cartas a auspiciadores</button>
+  </div>
+  <div class="menu" id="menu-ev-more" popover role="menu">
+    <button type="button" role="menuitem" data-toast="contabilidad-2027.csv descargado"><svg class="i"><use href="#i-file"/></svg>Exportar contabilidad (CSV)</button>
+    <hr class="admin-only">
+    <button type="button" role="menuitem" class="danger act-delete admin-only" data-open="dlg-borrar-ev"><svg class="i"><use href="#i-trash"/></svg>Borrar convención…<span class="admin-mark">admin</span></button>
+  </div>
+  <div class="menu" id="menu-act" popover role="menu">
+    <a href="actividad.html" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Ver detalle</a>
+    <a href="lista-facturacion.html" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Lista de facturación por actividad</a>
+    <hr>
+    <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-act"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…</button>
+  </div>
+  <div class="menu" id="menu-sp" popover role="menu">
+    <a href="auspiciador.html" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Ver auspiciador</a>
+    <button type="button" role="menuitem" data-toast="Carta (ES)"><svg class="i"><use href="#i-print"/></svg>Carta (ES)</button>
+    <button type="button" role="menuitem" data-toast="Carta (EN)"><svg class="i"><use href="#i-print"/></svg>Carta (EN)</button>
+    <button type="button" role="menuitem" data-toast="Etiqueta"><svg class="i"><use href="#i-print"/></svg>Etiqueta</button>
+    <hr>
+    <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-sp"><svg class="i"><use href="#i-trash"/></svg>Quitar auspiciador…</button>
+  </div>
+  <div class="menu" id="menu-bill" popover role="menu">
+    <a href="lista-facturacion.html" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Abrir PDF</a>
+    <hr>
+    <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-bill"><svg class="i"><use href="#i-trash"/></svg>Quitar archivo…</button>
+  </div>
+  <dialog class="dlg" id="dlg-quitar-act" aria-labelledby="dlg-quitar-act-t">
+    <div class="dlg-head danger"><h2 id="dlg-quitar-act-t">No se puede quitar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>Hotel Demo Plaza (5/5/2027) está en 37 registros.</b> Quite la actividad de esos registros primero.</div></div></div>
+    <div class="dlg-foot"><span class="left">409 · usada en registros</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+  </dialog>
+  <dialog class="dlg" id="dlg-quitar-sp" aria-labelledby="dlg-quitar-sp-t">
+    <div class="dlg-head danger"><h2 id="dlg-quitar-sp-t">¿Quitar el auspiciador?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><p>Se quita <b>Tasaciones Ejemplo</b> de Convención Demo 2027. No tiene dinero recibido.</p></div>
+    <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="button" data-close data-toast="Auspiciador quitado">Quitar</button></div>
+  </dialog>
+  <dialog class="dlg" id="dlg-quitar-bill" aria-labelledby="dlg-quitar-bill-t">
+    <div class="dlg-head danger"><h2 id="dlg-quitar-bill-t">¿Quitar el archivo?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><p>Se quita <b>Lista_Facturacion_2027-04-12.pdf</b>. El archivo se borra del almacén.</p></div>
+    <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="button" data-close data-toast="Archivo quitado">Quitar</button></div>
+  </dialog>
+  <dialog class="dlg" id="dlg-borrar-ev" aria-labelledby="dlg-borrar-ev-t">
+    <div class="dlg-head danger"><h2 id="dlg-borrar-ev-t">No se puede borrar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>Convención Demo 2027 tiene 184 registros.</b> Una convención con registros no se borra (AP-04). Cambie el estatus a Inactivo.</div></div></div>
+    <div class="dlg-foot"><span class="left">409 · Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+  </dialog>
+</body>
+</html>

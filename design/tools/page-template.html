@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<!--
+  Page template for the M1 page shells. Copy to design/<page>.html, then:
+  1. Set <title>, body data-module (inicio | convencion | escuela | correos | admin)
+     and data-nav (the data-nav value of the nav tab to mark, see partials/nav.html;
+     a detail page marks its list, e.g. registro.html -> data-nav="registros").
+  2. Fill the page bar (crumbs, title, actions) and <div class="content-inner">.
+  3. Run python3 design/tools/sync_partials.py to fill the partial markers.
+  4. Page CSS goes only in your section at the end of assets/app.css.
+  Delete this comment in the copy.
+-->
+<head>
+  <!-- @partial head -->
+  <!-- @endpartial -->
+  <title>Página · MBA</title>
+</head>
+<body data-module="convencion" data-nav="registros" data-role="admin">
+  <!-- @partial icons -->
+  <!-- @endpartial -->
+  <div class="app">
+    <!-- @partial topbar -->
+    <!-- @endpartial -->
+    <!-- @partial nav -->
+    <!-- @endpartial -->
+
+    <div class="pagebar">
+      <div class="crumbs"><a href="index.html">Inicio</a><span class="sep">/</span><a href="registros.html">Registros</a><span class="sep">/</span><span>Página</span></div>
+      <h1 class="title"><b>Título</b> <span class="sub">· subtítulo</span></h1>
+      <div class="actions">
+      </div>
+    </div>
+
+    <main class="content" id="main">
+      <div class="content-inner">
+      </div>
+    </main>
+
+    <!-- @partial footer -->
+    <!-- @endpartial -->
+  </div>
+
+  <!-- Menus (popover) and dialogs (<dialog class="dlg">) go here, outside .app. -->
+</body>
+</html>

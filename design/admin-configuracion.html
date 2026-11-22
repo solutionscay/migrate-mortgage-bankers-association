@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- @partial head -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <link href="assets/app.css" rel="stylesheet">
+  <script src="assets/app.js" defer></script>
+  <!-- @endpartial -->
+  <title>Configuración · MBA</title>
+</head>
+<body data-module="admin" data-nav="admin-configuracion" data-role="admin">
+  <!-- @partial icons -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3.5 3.5"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 16 16"><path d="M10 3.5L5.5 8l4.5 4.5"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></symbol>
+    <symbol id="i-sort" viewBox="0 0 16 16"><path d="M8 13V3M4.5 6.5L8 3l3.5 3.5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 16 16"><path d="M2.5 3.5h11v10h-11zM2.5 6.5h11M5.5 2v3M10.5 2v3"/></symbol>
+    <symbol id="i-more" viewBox="0 0 16 16"><path d="M3 8h.01M8 8h.01M13 8h.01" stroke-width="2.4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2l6.5 12h-13zM8 6.5v3.5M8 12v.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16"><path d="M2.5 2.5h11v11h-11zM8 7v4M8 5v.01"/></symbol>
+    <symbol id="i-print" viewBox="0 0 16 16"><path d="M4.5 6V2.5h7V6M4.5 11.5h-2v-5.5h11v5.5h-2M4.5 9.5h7v4h-7z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 13.5c.6-2.5 2.6-4 5-4s4.4 1.5 5 4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 16 16"><path d="M2.5 4.5h11M6 4.5V2.5h4v2M4 4.5l.7 9h6.6l.7-9"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.2 11.8l7.6-7.6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 16 16"><path d="M10.5 2.5l3 3-8 8h-3v-3z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 16 16"><path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 10.5v3h11v-3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 16 16"><path d="M2 3.5h12v9H2zM2 3.5l6 5 6-5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9zM9.5 1.5v3h3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 16 16"><path d="M3.5 7.5h9v6.5h-9zM5.5 7.5V5a2.5 2.5 0 015 0v2.5"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4.5H2zM2 9h3.5l1 1.5h3l1-1.5H14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 16 16"><path d="M13 3v3.5H9.5M3 13V9.5h3.5M12.5 6.5A5 5 0 004 5M3.5 9.5A5 5 0 0012 11"/></symbol>
+    <symbol id="i-list" viewBox="0 0 16 16"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01" /></symbol>
+    <symbol id="i-table" viewBox="0 0 16 16"><path d="M2 3h12v10H2zM2 6.5h12M2 10h12M6.5 3v10"/></symbol>
+    <symbol id="i-send" viewBox="0 0 16 16"><path d="M14 2L7 9M14 2l-4.5 12-2.5-5-5-2.5z"/></symbol>
+  </svg>
+  <!-- @endpartial -->
+  <div class="app">
+    <!-- @partial topbar -->
+    <header class="topbar">
+      <a class="brand" href="index.html">MBA <small>Convención y Escuela</small></a>
+      <nav class="modules" aria-label="Módulos">
+        <a href="convencionistas.html" data-module="convencion">Convención</a>
+        <a href="estudiantes.html" data-module="escuela">Escuela</a>
+        <a href="envios.html" data-module="correos">Correos</a>
+        <a href="admin-usuarios.html" data-module="admin" class="admin-only">Admin</a>
+      </nav>
+      <label class="search" role="search">
+        <span class="sr-only">Buscar</span>
+        <svg class="i"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Buscar convencionista, registro, estudiante…" autocomplete="off">
+      </label>
+      <button class="usermenu" type="button" data-menu="menu-user" aria-haspopup="menu" aria-expanded="false">
+        <svg class="i"><use href="#i-user"/></svg><b data-role-name>admin.demo</b><svg class="i i-sm"><use href="#i-chevron-down"/></svg>
+      </button>
+      <div class="menu" id="menu-user" popover role="menu">
+        <div class="menu-note">Sesión: <span data-role-text>ROLE-ADMIN</span></div>
+        <a href="cambiar-contrasena.html" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+        <hr>
+        <a href="login.html" role="menuitem">Salir</a>
+      </div>
+    </header>
+    <!-- @endpartial -->
+    <!-- @partial nav -->
+    <nav class="nav" aria-label="Secciones">
+      <div class="nav-group" data-group="inicio">
+        <a href="index.html" data-nav="inicio">Inicio</a>
+        <a href="cambiar-contrasena.html" data-nav="cambiar-contrasena">Cambiar contraseña</a>
+      </div>
+      <div class="nav-group" data-group="convencion">
+        <a href="convencionistas.html" data-nav="convencionistas">Convencionistas</a>
+        <a href="registros.html" data-nav="registros">Registros</a>
+        <a href="convenciones.html" data-nav="convenciones">Convenciones</a>
+        <a href="planes-lista.html" data-nav="planes">Planes</a>
+      </div>
+      <div class="nav-group" data-group="escuela">
+        <a href="estudiantes.html" data-nav="estudiantes">Estudiantes</a>
+        <a href="afiliados.html" data-nav="afiliados">Afiliados</a>
+        <a href="ofrecimiento.html" data-nav="ofrecimientos">Ofrecimientos</a>
+        <a href="matriculas.html" data-nav="matriculas">Matrículas</a>
+        <a href="importar-notas.html" data-nav="importar-notas">Importar notas</a>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <a href="panel-matriculas.html" data-nav="panel-matriculas">Panel</a>
+      </div>
+      <div class="nav-group" data-group="correos">
+        <a href="envios.html" data-nav="envios">Envíos</a>
+        <a href="bandeja-salida.html" data-nav="bandeja-salida">Bandeja de salida</a>
+      </div>
+      <div class="nav-group admin-only" data-group="admin">
+        <a href="admin-usuarios.html" data-nav="admin-usuarios">Usuarios</a>
+        <a href="admin-configuracion.html" data-nav="admin-configuracion">Configuración</a>
+        <a href="admin-correo.html" data-nav="admin-correo">Plantillas y remitentes</a>
+        <a href="admin-certificaciones.html" data-nav="admin-certificaciones">Certificaciones y profesores</a>
+      </div>
+      <a class="nav-aux" href="components.html" data-nav="componentes">Componentes</a>
+    </nav>
+    <!-- @endpartial -->
+
+    <div class="pagebar">
+      <div class="crumbs"><a href="index.html">Inicio</a><span class="sep">/</span><a href="admin-usuarios.html">Admin</a><span class="sep">/</span><span>Configuración</span></div>
+      <h1 class="title"><b class="admin-only">Configuración</b><span class="admin-only sub"> · organización, escuela, correo y textos</span><b class="staff-only">Sin permiso</b></h1>
+      <div class="actions">
+        <span class="admin-only ma-acts"><button class="btn btn-primary" type="submit" form="cfg-form">Guardar</button></span>
+      </div>
+    </div>
+
+    <main class="content" id="main">
+      <div class="content-inner">
+        <div class="msgpage staff-only ma-403"><div class="code">403</div><h4>Sin permiso</h4><p>Su rol no permite esta acción. Pida acceso a un administrador.</p><a class="btn btn-sm" href="index.html">Volver al inicio</a></div>
+        <div class="admin-only">
+          <form id="cfg-form" data-done="Configuración guardada">
+          <div class="tabs" role="tablist" aria-label="Secciones de configuración"><button type="button" role="tab" id="tab-org" aria-controls="panel-org" aria-selected="true">Organización</button><button type="button" role="tab" id="tab-esc" aria-controls="panel-esc" aria-selected="false">Escuela</button><button type="button" role="tab" id="tab-cor" aria-controls="panel-cor" aria-selected="false">Correo</button><button type="button" role="tab" id="tab-ses" aria-controls="panel-ses" aria-selected="false">Sesión</button><button type="button" role="tab" id="tab-doc" aria-controls="panel-doc" aria-selected="false">Plantillas de documentos</button><button type="button" role="tab" id="tab-val" aria-controls="panel-val" aria-selected="false">Listas de valores</button></div>
+          <div class="tabpanel" role="tabpanel" id="panel-org" aria-labelledby="tab-org"><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-org" class="req">Nombre</label><div class="field-wrap"><input class="field" id="cf-org" value="Asociación de Banqueros Hipotecarios Demo"></div>
+            <label for="cf-dir">Dirección</label><div class="field-wrap"><input class="field" id="cf-dir" value="Calle Ejemplo 100, Suite 2, San Juan, PR 00900"></div>
+            <label for="cf-tel">Teléfono</label><div class="field-wrap"><input class="field" id="cf-tel" value="(787) 555-0142"></div>
+            <label>Logo</label><div class="field-wrap"><div class="row"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>logo-demo.png · 38 KB<button class="x" type="button" aria-label="Quitar logo">×</button></span><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-upload"/></svg>Cambiar</button></div></div>
+            <div class="gap"></div>
+            <label for="cf-f1">Firmante 1</label><div class="field-wrap"><div class="inline-fields ma-two"><input class="field" id="cf-f1" value="Carmen Demo Ficticio"><input class="field" aria-label="Título del firmante 1" value="Presidenta"></div></div>
+            <label for="cf-f2">Firmante 2</label><div class="field-wrap"><div class="inline-fields ma-two"><input class="field" id="cf-f2" value="Rafael Prueba Muestra"><input class="field" aria-label="Título del firmante 2" value="Director de la Escuela"></div><div class="field-hint">Los firmantes salen en cartas y certificados (BR-SYS-03).</div></div>
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-esc" aria-labelledby="tab-esc" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-nmls">Tarifa NMLS por hora</label><div class="field-wrap"><span class="adorn ma-short"><span class="pre">$</span><input class="field money" id="cf-nmls" value="1.50"></span></div>
+            <label for="cf-csbs1">CSBS: id de proveedor</label><div class="field-wrap"><input class="field ma-short" id="cf-csbs1" value="DEMO-0000"></div>
+            <label for="cf-csbs2">CSBS: estado</label><div class="field-wrap"><input class="field ma-short" id="cf-csbs2" value="PR"></div>
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-cor" aria-labelledby="tab-cor" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-tpl">Plantilla para envíos nuevos</label><div class="field-wrap"><select class="field" id="cf-tpl"><option>Matrícula confirmada</option><option>Recordatorio de curso</option><option>Aviso general</option></select><div class="field-hint">Remitentes y plantillas: <a href="admin-correo.html">Plantillas y remitentes</a>.</div></div>
+            <label>Proveedor</label><div class="field-wrap"><div class="value">mock · sin clave de Resend en el servidor</div><div class="field-hint">La clave vive solo en el entorno del servidor. Esta página no la muestra ni la guarda (AP-13).</div></div>
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-ses" aria-labelledby="tab-ses" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-idle">Minutos sin uso</label><div class="field-wrap"><input class="field num ma-short" id="cf-idle" value="10" inputmode="numeric"><div class="field-hint">Después la sesión cierra y pide entrar otra vez (BR-AUTH-02).</div></div>
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-doc" aria-labelledby="tab-doc" hidden>
+            <table class="t"><colgroup><col><col style="width:140px"><col style="width:140px"><col style="width:100px"></colgroup>
+            <thead><tr><th>Documento</th><th>Módulo</th><th class="num">Cambiado</th><th></th></tr></thead><tbody><tr><td>Carta a auspiciadores</td><td>Convención</td><td class="num">11/2/2026</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Editor de «Carta a auspiciadores»">Editar</button></td></tr><tr><td>Certificado de graduación</td><td>Escuela</td><td class="num">10/28/2026</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Editor de «Certificado de graduación»">Editar</button></td></tr><tr><td>Certificado de asistencia a curso</td><td>Escuela</td><td class="num">10/28/2026</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Editor de «Certificado de asistencia a curso»">Editar</button></td></tr><tr><td>Política de cancelación</td><td>Convención</td><td class="num">9/15/2026</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Editor de «Política de cancelación»">Editar</button></td></tr><tr><td>Carta de bienvenida a estudiante</td><td>Escuela</td><td class="num">9/3/2026</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Editor de «Carta de bienvenida a estudiante»">Editar</button></td></tr></tbody></table>
+          </div>
+          <div class="tabpanel" role="tabpanel" id="panel-val" aria-labelledby="tab-val" hidden>
+            <table class="t"><colgroup><col><col style="width:120px"><col style="width:100px"></colgroup>
+            <thead><tr><th>Lista</th><th class="num">Valores</th><th></th></tr></thead><tbody><tr><td>Tipo de pago</td><td class="num">4</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Valores de «Tipo de pago»">Editar</button></td></tr><tr><td>Estatus de registro</td><td class="num">6</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Valores de «Estatus de registro»">Editar</button></td></tr><tr><td>Tipo de participante</td><td class="num">3</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Valores de «Tipo de participante»">Editar</button></td></tr><tr><td>Pueblos de Puerto Rico</td><td class="num">78</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Valores de «Pueblos de Puerto Rico»">Editar</button></td></tr><tr><td>Tipo de requisito</td><td class="num">2</td><td class="c"><button class="btn btn-sm" type="button" data-toast="Valores de «Tipo de requisito»">Editar</button></td></tr></tbody></table>
+          </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- @partial footer -->
+    <footer class="footer">
+      <span><b>MBA</b> · demostración · datos ficticios</span>
+      <span data-footer-status>Guardado 4:42 p. m.</span>
+      <span class="spacer"></span>
+      <span>Ver como</span>
+      <span class="seg" role="group" aria-label="Rol">
+        <button type="button" data-set-role="admin" aria-pressed="true">ROLE-ADMIN</button>
+        <button type="button" data-set-role="staff" aria-pressed="false">ROLE-STAFF</button>
+      </span>
+      <span>v0.1 · M1</span>
+    </footer>
+    <!-- @endpartial -->
+  </div>
+
+</body>
+</html>

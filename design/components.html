@@ -46,10 +46,10 @@
     <header class="topbar">
       <a class="brand" href="index.html">MBA <small>Convención y Escuela</small></a>
       <nav class="modules" aria-label="Módulos">
-        <a href="#" data-module="convencion">Convención</a>
-        <a href="#" data-module="escuela">Escuela</a>
-        <a href="#" data-module="correos">Correos</a>
-        <a href="#" data-module="admin" class="admin-only">Admin</a>
+        <a href="convencionistas.html" data-module="convencion">Convención</a>
+        <a href="estudiantes.html" data-module="escuela">Escuela</a>
+        <a href="envios.html" data-module="correos">Correos</a>
+        <a href="admin-usuarios.html" data-module="admin" class="admin-only">Admin</a>
       </nav>
       <label class="search" role="search">
         <span class="sr-only">Buscar</span>
@@ -61,19 +61,44 @@
       </button>
       <div class="menu" id="menu-user" popover role="menu">
         <div class="menu-note">Sesión: <span data-role-text>ROLE-ADMIN</span></div>
-        <a href="#" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+        <a href="cambiar-contrasena.html" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
         <hr>
-        <a href="#" role="menuitem">Salir</a>
+        <a href="login.html" role="menuitem">Salir</a>
       </div>
     </header>
     <!-- @endpartial -->
     <!-- @partial nav -->
     <nav class="nav" aria-label="Secciones">
-      <a href="#" data-nav="convencionistas">Convencionistas</a>
-      <a href="#" data-nav="registros">Registros</a>
-      <a href="#" data-nav="convenciones">Convenciones</a>
-      <a href="#" data-nav="planes">Planes</a>
-      <a href="components.html" data-nav="componentes">Componentes</a>
+      <div class="nav-group" data-group="inicio">
+        <a href="index.html" data-nav="inicio">Inicio</a>
+        <a href="cambiar-contrasena.html" data-nav="cambiar-contrasena">Cambiar contraseña</a>
+      </div>
+      <div class="nav-group" data-group="convencion">
+        <a href="convencionistas.html" data-nav="convencionistas">Convencionistas</a>
+        <a href="registros.html" data-nav="registros">Registros</a>
+        <a href="convenciones.html" data-nav="convenciones">Convenciones</a>
+        <a href="planes-lista.html" data-nav="planes">Planes</a>
+      </div>
+      <div class="nav-group" data-group="escuela">
+        <a href="estudiantes.html" data-nav="estudiantes">Estudiantes</a>
+        <a href="afiliados.html" data-nav="afiliados">Afiliados</a>
+        <a href="ofrecimiento.html" data-nav="ofrecimientos">Ofrecimientos</a>
+        <a href="matriculas.html" data-nav="matriculas">Matrículas</a>
+        <a href="importar-notas.html" data-nav="importar-notas">Importar notas</a>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <a href="panel-matriculas.html" data-nav="panel-matriculas">Panel</a>
+      </div>
+      <div class="nav-group" data-group="correos">
+        <a href="envios.html" data-nav="envios">Envíos</a>
+        <a href="bandeja-salida.html" data-nav="bandeja-salida">Bandeja de salida</a>
+      </div>
+      <div class="nav-group admin-only" data-group="admin">
+        <a href="admin-usuarios.html" data-nav="admin-usuarios">Usuarios</a>
+        <a href="admin-configuracion.html" data-nav="admin-configuracion">Configuración</a>
+        <a href="admin-correo.html" data-nav="admin-correo">Plantillas y remitentes</a>
+        <a href="admin-certificaciones.html" data-nav="admin-certificaciones">Certificaciones y profesores</a>
+      </div>
+      <a class="nav-aux" href="components.html" data-nav="componentes">Componentes</a>
     </nav>
     <!-- @endpartial -->
 
@@ -308,7 +333,7 @@
                 <div class="field-wrap"><button class="pick" type="button" data-open="dlg-plan">P2(B) · 15 marzo <span class="meta">$1,218.00</span><span class="act">Cambiar</span></button></div>
                 <span class="gap" style="height:4px"></span>
                 <span class="label">Plan (sin escoger)</span>
-                <div class="field-wrap"><button class="pick empty" type="button" data-open="dlg-evento"><svg class="i"><use href="#i-plus"/></svg>Escoger plan</button></div>
+                <div class="field-wrap"><button class="pick pick-unset" type="button" data-open="dlg-evento"><svg class="i"><use href="#i-plus"/></svg>Escoger plan</button></div>
               </div>
             </form>
           </section>
@@ -451,8 +476,8 @@
                   <colgroup><col style="width:92px"><col style="width:96px"><col><col style="width:96px"><col style="width:36px"></colgroup>
                   <thead><tr><th>Fecha</th><th>Número</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
                   <tbody>
-                    <tr><td>4/02/2027</td><td>DEMO-01</td><td>Cheque</td><td class="money">$500.00</td><td class="col-act"><button class="row-act admin-only" type="button" data-menu="menu-pay-admin" aria-label="Acciones del pago" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
-                    <tr class="voided"><td>4/10/2027</td><td>DEMO-02</td><td>Tarjeta <span class="tag err" style="margin-left:6px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
+                    <tr class="row-money"><td>4/02/2027</td><td>DEMO-01</td><td>Cheque</td><td class="money">$500.00</td><td class="col-act"><button class="row-act admin-only" type="button" data-menu="menu-pay-admin" aria-label="Acciones del pago" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                    <tr class="row-money voided"><td>4/10/2027</td><td>DEMO-02</td><td>Tarjeta <span class="tag err" style="margin-left:6px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -477,47 +502,61 @@
           <!-- ============ Roles ============ -->
           <section class="g-section" id="roles">
             <h2>Acciones por rol</h2>
-            <p class="lead">Anular y borrar se dibujan solo para ROLE-ADMIN. Con ROLE-STAFF el menú de la fila no los muestra y la tabla de pagos no tiene acción. La columna conserva su ancho, así que la tabla no cambia de forma. El servidor responde 403 de todas formas.</p>
+            <p class="lead">Una fila sin dinero (actividad, acompañante, actividad de plan) conserva «Quitar» para ROLE-STAFF y ROLE-ADMIN, con confirmación (AP-06, clase <code>act-remove</code>). Anular o borrar una fila con dinero (pago, registro con pagos) se dibuja solo para ROLE-ADMIN (AP-05, clases <code>act-void</code> y <code>act-delete</code> junto con <code>admin-only</code>). La columna de acciones conserva su ancho en las dos vistas. El servidor responde 403 de todas formas.</p>
             <div class="grid cols-2">
               <div>
                 <div class="role-label">Vista <code>ROLE-ADMIN</code></div>
-                <div class="table-wrap">
-                  <table class="t">
-                    <colgroup><col style="width:88px"><col><col style="width:90px"><col style="width:36px"></colgroup>
-                    <thead><tr><th>Fecha</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
-                    <tbody>
-                      <tr><td>4/02/2027</td><td>Cheque DEMO-01</td><td class="money">$500.00</td><td class="col-act"><button class="row-act" type="button" id="btn-pay-admin" data-menu="menu-pay-admin" aria-label="Acciones del pago" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
-                      <tr class="voided"><td>4/10/2027</td><td>Tarjeta DEMO-02 <span class="tag err" style="margin-left:4px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="g-sub" style="margin-top:12px">Menú de la fila de actividad</div>
-                <div class="menu" style="position:static;display:block;width:220px">
+                <div class="g-sub">Fila sin dinero (AP-06): actividad, acompañante</div>
+                <div class="menu" style="position:static;display:block;width:240px">
                   <button type="button"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
                   <button type="button"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
                   <hr>
-                  <button type="button" class="danger"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…<span class="admin-mark">admin</span></button>
+                  <button type="button" class="danger act-remove"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…</button>
                 </div>
-                <div class="row" style="margin-top:12px"><button class="btn btn-danger" type="button"><svg class="i"><use href="#i-trash"/></svg>Borrar convencionista</button></div>
-              </div>
-              <div>
-                <div class="role-label">Vista <code>ROLE-STAFF</code></div>
+                <div class="g-sub" style="margin-top:16px">Fila con dinero (AP-05): pago</div>
                 <div class="table-wrap">
                   <table class="t">
                     <colgroup><col style="width:88px"><col><col style="width:90px"><col style="width:36px"></colgroup>
                     <thead><tr><th>Fecha</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
                     <tbody>
-                      <tr><td>4/02/2027</td><td>Cheque DEMO-01</td><td class="money">$500.00</td><td class="col-act"></td></tr>
-                      <tr class="voided"><td>4/10/2027</td><td>Tarjeta DEMO-02 <span class="tag err" style="margin-left:4px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
+                      <tr class="row-money"><td>4/02/2027</td><td>Cheque DEMO-01</td><td class="money">$500.00</td><td class="col-act"><button class="row-act" type="button" id="btn-pay-admin" data-menu="menu-pay-admin" aria-label="Acciones del pago" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                      <tr class="row-money voided"><td>4/10/2027</td><td>Tarjeta DEMO-02 <span class="tag err" style="margin-left:4px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
                     </tbody>
                   </table>
                 </div>
-                <div class="g-sub" style="margin-top:12px">Menú de la fila de actividad</div>
-                <div class="menu" style="position:static;display:block;width:220px">
+                <div class="g-sub" style="margin-top:16px">Fila con dinero (AP-05): registro con pagos</div>
+                <div class="menu" style="position:static;display:block;width:240px">
+                  <button type="button"><svg class="i"><use href="#i-file"/></svg>Abrir registro</button>
+                  <button type="button"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</button>
+                  <hr>
+                  <button type="button" class="danger act-delete"><svg class="i"><use href="#i-trash"/></svg>Borrar registro…<span class="admin-mark">admin</span></button>
+                </div>
+              </div>
+              <div>
+                <div class="role-label">Vista <code>ROLE-STAFF</code></div>
+                <div class="g-sub">Fila sin dinero (AP-06): actividad, acompañante</div>
+                <div class="menu" style="position:static;display:block;width:240px">
                   <button type="button"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
                   <button type="button"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
+                  <hr>
+                  <button type="button" class="danger act-remove"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…</button>
                 </div>
-                <p class="field-hint" style="margin-top:12px">Sin «Quitar actividad», sin «Anular pago» y sin «Borrar convencionista». El menú y la tabla conservan su ancho.</p>
+                <div class="g-sub" style="margin-top:16px">Fila con dinero (AP-05): pago</div>
+                <div class="table-wrap">
+                  <table class="t">
+                    <colgroup><col style="width:88px"><col><col style="width:90px"><col style="width:36px"></colgroup>
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                    <tbody>
+                      <tr class="row-money"><td>4/02/2027</td><td>Cheque DEMO-01</td><td class="money">$500.00</td><td class="col-act"></td></tr>
+                      <tr class="row-money voided"><td>4/10/2027</td><td>Tarjeta DEMO-02 <span class="tag err" style="margin-left:4px">Anulado</span></td><td class="money">$250.00</td><td class="col-act"></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="g-sub" style="margin-top:16px">Fila con dinero (AP-05): registro con pagos</div>
+                <div class="menu" style="position:static;display:block;width:240px">
+                  <button type="button"><svg class="i"><use href="#i-file"/></svg>Abrir registro</button>
+                  <button type="button"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</button>
+                </div>
               </div>
             </div>
           </section>
@@ -684,18 +723,18 @@
   <div class="menu" id="menu-item-admin" popover role="menu">
     <button type="button" role="menuitem" data-toast="Editar atributos"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>
     <button type="button" role="menuitem" data-toast="Marcada sin cargo"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
-    <hr class="admin-only">
-    <button type="button" role="menuitem" class="danger admin-only" data-open="dlg-quitar"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…<span class="admin-mark">admin</span></button>
+    <hr>
+    <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…</button>
   </div>
   <div class="menu" id="menu-row-admin" popover role="menu">
     <button type="button" role="menuitem" data-toast="Abrir registro"><svg class="i"><use href="#i-file"/></svg>Abrir registro</button>
     <button type="button" role="menuitem" data-toast="Lista de facturación"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</button>
     <hr class="admin-only">
-    <button type="button" role="menuitem" class="danger admin-only" data-toast="Solo sin pagos (OP-REG-09)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar registro…<span class="admin-mark">admin</span></button>
+    <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Solo sin pagos (OP-REG-09)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar registro…<span class="admin-mark">admin</span></button>
   </div>
   <div class="menu" id="menu-pay-admin" popover role="menu">
     <div class="menu-note">Pago DEMO-01 · $500.00</div>
-    <button type="button" role="menuitem" class="danger" data-open="dlg-anular"><svg class="i"><use href="#i-ban"/></svg>Anular pago…<span class="admin-mark">admin</span></button>
+    <button type="button" role="menuitem" class="danger act-void admin-only" data-open="dlg-anular"><svg class="i"><use href="#i-ban"/></svg>Anular pago…<span class="admin-mark">admin</span></button>
   </div>
 
   <!-- Dialogs -->
