@@ -216,9 +216,13 @@ async fn list(
     Query(q): Query<ListQuery>,
 ) -> Result<Html<String>, AppError> {
     let conn = state.db();
+    // A search with no event given (UI-04 "Ver registros": `?q=<name>`) looks in every event; a plain list opens
+    // on the first active event.
+    let searching = q.q.as_deref().is_some_and(|s| !s.trim().is_empty());
     let event_uuid = match q.event.as_deref() {
         Some("todos") => None,
         Some(e) if !e.is_empty() => Some(e.to_owned()),
+        _ if searching => None,
         _ => default_event(&conn)?,
     };
     let status = q.status.clone().filter(|s| regs::STATUSES.contains(&s.as_str()));

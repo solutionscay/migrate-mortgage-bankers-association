@@ -468,3 +468,25 @@ async fn door_check_in() {
     // AP-02 on a form post: no CSRF -> 403.
     assert_eq!(app.post_form(&url, Some(&staff), "status=Cancel%C3%B3").await.status(), StatusCode::FORBIDDEN);
 }
+
+/// UI-04 "Ver registros" (`/registrations?q=<name>`): a search with no event given looks in every event, so a
+/// registration of a past (Inactivo) event shows; without `q` the list still opens on the first active event.
+#[tokio::test]
+async fn search_without_event_looks_in_every_event() {
+    let app = App::new();
+    let staff = app.staff().await;
+    let (name, number): (String, i64) = app
+        .conn()
+        .query_row(
+            "SELECT TRIM(COALESCE(p.name_first, '') || ' ' || COALESCE(p.name_last, '')), r.registration_number
+               FROM registration r JOIN people p ON p.uuid = r.person_uuid JOIN events e ON e.uuid = r.event_uuid
+              WHERE e.status = 'Inactivo' ORDER BY r.registration_number LIMIT 1",
+            [],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )
+        .unwrap();
+    let html = body(app.get(&format!("/registrations?q={}", enc(&name)), Some(&staff)).await).await;
+    assert!(html.contains(&number.to_string()), "#{number} of {name} in the search result");
+    let plain = body(app.get("/registrations", Some(&staff)).await).await;
+    assert!(!plain.contains(&format!(">{number}<")), "the plain list opens on the active event");
+}

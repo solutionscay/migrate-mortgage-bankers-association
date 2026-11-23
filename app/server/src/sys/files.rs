@@ -127,7 +127,7 @@ pub fn clean_filename(name: &str) -> String {
 }
 
 /// OP-SYS-04 store: checks the limits, writes the bytes under `data_dir`, inserts `stored_files` and the audit row.
-/// The caller runs it once per file; it takes the DB lock only for the insert.
+/// The caller runs it once per file; it holds the DB lock from the disk check to the insert (JOB-02 safety).
 pub fn store(state: &AppState, actor: &Actor, filename: &str, bytes: &[u8]) -> Result<StoredFile, StoreError> {
     let filename = clean_filename(filename);
     let mime = mime_for(&filename).ok_or(StoreError::Rejected(FileError::BadType))?;
@@ -140,6 +140,9 @@ pub fn store(state: &AppState, actor: &Actor, filename: &str, bytes: &[u8]) -> R
     let sha = sha256_hex(bytes);
     let rel = format!("files/{}/{}", &sha[..2], sha);
     let abs = state.config.data_dir.join(&rel);
+    // Hold the DB lock from the disk check to the insert. JOB-02 purges orphan rows and their bytes under the same
+    // lock, so it cannot delete these bytes between our check and our row (the race of the I2 open point).
+    let conn = state.db();
     if !abs.exists() {
         write_atomic(&abs, bytes).map_err(|e| StoreError::Internal(format!("write file: {e}")))?;
     }
@@ -151,7 +154,6 @@ pub fn store(state: &AppState, actor: &Actor, filename: &str, bytes: &[u8]) -> R
         sha256: sha,
         storage_path: rel,
     };
-    let conn = state.db();
     insert(&conn, &file, actor).map_err(|e| StoreError::Internal(format!("insert stored_files: {e}")))?;
     Ok(file)
 }
@@ -490,5 +492,37 @@ mod tests {
         assert!(resolve(FsPath::new("/d"), "files/ab/x").is_some());
         assert!(resolve(FsPath::new("/d"), "files/../x").is_none());
         assert!(resolve(FsPath::new("/d"), "/etc/passwd").is_none());
+    }
+
+    /// JOB-02 race: `store` touches the disk only while it holds the DB lock that the purge also holds, and bytes
+    /// that a purge removed are written again by the next upload of the same file.
+    #[test]
+    fn store_waits_for_the_lock_and_survives_a_purge() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut config = crate::config::Config::for_db(dir.path().join("t.db"));
+        config.data_dir = dir.path().join("data");
+        let state = crate::AppState::new(crate::db::open_in_memory().unwrap(), config);
+        let bytes = b"%PDF-1.4 carrera".to_vec();
+        let sha = sha256_hex(&bytes);
+        let on_disk = state.config.data_dir.join(format!("files/{}/{}", &sha[..2], sha));
+
+        // A purge (or any holder) has the lock: the upload must not write yet.
+        let guard = state.db();
+        let st = state.clone();
+        let b2 = bytes.clone();
+        let t = std::thread::spawn(move || store(&st, &Actor::system(), "carrera.pdf", &b2).unwrap());
+        std::thread::sleep(std::time::Duration::from_millis(200));
+        assert!(!on_disk.exists(), "no write while the lock is held");
+        drop(guard);
+        let first = t.join().unwrap();
+        assert!(on_disk.exists());
+
+        // The orphan is purged with its bytes; the same upload again restores them.
+        let later = crate::clock::now() + chrono::Duration::hours(crate::sys::jobs::ORPHAN_FILE_HOURS + 1);
+        crate::sys::jobs::purge_orphan_files(&state.db(), &state.config.data_dir, later).unwrap();
+        assert!(!on_disk.exists());
+        let second = store(&state, &Actor::system(), "carrera.pdf", &bytes).unwrap();
+        assert_ne!(first.uuid, second.uuid);
+        assert_eq!(std::fs::read(&on_disk).unwrap(), bytes);
     }
 }
