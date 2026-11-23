@@ -1,14 +1,18 @@
-//! SYS area (phase 2): OP-SYS-01 settings writes, OP-SYS-02 document templates (sanitized HTML, `ammonia`),
-//! OP-SYS-04 files (`POST /files`, `GET /files/{uuid}`; `stored_files` + `data/files/`, `mime_guess`), and JOB-02
-//! housekeeping (every 15 minutes: `auth::session::purge_expired`, plus grade-import tokens older than 30 minutes).
+//! SYS area: OP-SYS-04 files (`files`: `POST /files`, `GET /files/{uuid}`, the file-chip fragment) and JOB-02
+//! housekeeping (`jobs`). OP-SYS-01/02 domain functions for the admin pages go here too.
 //! OP-SYS-03 is the `mba-seed` binary (`crate::seed`), not a route (AP-14).
+
+pub mod files;
+pub mod jobs;
 
 use crate::AppState;
 use axum::Router;
 
 pub fn routes() -> Router<AppState> {
-    Router::new()
+    Router::new().merge(files::routes())
 }
 
-/// Background jobs, started once by `main` (JOB-02 goes here).
-pub fn spawn_jobs(_state: AppState) {}
+/// Background jobs, started once by `main`: JOB-02 every 15 minutes.
+pub fn spawn_jobs(state: AppState) {
+    jobs::spawn(state);
+}

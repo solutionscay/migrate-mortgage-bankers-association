@@ -217,7 +217,7 @@ Each operation row gives its policy (08). Each rule cites its object file and st
 | Domain/rule id | Plain-language invariant | Started by | Preconditions/inputs | Reads | Writes/found-set scope | Error/exception behavior | Object files | Open question |
 |---|---|---|---|---|---|---|---|---|
 | BR-AUTH-01 | Sign-in checks username (case-insensitive) and an argon2id password hash. 5 failures lock the user for 15 minutes. | form | | `users` | `sessions`, `audit_log` | Generic error message; no hint which part failed. | product decision (D-50) | none |
-| BR-AUTH-02 | A session ends after 10 minutes without a request. | request | | `sessions` | `sessions.last_seen_at` | Expired: redirect to sign-in. | `objects/MBA.fmp12/extended-privileges/4-fmreauthenticate10.txt` (D-40) | none |
+| BR-AUTH-02 | A session ends after 10 minutes without a request, and at the latest 12 hours after sign-in (`sessions.expires_at`; product decision, D-90). | request | | `sessions` | `sessions.last_seen_at` | Expired: redirect to sign-in. | `objects/MBA.fmp12/extended-privileges/4-fmreauthenticate10.txt` (D-40) | none |
 | BR-AUTH-03 | Every state-changing request carries the session CSRF token. | request | | | | Missing or wrong: 403. | product decision (D-50) | none |
 | BR-AUTH-04 | Only ROLE-ADMIN manages users and roles. | screen | | | `users` | | `objects/MBA.fmp12/privilege-sets/1-Full_Access.txt` (manageAccounts=True only here) | none |
 | BR-SYS-01 | Each module opens on its home screen: convention on events, school on the student list. No plug-in install. | file open | | | | | file triggers (appendix §6) | none |
@@ -226,7 +226,7 @@ Each operation row gives its policy (08). Each rule cites its object file and st
 | BR-SYS-04 | An uploaded file is stored once with its SHA-256, MIME type and size. | upload | | | `stored_files` | Too large or empty: refuse. | containers (04 appendix) | none |
 | OP-AUTH-01 | Sign in (BR-AUTH-01). | form | | | | | product decision | AP-01, AP-11 |
 | OP-AUTH-02 | Sign out. | button | | | delete session | | MBA 2, MBS 2, MBS_SendMail 20 (Re-Login) | AP-01 |
-| OP-AUTH-03 | Change own password. | form | current password | | `users.password_hash` | | `allowModifyPassword=True` in every privilege set | AP-12 |
+| OP-AUTH-03 | Change own password. WeakPassword: the new password has fewer than 10 characters (product decision, D-89); the same rule applies when an admin sets a password (OP-AUTH-04). | form | current password | | `users.password_hash` | Wrong current password or WeakPassword: refuse, nothing written. | `allowModifyPassword=True` in every privilege set | AP-12 |
 | OP-AUTH-04 | Manage users: create, set password, disable, change role. | admin screen | | | `users`, revoke `sessions` | | BR-AUTH-04 | AP-08, AP-11 |
 | OP-SYS-01 | Edit settings (BR-SYS-03). | admin screen | | | `app_settings` | | product decision | AP-08 |
 | OP-SYS-02 | Edit document templates (letters, certificates, policies) (D-18). | admin screen | | | `document_templates` | | 25 print layouts with fixed text (D-18) | AP-08 |

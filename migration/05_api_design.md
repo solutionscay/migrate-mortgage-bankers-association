@@ -475,15 +475,18 @@ Each operation row above names its object files. Tests (the semantic fixtures T-
 | T-05-08 | `POST /mail/emails/{id}/send` without `RESEND_API_KEY` | `mail_outbox` row with provider `mock`; e-mail Sent; no network call |
 | T-05-09 | EXT-01 with a local HTTP mock of the Resend API | request body, bearer header and `Idempotency-Key`; provider 422 -> `error` = 1, message on top of `error_log` |
 | T-05-10 | `PATCH /registrations/{id}/items/{item_id}` (qty), then `POST /registrations/{id}/guests` | qty patch sets `qty_manual` = 1; the guest add changes only items with `qty_manual` = 0; the hand-set qty stays (D-88) |
-| T-05-10 | `POST /mail/batches/{id}/send-all` twice | second call -> 409 while JOB-01 runs; sent e-mails skipped |
 | T-05-11 | `GET /calendar-options/{kind}` | inactive rows absent; affiliate student sees the member price |
 | T-05-12 | `POST /grades/import/{token}/apply` with another user's token | 404 |
 | T-05-13 | `PATCH /registrations/{id}/items/{item_id}` with `qty=3` | 200: row with the new total and `#totales` out of band; one `audit_log` `field.change` row |
 | T-05-14 | `PATCH /registrations/{id}/items/{item_id}` with `qty=0` | 422: field fragment with the typed value and the message; nothing written; totals unchanged |
 | T-05-15 | `PATCH /people/{id}` with two fields | 422; nothing written |
-| T-05-13 | all templates | no response body contains the value of `RESEND_API_KEY` or `password_hash` |
-| T-05-14 | `GET /print/*`, `GET /exports/*` | the export applies the same filter as the list (AP-10) |
-| T-05-15 | HTMX vs full page | the same `GET` returns a fragment with `HX-Request` and a full page without it |
+| T-05-16 | `POST /mail/batches/{id}/send-all` twice | second call -> 409 while JOB-01 runs; sent e-mails skipped |
+| T-05-17 | all templates | no response body contains the value of `RESEND_API_KEY` or `password_hash` |
+| T-05-18 | `GET /print/*`, `GET /exports/*` | the export applies the same filter as the list (AP-10) |
+| T-05-19 | HTMX vs full page | the same `GET` returns a fragment with `HX-Request` and a full page without it |
+| T-05-20 | `POST /files`, `GET /files/{uuid}` | no session -> 303/401; no CSRF -> 403; ROLE-STAFF upload -> 200 file chip, one `stored_files` row, bytes under the data folder, one `audit_log` `file.upload` row; download -> stored MIME type, `Content-Disposition` inline for PDF and images, attachment otherwise |
+| T-05-21 | `POST /files` limits | over 20 MB, empty, or a type outside the allow-list (SVG, HTML) -> 422 with the field error; no row, no file |
+| T-05-22 | JOB-02 with a fixed clock | sessions past `expires_at` or idle longer than `session.idle_minutes` deleted, live session kept; a second pass deletes nothing |
 
 ## Unresolved operations
 

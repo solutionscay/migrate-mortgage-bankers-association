@@ -1,4 +1,4 @@
-//! Route tests of I1: T-05-01, T-05-02, T-05-05, T-05-13 (no secret in a body), T-05-15 (htmx fragment);
+//! Route tests of I1: T-05-01, T-05-02, T-05-05, T-05-17 (no secret in a body), T-05-19 (htmx fragment);
 //! T-08-01..04, T-08-12, T-08-15..17, T-08-19, T-08-20.
 
 use axum::body::Body;
@@ -381,7 +381,7 @@ async fn no_external_channel_routes() {
     }
 }
 
-/// T-05-13 (secrets) / T-08-20: no page carries a password hash, a session token hash or another user's CSRF token.
+/// T-05-17 (secrets) / T-08-20: no page carries a password hash, a session token hash or another user's CSRF token.
 #[tokio::test]
 async fn no_secret_in_any_body() {
     let app = App::new();
@@ -412,7 +412,7 @@ async fn no_secret_in_any_body() {
     }
 }
 
-/// T-05-15 (htmx vs full page): the same GET returns the fragment with HX-Request and the full page without.
+/// T-05-19 (htmx vs full page): the same GET returns the fragment with HX-Request and the full page without.
 #[tokio::test]
 async fn htmx_gets_the_fragment() {
     let app = App::new();

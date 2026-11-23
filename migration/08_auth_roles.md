@@ -43,7 +43,7 @@ Demo seed users (`mba-seed`, OP-SYS-03; also listed in the users seed comment of
 | `inieves` | Ivelisse Nieves Arroyo | ROLE-ADMIN | MBA 3, MBS 3: `[Full Access]`; MBS_SendMail 5: `[Data Entry Only]` (D-84) |
 | `equintana` | Edwin Quintana Roldán | ROLE-STAFF | MBS_SendMail 4: `[Data Entry Only]` |
 
-`email` is NULL. Each password is random, printed once by the seed tool, and never stored in the repository.
+`email` is NULL. Demo build (D-02): every seed account, including the generic `admin.demo` (ROLE-ADMIN) and `staff.demo` (ROLE-STAFF), gets one fixed demo password. `mba-seed` prints it and the README lists it, so a reviewer can sign in without reading a log. It is a demo credential, not a secret. A production build would generate a random password per account and print it once.
 
 The DDR has no password or hash; no password migration. Disabled users keep their row (`users.active = 0`) and cannot sign in. Deprovisioning = disable; delete is not offered (audit rows keep `user_id`). Break-glass: the CLI seed tool can reset the admin password (OP-SYS-03). MFA: none (D-50).
 

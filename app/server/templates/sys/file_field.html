@@ -1,0 +1,11 @@
+<div class="file-field">
+{%- if let Some(f) = file %}
+  <div class="row"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg><a href="/files/{{ f.uuid }}" target="_blank" rel="noopener" style="color:inherit">{{ f.filename }}</a> · {{ f.size_label() }}<button class="x" type="button" aria-label="Quitar {{ label }}"
+    {%- if let Some(url) = remove_url %} hx-delete="{{ url }}"{% else %} hx-get="/files/field?{{ reset_query() }}"{% endif %} hx-target="closest .file-field" hx-swap="outerHTML"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><input type="hidden" name="{{ name }}" value="{{ f.uuid }}"></div>
+{%- else %}
+  <div class="row"><label class="btn btn-sm"><svg class="i i-sm"><use href="#i-upload"/></svg>Escoger archivo<input type="file" name="file" accept="{{ accept }}" hidden hx-post="/files" hx-encoding="multipart/form-data" hx-trigger="change" hx-vals='{{ hx_vals() }}' hx-target="closest .file-field" hx-swap="outerHTML" aria-label="Escoger {{ label }}"></label><span class="field-hint">PDF, imagen, Excel, Word, CSV o texto; hasta 20 MB</span></div>
+  {%- if let Some(e) = error %}
+  <div class="field-error" role="alert"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>
+  {%- endif %}
+{%- endif %}
+</div>
