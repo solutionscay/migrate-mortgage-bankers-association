@@ -1,0 +1,17 @@
+{#- Attributes of one item (BR-REG-06): hotel (reservation, extra nights) or seating (table). Cancelar closes and sends nothing (D-31); Aceptar posts. -#}
+<dialog class="dlg" id="dlg-attr-{{ uuid }}" aria-labelledby="dlg-attr-{{ uuid }}-t">
+  <form method="post" action="{{ action }}">
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+    <div class="dlg-head"><h2 id="dlg-attr-{{ uuid }}-t">Atributos · {{ name }}</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body">
+      {% if let Some(e) = error %}<div class="error-summary" role="alert" style="margin-bottom:8px"><b>No se guardó.</b> {{ e }}</div>{% endif %}
+      <div class="form">
+      {% if hotel %}<label for="at-res-{{ uuid }}">Reservación #</label><div class="field-wrap"><input class="field" id="at-res-{{ uuid }}" name="hotel_reservation_num" value="{{ reserva }}" maxlength="60" autofocus></div>
+      <label for="at-adic-{{ uuid }}">Noches adicionales</label><div class="field-wrap"><input class="field num" id="at-adic-{{ uuid }}" name="adicional" value="{{ adicional }}" maxlength="60" style="width:96px"></div>
+      {% else %}<label for="at-mesa-{{ uuid }}">Mesa #</label><div class="field-wrap"><input class="field num" id="at-mesa-{{ uuid }}" name="mesa" value="{{ mesa }}" maxlength="60" style="width:96px" autofocus></div>{% endif %}
+      </div>
+      <p class="field-hint" style="margin-top:8px">Hotel: reservación y noches. Comidas: mesa. Otros: sin atributos (BR-REG-06).</p>
+    </div>
+    <div class="dlg-foot"><span class="left">Cancelar no cambia nada</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Aceptar</button></div>
+  </form>
+</dialog>

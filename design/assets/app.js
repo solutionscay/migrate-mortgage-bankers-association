@@ -98,7 +98,8 @@
 
   // ---- One click handler for every data-* hook ----
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-open],[data-close],[data-menu],[data-set-role],[role=tab],[data-toast],[data-busy],[data-pick],[data-soon]");
+    let el = e.target.closest("[data-open],[data-close],[data-menu],[data-set-role],[role=tab],[data-toast],[data-busy],[data-pick],[data-soon]");
+    if (el === document.body) el = null;   // <body data-open> only names the dialog to open on load
     if (!el) {
       if (e.target.matches("dialog.dlg")) e.target.close();   // backdrop click
       return;

@@ -1,0 +1,12 @@
+{#- Escoger evento (BR-REG-01): active events only; offered only while the registration has no event. -#}
+<dialog class="dlg wide" id="dlg-evento" aria-labelledby="dlg-evento-t">
+  <div class="dlg-head"><h2 id="dlg-evento-t">Escoger evento</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div class="dlg-body">
+    {% if events.is_empty() %}<div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Al momento no hay eventos activos.</h4><p>Active un evento en Convenciones.</p></div>
+    {% else %}<div class="table-wrap picker-list"><table class="t"><thead><tr><th>Evento</th><th>Lugar</th><th>Comienza</th><th>Termina</th><th>Estatus</th></tr></thead><tbody>
+    {% for e in events %}<tr><td><form method="post" action="{{ action }}"><input type="hidden" name="_csrf" value="{{ csrf }}"><button class="pick-hit" type="submit" name="event_uuid" value="{{ e.uuid }}"{% if loop.first %} autofocus{% endif %}>{{ e.name }}</button></form></td><td>{{ e.location }}</td><td>{{ e.start }}</td><td>{{ e.end }}</td><td><span class="tag ok">Activo</span></td></tr>
+    {% endfor %}</tbody></table></div>{% endif %}
+    <p class="field-hint">Solo eventos activos (BR-REG-01). Una vez escogido, el evento no cambia.</p>
+  </div>
+  <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button></div>
+</dialog>

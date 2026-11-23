@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Registro en puerta{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/events">Convenciones</a><span class="sep">/</span><a href="/events/{{ event_uuid }}">{{ event_name }}</a><span class="sep">/</span><span>Registro en puerta</span></div>
+      <h1 class="title"><b>Registro en puerta</b> <span class="sub">· {{ event_name }}</span></h1>
+      <div class="actions">
+        <a class="btn" href="/events/{{ event_uuid }}"><svg class="i"><use href="#i-chevron-left"/></svg>Volver</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="door-wrap">
+          <div class="door-search"><label class="search"><span class="sr-only">Buscar</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre o #" autocomplete="off" hx-get="/events/{{ event_uuid }}/door" hx-trigger="input changed delay:300ms, search" hx-target="#door-rows" hx-swap="outerHTML"></label><span class="door-count" id="door-count">{{ shown }} de {{ total }} · <span id="door-attended">{{ attended }}</span> asistieron</span></div>
+          <div class="table-wrap">
+<table class="t door-table">
+<colgroup><col style="width:64px"><col><col style="width:80px"><col style="width:360px"></colgroup>
+<thead><tr><th class="num">#</th><th>Nombre y compañía</th><th class="num">Acomp.</th><th>En puerta</th></tr></thead>
+<tbody id="door-rows">
+{% for r in rows %}{{ r|safe }}
+{% endfor %}{% if rows.is_empty() %}<tr class="empty"><td colspan="4"><div class="empty"><h4>{% if q.is_empty() %}Este evento no tiene registros.{% else %}Ningún registro coincide con «{{ q }}».{% endif %}</h4></div></td></tr>{% endif %}
+</tbody>
+</table>
+          </div>
+        </div>
+      </div>
+{% endblock %}

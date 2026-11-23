@@ -1,0 +1,21 @@
+{#- Escoger plan (BR-REG-02) and one confirm dialog per other plan when a plan is set. -#}
+<dialog class="dlg" id="dlg-plan" aria-labelledby="dlg-plan-t">
+  <div class="dlg-head"><h2 id="dlg-plan-t">Escoger plan</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div class="dlg-body">
+    {% if page.plans.is_empty() %}<div class="empty"><h4>Este evento no tiene planes.</h4><p>Cree un plan en Planes.</p></div>
+    {% else %}<div class="table-wrap picker-list"><table class="t"><colgroup><col><col style="width:110px"><col style="width:110px"></colgroup><thead><tr><th>Plan de {% if let Some(e) = page.event %}{{ e.name }}{% endif %}</th><th class="num">Actividades</th><th class="money">Precio</th></tr></thead><tbody>
+    {% for p in page.plans %}<tr{% if p.current %} aria-selected="true"{% endif %}><td>{% if p.current %}{{ p.name }} <span class="tag info">Actual</span>{% else %}<form method="post" action="/registrations/{{ page.h.uuid }}/plan"><input type="hidden" name="_csrf" value="{{ page.shell.csrf }}"><button class="pick-hit" type="submit" name="plan_uuid" value="{{ p.uuid }}">{{ p.name }}</button></form>{% endif %}</td><td class="num">{{ p.items }}</td><td class="money">{{ p.price }}</td></tr>
+    {% endfor %}</tbody></table></div>{% endif %}
+    <p class="field-hint">Escoger otro plan pide confirmación: borra las actividades del plan actual (BR-REG-02).</p>
+  </div>
+  <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button></div>
+</dialog>
+{% if let Some((_pu, pname, _pp)) = page.plan %}{% for p in page.plans %}{% if !p.current %}
+<dialog class="dlg" id="dlg-plan-confirm-{{ p.uuid }}" aria-labelledby="dlg-plan-confirm-{{ p.uuid }}-t">
+  <form method="post" action="/registrations/{{ page.h.uuid }}/plan">
+    <input type="hidden" name="_csrf" value="{{ page.shell.csrf }}"><input type="hidden" name="plan_uuid" value="{{ p.uuid }}"><input type="hidden" name="confirm" value="1">
+    <div class="dlg-head danger"><h2 id="dlg-plan-confirm-{{ p.uuid }}-t">¿Cambiar el plan?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><p>El registro #{{ page.h.number }} tiene <b>{{ page.lines.len() }} actividad{% if page.lines.len() != 1 %}es{% endif %}</b> (plan {{ pname }}). Cambiar a <b>{{ p.name }}</b> las borra y crea {{ p.items }} actividad{% if p.items != 1 %}es{% endif %} del plan nuevo. El total pasa de {{ page.usd(page.totals.total) }} a {{ p.price }}.</p></div>
+    <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Sí, cambiar el plan</button></div>
+  </form>
+</dialog>{% endif %}{% endfor %}{% endif %}

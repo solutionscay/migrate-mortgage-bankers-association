@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Registro #{{ h.number }}{% endblock %}
+{% block body_state %}{% if let Some(d) = x.open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/people">Convención</a><span class="sep">/</span><a href="/registrations">Registros</a><span class="sep">/</span><span>#{{ h.number }}</span></div>
+      <h1 class="title"><b>Registro</b> #{{ h.number }} · {{ h.name() }} <span class="sub">· {{ kind }}</span></h1>
+      <div class="actions">
+        <div class="status-slot"><label for="r-st">Estatus</label><div style="width:150px">{{ status.html()|safe }}</div></div><a class="btn" href="/print/convention/lista-facturacion?registration={{ h.uuid }}"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</a><button class="btn btn-icon" type="button" data-menu="menu-reg" aria-label="Más acciones del registro" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <style>
+        .picker-list tbody tr { position: relative; }
+        .pick-hit { all: unset; cursor: pointer; }
+        .pick-hit::after { content: ""; position: absolute; inset: 0; }
+        .pick-hit:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+        .t tbody.line + tbody.line tr:first-child td { border-top: 0; }
+      </style>
+      <div class="content-inner">
+        {% if let Some(n) = x.notice %}<div class="banner ok" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        {% if let Some(e) = x.error %}<div class="banner err" role="alert" style="margin-bottom:12px"><svg class="i"><use href="#i-alert"/></svg><div><b>No se hizo.</b> {{ e }}</div></div>{% endif %}
+
+        <div class="grid reg-top">
+          <div>
+            <div class="form">
+              <label>Compañía</label><div class="field-wrap"><input class="field" value="{{ h.company }}" readonly tabindex="-1" aria-label="Compañía"></div>
+              <label>Nombre</label><div class="field-wrap"><input class="field" value="{{ h.first }}" readonly tabindex="-1" aria-label="Nombre"></div>
+              <label>Apellido</label><div class="field-wrap"><input class="field" value="{{ h.last }}" readonly tabindex="-1" aria-label="Apellido"></div>
+              <label>Nombre badge</label><div class="field-wrap"><input class="field" value="{{ h.badge }}" readonly tabindex="-1" aria-label="Nombre badge"></div>
+              <label>Teléfono</label><div class="field-wrap"><input class="field" value="{{ h.phone }}" readonly tabindex="-1" aria-label="Teléfono"></div>
+              <label>Fax</label><div class="field-wrap"><input class="field" value="{{ h.fax }}" readonly tabindex="-1" aria-label="Fax"></div>
+              <span class="label"></span><div class="field-wrap"><a href="/people/{{ h.person_uuid }}" class="person-link"><svg class="i i-sm"><use href="#i-user"/></svg> Abrir convencionista</a></div>
+              <span class="gap"></span>
+              <span class="label" id="r-cp">Costeado por</span>
+              {{ costeado.html()|safe }}
+            </div>
+          </div>
+          <div>
+            <div class="form">
+              <label>Dirección</label><div class="field-wrap"><input class="field" value="{{ h.address }}" readonly tabindex="-1" aria-label="Dirección"></div>
+              <label>Ciudad/Estado/Zip</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 48px 72px"><input class="field" value="{{ h.city }}" readonly tabindex="-1" aria-label="Ciudad"><input class="field" value="{{ h.state }}" readonly tabindex="-1" aria-label="Estado"><input class="field" value="{{ h.zip }}" readonly tabindex="-1" aria-label="Zip"></div>
+              <label>E-mail</label><div class="field-wrap"><input class="field" value="{{ h.email }}" readonly tabindex="-1" aria-label="E-mail"></div>
+              <span class="gap"></span>
+              <span class="label">Evento</span>
+              <div class="field-wrap">
+                {% if let Some(e) = event %}<div class="pick pick-fixed">{{ e.name }} <span class="meta">{{ e.start }}</span></div>
+                {% else %}<button class="pick pick-unset" type="button" data-open="dlg-evento"><svg class="i"><use href="#i-plus"/></svg>Escoger evento</button>{% endif %}
+              </div>
+              <span class="gap" style="height:4px"></span>
+              <span class="label">Plan</span>
+              <div class="field-wrap">
+                {% if let Some((_u, name, price)) = plan %}<button class="pick" type="button" data-open="dlg-plan">{{ name }} <span class="meta">{{ price }}</span><span class="act">Cambiar</span></button>
+                {% else if event.is_some() %}<button class="pick pick-unset" type="button" data-open="dlg-plan"><svg class="i"><use href="#i-plus"/></svg>Escoger plan</button>
+                {% else %}<button class="pick pick-unset" type="button" disabled title="Escoja el evento primero"><svg class="i"><use href="#i-plus"/></svg>Escoger plan</button>{% endif %}
+              </div>
+              <span class="gap"></span>
+              <label for="r-badges">Nombres badge</label>{{ badges.html()|safe }}
+            </div>
+          </div>
+          <div class="block">
+            <div class="block-head"><h3>Acompañantes</h3><span class="count">{{ guests.len() }}</span></div>
+<table class="t">
+<colgroup><col><col><col><col style="width:36px"></colgroup>
+<thead><tr><th>Nombre</th><th>Apellido</th><th>Nombre badge</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{% for g in guests %}<tr><td class="edit">{{ g.first.html()|safe }}</td><td class="edit">{{ g.last.html()|safe }}</td><td class="edit">{{ g.badge.html()|safe }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-g-{{ g.uuid }}" aria-label="Acciones de {{ g.name }}" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{% endfor %}<tr class="add-row"><td><input class="field" form="f-guest" name="name_first" placeholder="Nombre" aria-label="Nombre del acompañante nuevo"></td><td><input class="field" form="f-guest" name="name_last" placeholder="Apellido" aria-label="Apellido del acompañante nuevo"></td><td><input class="field" form="f-guest" name="name_badge" placeholder="Nombre badge" aria-label="Nombre badge del acompañante nuevo"></td><td class="col-act"><button class="btn btn-sm btn-icon btn-primary" type="submit" form="f-guest" aria-label="Añadir acompañante"><svg class="i i-sm"><use href="#i-plus"/></svg></button></td></tr>
+</tbody>
+</table>
+            <form id="f-guest" method="post" action="/registrations/{{ h.uuid }}/guests"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"></form>
+          </div>
+        </div>
+
+        <div class="block" style="margin-top:24px">
+          <div class="block-head"><h3>Detalles del registro</h3><span class="count">{{ lines.len() }} actividad{% if lines.len() != 1 %}es{% endif %}</span>
+            <div class="row"><span class="htmx-indicator">Actualizando…</span></div>
+          </div>
+          {% if !lines.is_empty() %}
+<table class="t">
+<colgroup><col style="width:84px"><col><col style="width:58px"><col style="width:84px"><col style="width:80px"><col style="width:84px"><col style="width:80px"><col style="width:150px"><col style="width:84px"><col style="width:44px"><col style="width:90px"><col style="width:66px"><col style="width:36px"></colgroup>
+<thead>
+          <tr class="group"><th colspan="3"></th><th colspan="2" class="g">COMIENZA</th><th colspan="2" class="g">TERMINA</th><th colspan="6"></th></tr><tr><th>Tipo</th><th>Evento</th><th>Plan</th><th>Fecha</th><th>Hora</th><th>Fecha</th><th>Hora</th><th>Detalles</th><th class="money">Precio</th><th class="num">Qty.</th><th class="money">Total</th><th class="c">Sin cargo</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+{% for l in lines %}{{ self.line_html(l)|safe }}
+{% endfor %}{% if !add_items.is_empty() %}<tbody><tr class="add-row"><td colspan="8"><select class="field" form="f-item" name="event_item_uuid" aria-label="Actividad del evento">{% for (u, label) in add_items %}<option value="{{ u }}">{{ label }}</option>{% endfor %}</select></td><td colspan="2"></td><td colspan="3"><button class="btn btn-sm btn-primary" type="submit" form="f-item" style="width:100%"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></td></tr></tbody>{% endif %}
+</table>
+          {% else %}
+          <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin actividades</h4><p>{% if event.is_some() %}Escoja un plan o añada una actividad.{% else %}Escoja el evento; luego el plan o una actividad.{% endif %}</p>{% if event.is_some() %}<button class="btn btn-sm" type="button" data-open="dlg-plan"><svg class="i i-sm"><use href="#i-plus"/></svg>Escoger plan</button>{% else %}<button class="btn btn-sm" type="button" data-open="dlg-evento"><svg class="i i-sm"><use href="#i-plus"/></svg>Escoger evento</button>{% endif %}</div>
+          {% if !add_items.is_empty() %}<table class="t"><colgroup><col><col style="width:220px"></colgroup><tbody><tr class="add-row"><td><select class="field" form="f-item" name="event_item_uuid" aria-label="Actividad del evento">{% for (u, label) in add_items %}<option value="{{ u }}">{{ label }}</option>{% endfor %}</select></td><td><button class="btn btn-sm btn-primary" type="submit" form="f-item" style="width:100%"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></td></tr></tbody></table>{% endif %}
+          {% endif %}
+          <form id="f-item" method="post" action="/registrations/{{ h.uuid }}/items"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"></form>
+        </div>
+
+        <div class="grid reg-bottom" id="pagos">
+          <div class="block">
+            <div class="block-head"><h3>Detalles de pago</h3><span class="count">{{ payments_count }} pago{% if payments_count != 1 %}s{% endif %}</span><div class="row"><button class="btn btn-sm" type="button" data-open="dlg-pago"><svg class="i i-sm"><use href="#i-plus"/></svg>Registrar pago</button></div></div>
+            {% if !payments.is_empty() %}
+<table class="t">
+<colgroup><col style="width:92px"><col style="width:96px"><col><col style="width:96px"><col style="width:36px"></colgroup>
+<thead><tr><th>Fecha</th><th>Número</th><th>Tipo de pago</th><th class="money">Pago</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{% for p in payments %}<tr class="row-money{% if p.voided %} voided{% endif %}"{% if p.voided %} title="Anulado: {{ p.reason }}"{% endif %}><td>{{ p.date }}</td><td>{{ p.number }}</td><td>{{ p.kind }}{% if p.voided %} <span class="tag err">Anulado</span>{% endif %}</td><td class="money">{{ p.amount }}</td><td class="col-act">{% if shell.is_admin && !p.voided %}<button class="row-act" type="button" data-menu="menu-pay-{{ p.uuid }}" aria-label="Acciones del pago {{ p.number }}" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button>{% endif %}</td></tr>
+{% endfor %}</tbody>
+</table>
+            {% else %}<div class="empty"><h4>Sin pagos</h4><p>Registre el primer pago cuando el plan esté escogido.</p></div>{% endif %}
+          </div>
+          <div>
+            <label class="section-title" for="r-com" style="display:block">Comentarios</label>
+            {{ comments.html()|safe }}
+          </div>
+          <dl class="totals" id="totales">{{ totals_html|safe }}</dl>
+        </div>
+      </div>
+
+      <div class="menu" id="menu-reg" popover role="menu">
+        <button type="button" role="menuitem" data-open="dlg-cancelar"><svg class="i"><use href="#i-ban"/></svg>Cancelar registro…</button>
+        {% if shell.is_admin %}<hr>
+        {% if payments_count > 0 %}<div class="menu-note">Tiene pagos: no se borra (AP-05)</div>{% endif %}
+        <button type="button" role="menuitem" class="danger act-delete" data-open="dlg-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar registro…<span class="admin-mark">admin</span></button>{% endif %}
+      </div>
+      {% for l in lines %}
+      <div class="menu" id="menu-li-{{ l.uuid }}" popover role="menu">
+        {% if l.has_attr %}<button type="button" role="menuitem" data-open="dlg-attr-{{ l.uuid }}"><svg class="i"><use href="#i-edit"/></svg>Editar atributos</button>{% endif %}
+        <button type="button" role="menuitem" hx-patch="{{ l.url }}" hx-vals='{"no_charge": "1"}' hx-target="#li-{{ l.uuid }}" hx-swap="outerHTML" popovertarget="menu-li-{{ l.uuid }}" popovertargetaction="hide"><svg class="i"><use href="#i-check"/></svg>Marcar sin cargo</button>
+        <hr>
+        <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-{{ l.uuid }}"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…</button>
+      </div>
+      <dialog class="dlg" id="dlg-quitar-{{ l.uuid }}" aria-labelledby="dlg-quitar-{{ l.uuid }}-t">
+        <form method="post" action="{{ l.url }}">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="confirm" value="1">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-{{ l.uuid }}-t">¿Quitar la actividad?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita <b>{{ l.name }}</b> ({{ l.kind }}, {{ l.d_start }}) del registro #{{ h.number }}. El total se recalcula en el servidor.</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar</button></div>
+        </form>
+      </dialog>
+      {% endfor %}
+      {% for d in attr_dialogs %}{{ d|safe }}
+      {% endfor %}
+      {% for g in guests %}
+      <div class="menu" id="menu-g-{{ g.uuid }}" popover role="menu">
+        <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-g-{{ g.uuid }}"><svg class="i"><use href="#i-trash"/></svg>Quitar acompañante…</button>
+      </div>
+      <dialog class="dlg" id="dlg-quitar-g-{{ g.uuid }}" aria-labelledby="dlg-quitar-g-{{ g.uuid }}-t">
+        <form method="post" action="/registrations/{{ h.uuid }}/guests/{{ g.uuid }}">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-g-{{ g.uuid }}-t">¿Quitar el acompañante?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita a <b>{{ g.name }}</b>. Las cantidades de las actividades se recalculan, menos las puestas a mano (BR-REG-03, D-88).</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar</button></div>
+        </form>
+      </dialog>
+      {% endfor %}
+      {% for p in payments %}{% if shell.is_admin && !p.voided %}
+      <div class="menu" id="menu-pay-{{ p.uuid }}" popover role="menu">
+        <div class="menu-note">Pago {{ p.number }} · {{ p.amount }}</div>
+        <button type="button" role="menuitem" class="danger act-void" data-open="dlg-anular-{{ p.uuid }}"><svg class="i"><use href="#i-ban"/></svg>Anular pago…<span class="admin-mark">admin</span></button>
+      </div>
+      <dialog class="dlg" id="dlg-anular-{{ p.uuid }}" aria-labelledby="dlg-anular-{{ p.uuid }}-t">
+        <form method="post" action="/payments/{{ p.uuid }}/void">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          <div class="dlg-head danger"><h2 id="dlg-anular-{{ p.uuid }}-t">Anular pago {{ p.number }}</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p style="margin-bottom:12px">El pago de <b>{{ p.amount }}</b> queda tachado y fuera del balance. No se borra (AP-05).</p><div class="form"><label for="an-razon-{{ p.uuid }}" class="req">Razón</label><div class="field-wrap"><textarea class="field" id="an-razon-{{ p.uuid }}" name="void_reason" rows="3" required placeholder="Por qué se anula"{% if self.void_error(p.uuid).is_some() %} aria-invalid="true"{% endif %}></textarea>{% if let Some(m) = self.void_error(p.uuid) %}<div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% endif %}</div></div></div>
+          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-danger-solid" type="submit">Anular pago</button></div>
+        </form>
+      </dialog>
+      {% endif %}{% endfor %}
+      <dialog class="dlg" id="dlg-pago" aria-labelledby="dlg-pago-t">
+        <form method="post" action="/registrations/{{ h.uuid }}/payments">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          <div class="dlg-head"><h2 id="dlg-pago-t">Registrar pago</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body">
+            {% if x.pay.amount_err.is_some() || x.pay.kind_err.is_some() %}<div class="error-summary" role="alert" style="margin-bottom:12px"><b>Revise el pago.</b></div>{% endif %}
+            <div class="form">
+              <label for="pg-fecha">Fecha</label><div class="field-wrap"><input class="field" id="pg-fecha" value="Hoy" readonly tabindex="-1"><div class="field-hint">La fecha del pago es la del registro en el sistema.</div></div>
+              <label for="pg-monto" class="req">Pago</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" inputmode="decimal" id="pg-monto" name="payment" required value="{% if x.pay.amount.is_empty() %}{{ self.balance_text() }}{% else %}{{ x.pay.amount }}{% endif %}" autofocus{% if x.pay.amount_err.is_some() %} aria-invalid="true" aria-describedby="pg-e1"{% endif %}></span>{% if let Some(m) = x.pay.amount_err %}<div class="field-error" id="pg-e1"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% endif %}</div>
+              <label for="pg-tipo" class="req">Tipo de pago</label><div class="field-wrap"><select class="field" id="pg-tipo" name="payment_type"{% if x.pay.kind_err.is_some() %} aria-invalid="true"{% endif %}>{% for k in payment_types %}<option{% if x.pay.kind == **k %} selected{% endif %}>{{ k }}</option>{% endfor %}</select>{% if let Some(m) = x.pay.kind_err %}<div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% endif %}</div>
+              <label for="pg-num">Número</label><div class="field-wrap"><input class="field" id="pg-num" name="payment_number" value="{{ x.pay.number }}" maxlength="60"></div>
+            </div>
+          </div>
+          <div class="dlg-foot"><span class="left">Balance actual: {{ self.usd(totals.balance) }}</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+        </form>
+      </dialog>
+      {% if event.is_none() %}{{ self.event_picker_html()|safe }}{% else %}{{ self.plan_picker_html()|safe }}{% endif %}
+      <dialog class="dlg" id="dlg-cancelar" aria-labelledby="dlg-cancelar-t">
+        <form method="post" action="/registrations/{{ h.uuid }}/cancel">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          <div class="dlg-head danger"><h2 id="dlg-cancelar-t">¿Cancelar el registro #{{ h.number }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>El estatus pasa a <b>Canceló</b>. Las actividades y los pagos se quedan; los pagos no se borran (AP-05).</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>No</button><button class="btn btn-danger-solid" type="submit">Cancelar registro</button></div>
+        </form>
+      </dialog>
+      {% if shell.is_admin %}<dialog class="dlg" id="dlg-borrar" aria-labelledby="dlg-borrar-t">
+        <form method="post" action="/registrations/{{ h.uuid }}">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-t">¿Borrar el registro #{{ h.number }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body">{% if payments_count > 0 %}<p>Este registro tiene {{ payments_count }} pago{% if payments_count != 1 %}s{% endif %}. No se borra: cancélelo (estatus Canceló, AP-05).</p>{% else %}<p>Se borran el registro, sus actividades y sus acompañantes. No se puede deshacer.</p>{% endif %}</div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button>{% if payments_count > 0 %}<button class="btn btn-danger-solid" type="button" data-open="dlg-cancelar">Cancelar el registro…</button>{% else %}<button class="btn btn-danger-solid" type="submit">Borrar</button>{% endif %}</div>
+        </form>
+      </dialog>{% endif %}
+{% endblock %}
