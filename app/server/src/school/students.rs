@@ -285,7 +285,8 @@ pub fn academic(conn: &Connection, student: &str) -> DResult<Academic> {
     Ok(a)
 }
 
-/// One row of "Progreso por certificación" (UI-15): `v_student_certification_progress` plus the names of the
+/// One row of "Progreso por certificación" (UI-15), in the certifications' own order (creation order: COH, CSH, CPP,
+/// CCR in the seed, as the design lists them): `v_student_certification_progress` plus the names of the
 /// required courses with no passed enrollment ("Cursos que faltan", BR-CRT-02).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Progress {
@@ -309,7 +310,7 @@ pub fn certification_progress(conn: &Connection, student: &str) -> rusqlite::Res
             "SELECT p.uuid, c.certification, c.description, p.total, p.completed, p.left_count, p.average_points,
                     p.total_credits, p.total_hours, p.graduation_date, p.is_graduated, p.certification_uuid
                FROM v_student_certification_progress p JOIN certifications c ON c.uuid = p.certification_uuid
-              WHERE p.student_uuid = ?1 ORDER BY p.is_graduated DESC, c.certification",
+              WHERE p.student_uuid = ?1 ORDER BY c.created_at, c.rowid",
         )?
         .query_map([student], |r| {
             Ok((

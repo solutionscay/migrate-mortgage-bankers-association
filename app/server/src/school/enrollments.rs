@@ -115,7 +115,7 @@ pub fn cancel_enrollment(tx: &Transaction, who: &Who, kind: Kind, enrollment: &s
 }
 
 /// OP-ENR-05 / BR-ENR-08 delete: two-step confirm; an enrollment with a payment is refused (409, cancel instead);
-/// without a payment, ROLE-ADMIN deletes it (AP-05).
+/// without a payment, staff or admin removes it (AP-06).
 pub fn delete_enrollment(tx: &Transaction, who: &Who, kind: Kind, enrollment: &str, confirm: bool) -> DResult<()> {
     let paid = pago(tx, kind, enrollment)?;
     policy::ap05_enrollment_delete(who, paid)?;

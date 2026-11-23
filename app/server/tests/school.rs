@@ -161,6 +161,8 @@ fn t07_09_certification_progress() {
     // The seeded Elena: the design's progress rows.
     let elena = uuid_of(&conn, "students", "nombre", "Elena Muestra Ficticia");
     let rows = students::certification_progress(&conn, &elena).unwrap();
+    let order: Vec<&str> = rows.iter().map(|r| r.certification.as_str()).collect();
+    assert_eq!(order, ["COH", "CSH", "CPP", "CCR", "TST"], "the design order, then newer ones; not graduated-first");
     let cpp = rows.iter().find(|r| r.certification == "CPP").unwrap();
     assert_eq!((cpp.total, cpp.completed, cpp.left_count, cpp.average_points), (5, 2, 3, Some(92)));
     assert_eq!(cpp.courses_left, ["Documentación de Cierre", "Procesamiento de Préstamos", "Seguros"]);
@@ -366,12 +368,12 @@ fn t07_13_paid_enrollment_is_cancelled_not_deleted() {
     }
     enrollments::cancel_enrollment(&tx, &staff(), Kind::Course, &paid).unwrap();
     assert_eq!(one::<String>(&tx, "SELECT status FROM enrollments_course WHERE uuid = ?1", &paid), "BAJA");
-    assert_eq!(enrollments::delete_enrollment(&tx, &staff(), Kind::Course, &free, true), Err(DomainError::Forbidden));
+    // AP-06: without a payment, staff removes it after the confirm.
     assert_eq!(
-        enrollments::delete_enrollment(&tx, &admin(), Kind::Course, &free, false),
+        enrollments::delete_enrollment(&tx, &staff(), Kind::Course, &free, false),
         Err(DomainError::ConfirmRequired)
     );
-    enrollments::delete_enrollment(&tx, &admin(), Kind::Course, &free, true).unwrap();
+    enrollments::delete_enrollment(&tx, &staff(), Kind::Course, &free, true).unwrap();
     assert_eq!(one::<i64>(&tx, "SELECT COUNT(*) FROM enrollments_course WHERE uuid = ?1", &free), 0);
     tx.commit().unwrap();
     // A seminar enrollment cancels to Canceló.

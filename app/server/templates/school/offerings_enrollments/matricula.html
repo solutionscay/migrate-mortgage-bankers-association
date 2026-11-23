@@ -60,7 +60,7 @@
     {%- else %}
     <div class="dlg-foot">
       {%- if paid > 0 %}<span class="sch-blocked"><button class="btn btn-danger" type="button" disabled aria-describedby="del-hint"><svg class="i"><use href="#i-trash"/></svg>Borrar</button><span class="field-hint" id="del-hint">Tiene un pago: use Dar de baja (BR-ENR-08)</span></span>
-      {%- else if is_admin %}<button class="btn btn-danger" type="button" data-open="dlg-mat-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar…</button>
+      {%- else %}<button class="btn btn-danger" type="button" data-open="dlg-mat-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar…</button>
       {%- endif %}
       <span class="left"></span>
       {%- if !cancelled %}<button class="btn" type="submit" form="f-baja"><svg class="i"><use href="#i-ban"/></svg>Dar de baja</button>{% endif %}
@@ -71,12 +71,12 @@
     <form method="post" action="/enrollments/{{ kind.slug() }}/{{ uuid }}/cancel" id="f-baja"><input type="hidden" name="_csrf" value="{{ csrf }}"></form>
     {%- endif %}
   </dialog>
-  {%- if !is_new && paid == 0 && is_admin %}
+  {%- if !is_new && paid == 0 %}
   <dialog class="dlg" id="dlg-mat-borrar" aria-labelledby="dlg-mat-borrar-t">
     <form method="post" action="/enrollments/{{ kind.slug() }}/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ csrf }}"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="confirm" value="1">
     <div class="dlg-head danger"><h2 id="dlg-mat-borrar-t">¿Quitar la matrícula?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
     <div class="dlg-body"><p>Se quita la matrícula de <b>{{ delete_title }}</b>. No tiene pagos, así que se puede borrar (BR-ENR-08).</p></div>
-    <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
+    <div class="dlg-foot"><span class="left">Sin pago: se puede quitar (AP-06)</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
     </form>
   </dialog>
   {%- endif %}

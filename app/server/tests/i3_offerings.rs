@@ -379,7 +379,7 @@ async fn op_enr_04_08_save_enrollment() {
 }
 
 /// OP-ENR-05 (BR-ENR-08, AP-05): with a payment the dialog shows Dar de baja and a disabled Borrar, delete is 409 and
-/// cancel gives BAJA; without a payment staff gets 403, admin needs the confirm, then the row goes.
+/// cancel gives BAJA; without a payment staff may remove it (AP-06): confirm first, then the row goes.
 #[tokio::test]
 async fn op_enr_05_cancel_and_delete() {
     let app = App::new();
@@ -398,13 +398,13 @@ async fn op_enr_05_cancel_and_delete() {
 
     let free = one(&app, "SELECT uuid FROM enrollments_course WHERE serial = 10490");
     let url = format!("/enrollments/course/{free}");
-    assert_eq!(delete(&app, &url, &staff, "&confirm=1").await.status(), StatusCode::FORBIDDEN);
-    let html = body(app.get(&url, Some(&admin)).await).await;
+    // AP-06: no payment, so ROLE-STAFF sees Borrar and removes it after the confirm.
+    let html = body(app.get(&url, Some(&staff)).await).await;
     assert!(html.contains("data-open=\"dlg-mat-borrar\"") && html.contains("¿Quitar la matrícula?"));
-    let res = delete(&app, &url, &admin, "").await;
+    let res = delete(&app, &url, &staff, "").await;
     assert_eq!(res.status(), StatusCode::OK);
     assert!(body(res).await.contains("data-open=\"dlg-mat-borrar\""), "confirm first");
-    let res = delete(&app, &url, &admin, "&confirm=1").await;
+    let res = delete(&app, &url, &staff, "&confirm=1").await;
     assert_eq!(res.status(), StatusCode::SEE_OTHER);
     assert_eq!(app.count(&format!("SELECT COUNT(*) FROM enrollments_course WHERE uuid = '{free}'")), 0);
 }
