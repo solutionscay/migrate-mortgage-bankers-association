@@ -10,7 +10,7 @@ The repo holds the full migration plan and the clickable design pages for the ne
 
 - The migration plan is done and audited.
 - The M1 design is done. The operator approved it on 2026-11-23 and the epic ([#1](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/1)) is closed.
-- The build is gated (G-BUILD) on the operator's approval of the promo video. No build work starts before that.
+- The build is gated (G-BUILD) on the operator's approval of the promo video. Nothing is built before that.
 
 ## How it was made
 
@@ -20,7 +20,7 @@ The run:
 
 - 3 FileMaker files with a DDR (FileMaker 26.0.3, exported 2026-11-13).
 - 806 objects: 212 scripts, 181 layouts, 43 tables, 75 table occurrences, 57 relationships, 24 custom functions, 36 value lists, 111 custom menus and more.
-- Steps 1-9 done, including the audit of the plan against the objects.
+- All six skill steps done, including the audit of the plan against the objects.
 
 ## Migration plan
 
@@ -76,7 +76,7 @@ A second reader re-checked 75 rules against the objects (10 were wrong, all fixe
 
 ### Not in this repo
 
-The plan cites object files and explorer catalogs. Those files come from the client's DDR and are not published here.
+The plan cites object files and explorer catalogs. They come from the client's DDR, so they are not published here.
 
 ## Milestones and epics
 
@@ -96,11 +96,11 @@ G-BUILD sits between M2 and I1: build work starts only after the operator approv
 
 Static HTML design pages: a component gallery and a page for each of the 35 kept screens. Open [design/index.html](design/index.html) or [design/components.html](design/components.html) in a browser straight from disk. The pages need no network access. See [design/README.md](design/README.md) for the page table and the state hooks.
 
-Visual direction: a three-level navigation (module in the top bar, section in the nav bar, record tab on the page), IBM Plex Sans on a warm stone canvas, teal as the one accent, and per-field autosave states.
+Visual direction: three-level navigation (module in the top bar, section in the nav bar, record tab on the page), IBM Plex Sans on a warm stone canvas, teal as the one accent, and per-field autosave states.
 
-| Registro (UI-06) | Convención (UI-09) |
+| Registro (UI-06), saving | Convención (UI-09) |
 |---|---|
-| ![Registro](design/screenshots/registro.png) | ![Convencion](design/screenshots/convencion.png) |
+| ![Registro, saving](design/screenshots/registro-guardando.png) | ![Convencion](design/screenshots/convencion.png) |
 | **Estudiante (UI-15)** | **Envío de correos (UI-26)** |
 | ![Estudiante](design/screenshots/estudiante.png) | ![Correos](design/screenshots/correos.png) |
 
@@ -110,7 +110,7 @@ The three navigation levels in the component gallery:
 
 ## Key decisions
 
-- **Platform:** one web app with one SQLite database for all three modules. Rust axum + askama + rusqlite, SSR with HTMX, a small vanilla JS file. No SPA, no JSON API.
+- **Platform:** one web app with one SQLite database for all three modules. Rust axum + askama + rusqlite, SSR with HTMX, a small vanilla JS file. The app has no SPA and no JSON API.
 - **Editing:** per-field autosave on the record pages.
 - **Data:** no FileMaker data is migrated. A seed tool creates synthetic data.
 - **Money:** stored as integer cents.
