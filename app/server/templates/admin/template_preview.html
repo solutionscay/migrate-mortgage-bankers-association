@@ -1,0 +1,11 @@
+{#- UI-30 template preview: the letter with merged data (POST /admin/templates/{code}/preview). -#}
+<article class="sheet tpl-sheet" aria-label="Vista previa del documento">
+  <header class="tpl-head">
+    {%- if let Some(u) = logo_url %}<img class="tpl-logo-img" src="{{ u }}" alt="Logo">{% else %}<div class="sch-logo" aria-hidden="true">{{ initials }}</div>{% endif -%}
+    <div class="tpl-org">{{ org }}</div>
+  </header>
+  <div class="tpl-body">{{ body|safe }}</div>
+  {%- if show_signer %}
+  <footer class="tpl-sign"><b>{{ signer }}</b>{% if !signer_title.is_empty() %}<br>{{ signer_title }}{% endif %}</footer>
+  {%- endif %}
+</article>

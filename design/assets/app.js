@@ -137,6 +137,7 @@
       e.preventDefault();
       const el = document.activeElement;
       if (el && el.matches("[hx-patch]")) el.dispatchEvent(new Event("change", { bubbles: true }));
+      else if (el && el.closest(".rte-area")) el.dispatchEvent(new Event("rte:commit"));
       else if (el && el.closest("dialog form")) el.closest("form").requestSubmit();
       else mbaToast("Cada campo se guarda al salir de él");
     }
@@ -243,4 +244,202 @@
     if (dlg) openDialog(dlg);
     if (params.get("menu")) { const b = document.getElementById(params.get("menu")); if (b) toggleMenu(b); }
   });
+
+  // ---- Rich-text editor (UI-30 document templates): <div data-rte> ----
+  // A contenteditable area over a hidden autosave textarea (.rte-source, hx-patch). The toolbar makes only
+  // p, b, i, h2, ul/li (the server allow-list). Merge fields are chips (contenteditable=false) stored as {{token}}.
+  // The body saves when the area loses focus; Esc puts back the saved text. data-preview: POST URL of the merged
+  // preview, refreshed 400 ms after typing and when the "Vista previa con" record changes.
+  const TOKEN = /\{\{\s*([a-z0-9_]+)\s*\}\}/g;
+  function rteInit(box) {
+    if (box.rte) return;
+    const area = $(".rte-area", box), bar = $(".rte-bar", box);
+    const menu = $(".rte-menu", box);
+    const labels = {};
+    $$("[data-token]", menu || box).forEach((b) => (labels[b.dataset.token] = b.dataset.label));
+    const src = () => $(".rte-source", box);
+    const pick = $("[data-pv-record]");
+    const out = document.getElementById("doc-preview");
+    let dirty = false, range = null, timer = 0, seq = 0;
+
+    function chip(token) {
+      const c = document.createElement("span");
+      c.className = "rte-chip"; c.contentEditable = "false"; c.dataset.token = token;
+      if (labels[token]) c.textContent = labels[token];
+      else {
+        c.classList.add("is-unknown"); c.textContent = "Campo desconocido";
+        c.title = "Este campo no existe para este documento. Bórrelo o use Insertar campo.";
+      }
+      return c;
+    }
+    function load(html) {
+      const t = document.createElement("template");
+      t.innerHTML = html || "";
+      const walk = document.createTreeWalker(t.content, NodeFilter.SHOW_TEXT);
+      const texts = [];
+      while (walk.nextNode()) texts.push(walk.currentNode);
+      texts.forEach((n) => {
+        const v = n.nodeValue;
+        TOKEN.lastIndex = 0;
+        if (!TOKEN.test(v)) return;
+        TOKEN.lastIndex = 0;
+        const f = document.createDocumentFragment();
+        let last = 0, m;
+        while ((m = TOKEN.exec(v))) {
+          if (m.index > last) f.appendChild(document.createTextNode(v.slice(last, m.index)));
+          f.appendChild(chip(m[1]));
+          last = m.index + m[0].length;
+        }
+        if (last < v.length) f.appendChild(document.createTextNode(v.slice(last)));
+        n.replaceWith(f);
+      });
+      area.replaceChildren(t.content);
+      dirty = false;
+    }
+    function value() {
+      const c = area.cloneNode(true);
+      $$(".rte-chip", c).forEach((ch) => ch.replaceWith(document.createTextNode("{{" + ch.dataset.token + "}}")));
+      $$("div", c).forEach((d) => { const p = document.createElement("p"); p.append(...d.childNodes); d.replaceWith(p); });
+      return c.innerHTML.replace(/\u200b/g, "").trim();
+    }
+    function preview(now) {
+      if (!box.dataset.preview || !out) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const n = ++seq;
+        const hx = JSON.parse(document.body.getAttribute("hx-headers") || "{}");
+        fetch(box.dataset.preview, {
+          method: "POST", credentials: "same-origin",
+          headers: Object.assign({ "Content-Type": "application/x-www-form-urlencoded" }, hx),
+          body: new URLSearchParams({ body_html: value(), record: pick ? pick.value : "" }),
+        }).then((r) => (r.ok ? r.text() : Promise.reject(r)))
+          .then((html) => { if (n === seq) out.innerHTML = html; })
+          .catch(() => {});
+      }, now ? 0 : 400);
+    }
+    function commit() {
+      const ta = src();
+      if (!dirty || !ta) return;
+      dirty = false;
+      const v = value();
+      if (v === ta.dataset.saved && !ta.closest("[data-unsaved]")) return;
+      ta.value = v;
+      ta.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    function revert() {
+      const ta = src();
+      if (!ta) return;
+      ta.value = ta.dataset.saved;
+      load(ta.dataset.saved);
+      clearError(ta);
+      preview(true);
+    }
+    function states() {
+      $$("[data-cmd]", bar).forEach((b) => {
+        let on = false;
+        try {
+          const c = b.dataset.cmd;
+          if (c === "bold" || c === "italic") on = document.queryCommandState(c);
+          else if (c === "list") on = document.queryCommandState("insertUnorderedList");
+          else if (c === "heading") on = /^h2$/i.test(document.queryCommandValue("formatBlock"));
+        } catch (_) {}
+        b.setAttribute("aria-pressed", String(on));
+      });
+    }
+    // The live selection when it is in the area, else the one saved when the area lost focus.
+    const inArea = () => { const s = getSelection(); return s.rangeCount > 0 && area.contains(s.anchorNode); };
+    function remember() { if (inArea()) range = getSelection().getRangeAt(0).cloneRange(); }
+    function focusAt() {
+      const inside = inArea();
+      area.focus();
+      if (inside) return;
+      if (!range || !area.contains(range.commonAncestorContainer)) {
+        range = document.createRange(); range.selectNodeContents(area); range.collapse(false);
+      }
+      const s = getSelection(); s.removeAllRanges(); s.addRange(range);
+    }
+    function exec(cmd) {
+      focusAt();
+      document.execCommand("styleWithCSS", false, false);
+      if (cmd === "bold" || cmd === "italic") document.execCommand(cmd);
+      else if (cmd === "list") document.execCommand("insertUnorderedList");
+      else if (cmd === "heading") {
+        const isH = /^h2$/i.test(document.queryCommandValue("formatBlock"));
+        document.execCommand("formatBlock", false, isH ? "p" : "h2");
+      }
+      changed(); states();
+    }
+    function insert(token) {
+      focusAt();
+      const s = getSelection();
+      range = s.getRangeAt(0);
+      const c = chip(token);
+      range.deleteContents();
+      range.insertNode(c);
+      const space = document.createTextNode(" ");
+      c.after(space);
+      range = document.createRange(); range.setStart(space, 1); range.collapse(true);
+      s.removeAllRanges(); s.addRange(range);
+      changed();
+    }
+    function changed() { dirty = true; preview(false); }
+
+    // Toolbar buttons keep the focus (and the selection) in the area.
+    bar.addEventListener("mousedown", (e) => { if (e.target.closest("[data-cmd]")) e.preventDefault(); });
+    bar.addEventListener("click", (e) => { const b = e.target.closest("[data-cmd]"); if (b) exec(b.dataset.cmd); });
+    if (menu) {
+      menu.addEventListener("mousedown", (e) => e.preventDefault());
+      menu.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-token]");
+        if (!b) return;
+        menu.hidePopover(); insert(b.dataset.token);
+      });
+    }
+    // A caret inside a chip cannot type: move it just after the chip (a zero-width space when nothing follows).
+    function caretAfter(ch) {
+      let n = ch.nextSibling;
+      if (!n || n.nodeType !== 3) { n = document.createTextNode("\u200b"); ch.after(n); }
+      const r = document.createRange();
+      r.setStart(n, n.nodeValue.charAt(0) === "\u200b" ? 1 : 0); r.collapse(true);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+    document.addEventListener("selectionchange", () => {
+      const s = getSelection();
+      if (!s.rangeCount || !area.contains(s.anchorNode)) return;
+      const el = s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement;
+      const ch = el && el.closest(".rte-chip");
+      if (ch && s.isCollapsed) { caretAfter(ch); return; }
+      remember(); states();
+    });
+    area.addEventListener("focus", () => { try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (_) {} });
+    area.addEventListener("input", changed);
+    area.addEventListener("keyup", remember);
+    area.addEventListener("mouseup", remember);
+    area.addEventListener("blur", () => {
+      remember(); commit();
+      $$("[data-cmd]", bar).forEach((b) => b.setAttribute("aria-pressed", "false"));
+    });
+    area.addEventListener("rte:commit", commit);
+    area.addEventListener("paste", (e) => {
+      e.preventDefault();
+      document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text/plain"));
+    });
+    area.addEventListener("keydown", (e) => {
+      const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); revert(); }
+      else if (mod && k === "u") e.preventDefault();   // underline is not in the allow-list
+      else if (mod && (k === "b" || k === "i")) { e.preventDefault(); exec(k === "b" ? "bold" : "italic"); }
+    });
+    if (pick) pick.addEventListener("change", () => preview(true));
+    // After the PATCH swaps the field: show the saved (sanitized) text unless the user is typing again.
+    box.addEventListener("htmx:afterSettle", () => {
+      const ta = src();
+      if (!ta) return;
+      if (ta.closest("[data-unsaved]")) dirty = true;
+      else if (document.activeElement !== area && !dirty && value() !== ta.dataset.saved) load(ta.dataset.saved);
+    });
+    load(src() ? src().value : "");
+    box.rte = { load, value };
+  }
+  document.addEventListener("DOMContentLoaded", () => $$("[data-rte]").forEach(rteInit));
 })();

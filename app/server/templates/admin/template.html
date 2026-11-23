@@ -3,26 +3,57 @@
 {% block pagebar %}
     <div class="pagebar">
       <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/admin/users">Admin</a><span class="sep">/</span><a href="/admin/settings?tab=tab-doc">Configuración</a><span class="sep">/</span><span>Plantillas de documentos</span></div>
-      <h1 class="title"><b>{{ doc.title }}</b><span class="sub"> · {{ doc.module }} · cambiado {{ doc.changed }}{% if !doc.changed_by.is_empty() %} por {{ doc.changed_by }}{% endif %}</span></h1>
+      <h1 class="title"><b>{{ doc.title }}</b><span class="sub"> · {{ doc.module_label }} · cambiado {{ doc.changed }}{% if !doc.changed_by.is_empty() %} por {{ doc.changed_by }}{% endif %}</span></h1>
       <div class="actions"><a class="btn" href="/admin/settings?tab=tab-doc"><svg class="i"><use href="#i-chevron-left"/></svg>Plantillas</a></div>
     </div>
 {% endblock %}
 {% block content %}
       <div class="content-inner">
-        <div class="grid cols-main-aside">
+        <div class="grid tpl-grid">
           <div class="block">
-            <div class="block-head"><h3>Texto</h3><span class="count">{{ doc.code }}</span></div>
-            <div class="block-body"><div class="form ma-form-wide">
-              <label for="dt-title" class="req">Título</label>{{ title.html()|safe }}
-              <label for="dt-body" class="req">Texto</label>{{ body.html()|safe }}
-              {% if let Some(s) = doc.source %}<label>Origen</label><div class="field-wrap"><div class="value">{{ s }}</div></div>{% endif %}
-            </div></div>
+            <div class="block-head"><h3>Texto</h3></div>
+            <div class="block-body">
+              <div class="form ma-form-wide tpl-title"><label for="dt-title" class="req">Título</label>{{ title.html()|safe }}</div>
+              <div class="rte" data-rte data-preview="/admin/templates/{{ doc.code }}/preview">
+                <div class="rte-bar" role="toolbar" aria-label="Formato del texto" aria-controls="dt-body-ed">
+                  <button type="button" class="rte-btn" data-cmd="bold" aria-pressed="false" title="Negrita (Ctrl+B)"><b>B</b><span class="sr-only">Negrita</span></button>
+                  <button type="button" class="rte-btn" data-cmd="italic" aria-pressed="false" title="Cursiva (Ctrl+I)"><i>I</i><span class="sr-only">Cursiva</span></button>
+                  <button type="button" class="rte-btn" data-cmd="heading" aria-pressed="false" title="Título de sección">Título</button>
+                  <button type="button" class="rte-btn" data-cmd="list" aria-pressed="false" title="Lista con viñetas"><svg class="i"><use href="#i-list"/></svg>Lista</button>
+                  <span class="rte-sep" aria-hidden="true"></span>
+                  <button type="button" class="rte-btn" id="rte-insert" data-menu="rte-fields" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-plus"/></svg>Insertar campo<svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+                  <div class="menu rte-menu" id="rte-fields" popover role="menu" aria-label="Campos">
+                    {%- for g in groups %}
+                    {%- if !loop.first %}<hr>{% endif %}
+                    <div class="menu-note">{{ g.label }}</div>
+                    {%- for f in g.fields %}
+                    <button type="button" role="menuitem" data-token="{{ f.token }}" data-label="{{ f.label }}">{{ f.label }}</button>
+                    {%- endfor %}
+                    {%- endfor %}
+                  </div>
+                </div>
+                <div class="rte-area" id="dt-body-ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Texto del documento" spellcheck="true"></div>
+                {{ body.html()|safe }}
+              </div>
+              <p class="field-hint tpl-hint">El texto se guarda al salir del editor. Esc deshace los cambios que no se han guardado. Los campos se llenan con los datos de cada carta al imprimir.</p>
+            </div>
           </div>
-          <div class="block">
-            <div class="block-head"><h3>Vista previa</h3><span class="count">HTML limpio</span></div>
-            <div class="block-body" id="doc-preview">{{ doc.body|safe }}</div>
+          <div class="block tpl-pv">
+            <div class="block-head"><h3>Vista previa</h3>
+              <span class="row tpl-pv-pick"><label for="pv-record">Vista previa con</label>
+                <select class="field" id="pv-record" data-pv-record>
+                  {%- for g in records %}
+                  <optgroup label="{{ g.label }}">
+                    {%- for (id, label) in g.opts %}
+                    <option value="{{ id }}"{% if id.as_str() == record.as_str() %} selected{% endif %}>{{ label }}</option>
+                    {%- endfor %}
+                  </optgroup>
+                  {%- endfor %}
+                </select>
+              </span>
+            </div>
+            <div class="block-body tpl-pv-body" id="doc-preview" aria-live="polite">{{ letter|safe }}</div>
           </div>
         </div>
-        <p class="field-hint" style="margin-top:8px">Cada campo se guarda al salir de él. El servidor quita las etiquetas y atributos que no están permitidos (scripts, estilos, eventos).</p>
       </div>
 {% endblock %}

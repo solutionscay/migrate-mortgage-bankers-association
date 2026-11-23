@@ -52,7 +52,7 @@ SQLite schema for the three modules in one database: 41 tables and 11 views. Mon
 
 ### 05 API design
 
-The server-rendered routes (150), the operations behind them, the 72 print pages, and the one outbound integration (Resend, with an outbox mock when no key is set).
+The server-rendered routes (151), the operations behind them, the 72 print pages, and the one outbound integration (Resend, with an outbox mock when no key is set).
 [migration/05_api_design.md](migration/05_api_design.md) · [appendix](migration/05_api_design_appendix.md)
 
 ### 06 UI specification

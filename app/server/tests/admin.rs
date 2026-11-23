@@ -167,7 +167,7 @@ async fn staff_is_refused_on_admin_routes() {
     assert_eq!(role, "staff");
 }
 
-/// OP-SYS-02 (D-18): the body is sanitized with ammonia; the preview goes out of band; merge fields stay.
+/// OP-SYS-02 (D-18): the body is sanitized with ammonia; merge fields stay. More in `tests/templates.rs`.
 #[tokio::test]
 async fn template_body_is_sanitized() {
     let app = App::new();
@@ -184,7 +184,7 @@ async fn template_body_is_sanitized() {
         .await;
     assert_eq!(res.status(), StatusCode::OK);
     let html = body(res).await;
-    assert!(html.contains("hx-swap-oob=\"innerHTML:#doc-preview\""));
+    assert!(html.contains("rte-source") && !html.contains("hx-swap-oob"));
     let stored: String = app
         .conn()
         .query_row("SELECT body_html FROM document_templates WHERE code = 'mbs.graduation_certificate'", [], |r| {

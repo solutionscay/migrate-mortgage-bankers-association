@@ -3,8 +3,7 @@
 //! * `GET /settings` the tabs of `design/admin-configuracion.html`; `PATCH /settings` one setting per request. The
 //!   field name is the `app_settings.key`; only the keys in [`SETTINGS`] are accepted, any other key is refused
 //!   (05 "unknown key refused").
-//! * `GET /templates/{code}` one document template; `PATCH /templates/{code}` title or body. The body is sanitized
-//!   with `ammonia` (allow-list HTML); the response returns the sanitized text and the preview out of band.
+//! * Document templates (OP-SYS-02) live in [`super::templates`]; the tab here lists them.
 //! * `GET /value-lists?lista=` the values 04 seeds; `POST /value-lists` add, rename or move an item (05). A value
 //!   that a CHECK constraint of the schema names cannot be renamed.
 
@@ -15,7 +14,7 @@ use crate::error::AppError;
 use crate::web::{render_page, Page};
 use crate::AppState;
 use askama::Template;
-use axum::extract::{Path, Query, State};
+use axum::extract::{Query, State};
 use axum::http::HeaderMap;
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::get;
@@ -28,7 +27,6 @@ use serde_json::json;
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/settings", get(settings_page).patch(patch_setting))
-        .route("/templates/{code}", get(template_page).patch(patch_template))
         .route("/value-lists", get(value_lists_page).post(value_list_command))
 }
 
@@ -200,7 +198,7 @@ impl SettingsPage {
     }
 }
 
-fn module_label(m: &str) -> &'static str {
+pub fn module_label(m: &str) -> &'static str {
     match m {
         "convention" => "Convención",
         "school" => "Escuela",
@@ -304,7 +302,7 @@ fn widget_error(mut w: crate::sys::files::FileField, msg: String) -> crate::sys:
 }
 
 /// "11/2/2026" (design date format).
-fn us_date(stored: &str) -> String {
+pub fn us_date(stored: &str) -> String {
     use chrono::Datelike;
     crate::clock::parse(stored).map(|t| format!("{}/{}/{}", t.month(), t.day(), t.year())).unwrap_or_default()
 }
@@ -365,185 +363,6 @@ async fn patch_setting(
         Outcome::Invalid(msg) => view.refused(&field.value, msg),
     };
     Ok(autosave::respond(&view, ""))
-}
-
-// ---------------------------------------------------------------------------------------------------------------
-// OP-SYS-02 document templates
-// ---------------------------------------------------------------------------------------------------------------
-
-/// `PATCH /admin/templates/{code}`: title and body (D-18).
-pub static TEMPLATES: Registry = Registry {
-    table: "document_templates",
-    key_col: "code",
-    stamp: Stamp::Full,
-    fields: &[
-        FieldDef::new("title", "title", "Título", |s| autosave::required_text(s, 200)),
-        FieldDef::new("body_html", "body_html", "Texto", parse_body),
-    ],
-};
-
-/// Sanitized HTML (allow-list). `{{merge_field}}` tokens are plain text and pass through.
-pub fn sanitize(html: &str) -> String {
-    ammonia::clean(html)
-}
-
-fn parse_body(s: &str) -> Result<Value, String> {
-    let clean = sanitize(s.trim());
-    if clean.trim().is_empty() {
-        Err("Escriba el texto del documento.".into())
-    } else if clean.len() > 100_000 {
-        Err("El texto es demasiado largo.".into())
-    } else {
-        Ok(Value::Text(clean))
-    }
-}
-
-struct Doc {
-    code: String,
-    title: String,
-    module: &'static str,
-    body: String,
-    source: Option<String>,
-    changed: String,
-    changed_by: String,
-}
-
-fn doc_get(conn: &Connection, code: &str) -> Result<Doc, AppError> {
-    Ok(conn.query_row(
-        "SELECT code, title, module, body_html, source_layout, modified_at, COALESCE(modified_by, '') FROM document_templates WHERE code = ?1",
-        [code],
-        |r| {
-            let at: String = r.get(5)?;
-            Ok(Doc {
-                code: r.get(0)?,
-                title: r.get(1)?,
-                module: module_label(&r.get::<_, String>(2)?),
-                body: r.get(3)?,
-                source: r.get(4)?,
-                changed: crate::admin::users::us_datetime(&at),
-                changed_by: r.get(6)?,
-            })
-        },
-    )?)
-}
-
-fn doc_url(code: &str) -> String {
-    format!("/admin/templates/{code}")
-}
-
-fn title_field(code: &str, saved: &str) -> FieldView {
-    FieldView::new(doc_url(code), "title", "dt-title", Control::Text, saved)
-}
-
-fn body_field(code: &str, saved: &str) -> FieldView {
-    FieldView::new(doc_url(code), "body_html", "dt-body", Control::Textarea(16), saved)
-        .hint("HTML simple. Campos: {{nombre}}, {{fecha}}, {{evento}}, {{curso}}, {{firmante}}, {{titulo_firmante}}.")
-}
-
-#[derive(Template)]
-#[template(path = "admin/template.html", blocks = ["content"])]
-struct TemplatePage {
-    shell: Shell,
-    doc: Doc,
-    title: FieldView,
-    body: FieldView,
-}
-
-impl Page for TemplatePage {
-    fn render_fragment(&self) -> askama::Result<String> {
-        self.as_content().render()
-    }
-}
-
-async fn template_page(
-    State(state): State<AppState>,
-    user: CurrentUser,
-    headers: HeaderMap,
-    Path(code): Path<String>,
-) -> Result<Html<String>, AppError> {
-    let doc = doc_get(&state.db(), &code)?;
-    let mut shell = Shell::new(&user, "admin", "admin-configuracion");
-    shell.autosave = true;
-    let page =
-        TemplatePage { title: title_field(&doc.code, &doc.title), body: body_field(&doc.code, &doc.body), shell, doc };
-    render_page(&headers, &page)
-}
-
-async fn patch_template(
-    State(state): State<AppState>,
-    user: CurrentUser,
-    rid: Option<Extension<RequestId>>,
-    Path(code): Path<String>,
-    field: OneField,
-) -> Result<Response, AppError> {
-    let Some(def) = TEMPLATES.get(&field.name) else {
-        return Ok(autosave::contract_error("Este campo no se puede cambiar aquí."));
-    };
-    let actor = user.actor();
-    let mut conn = state.db();
-    let doc = doc_get(&conn, &code)?;
-    let record = format!("Plantilla «{}»", doc.title);
-    let ctx = Ctx { actor: &actor, request_id: rid.as_ref().map(|r| r.0 .0.as_str()), record: &record };
-    let outcome =
-        autosave::save(&mut conn, &TEMPLATES, &Value::Text(code.clone()), def, &field.value, &ctx, |_, _, _| Ok(()))?;
-    let doc = doc_get(&conn, &code)?;
-    let view = if def.name == "title" { title_field(&code, &doc.title) } else { body_field(&code, &doc.body) };
-    Ok(match outcome {
-        Outcome::Saved { .. } => {
-            let extra = if def.name == "body_html" { autosave::oob("doc-preview", &doc.body) } else { String::new() };
-            autosave::respond(&view, &extra)
-        }
-        Outcome::Invalid(msg) => autosave::respond(&view.refused(&field.value, msg), ""),
-    })
-}
-
-/// The document templates of D-18 that the demo seed writes (`mba-seed`). Texts are synthetic.
-pub fn seed_document_templates(conn: &Connection, at: &str, actor: &str) -> rusqlite::Result<()> {
-    let rows: [(&str, &str, &str, Option<&str>, &str); 5] = [
-        (
-            "mba.sponsor_letter",
-            "convention",
-            "Carta a auspiciadores",
-            Some("objects/MBA.fmp12/layouts/48-Carta_Auspicio_español.txt"),
-            "<p>Estimado/a {{nombre}}:</p><p>Le invitamos a auspiciar la {{evento}}. Su apoyo hace posible la educación continua de la industria hipotecaria.</p><p>Cordialmente,</p><p><b>{{firmante}}</b><br>{{titulo_firmante}}</p>",
-        ),
-        (
-            "mbs.graduation_certificate",
-            "school",
-            "Certificado de graduación",
-            Some("objects/MBS.fmp12/layouts/47-Certificado_Graduacion.txt"),
-            "<h2>Certificado de graduación</h2><p>Se certifica que <b>{{nombre}}</b> completó los requisitos de la certificación {{curso}} el {{fecha}}.</p><p><b>{{firmante}}</b><br>{{titulo_firmante}}</p>",
-        ),
-        (
-            "mbs.course_attendance_certificate",
-            "school",
-            "Certificado de asistencia a curso",
-            None,
-            "<h2>Certificado de asistencia</h2><p><b>{{nombre}}</b> asistió al curso {{curso}} el {{fecha}}.</p><p><b>{{firmante}}</b><br>{{titulo_firmante}}</p>",
-        ),
-        (
-            "mba.cancellation_policy",
-            "convention",
-            "Política de cancelación",
-            None,
-            "<p>Las cancelaciones recibidas por escrito antes de la fecha límite de la {{evento}} reciben reembolso, menos un cargo administrativo. Después de esa fecha no hay reembolso.</p>",
-        ),
-        (
-            "mbs.student_welcome_letter",
-            "school",
-            "Carta de bienvenida a estudiante",
-            None,
-            "<p>Estimado/a {{nombre}}:</p><p>Bienvenido/a a la Escuela. Su primer curso, {{curso}}, comienza el {{fecha}}.</p><p><b>{{firmante}}</b><br>{{titulo_firmante}}</p>",
-        ),
-    ];
-    for (code, module, title, source, body) in rows {
-        conn.execute(
-            "INSERT INTO document_templates (code, module, title, body_html, source_layout, modified_at, modified_by)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![code, module, title, body, source, at, actor],
-        )?;
-    }
-    Ok(())
 }
 
 // ---------------------------------------------------------------------------------------------------------------

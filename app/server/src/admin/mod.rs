@@ -5,11 +5,12 @@
 //! `/admin` prefix. ROLE-STAFF gets 403 on every path, built or not (T-05-05, T-08-12).
 
 pub mod settings;
+pub mod templates;
 pub mod users;
 
 use crate::AppState;
 use axum::Router;
 
 pub fn routes() -> Router<AppState> {
-    Router::new().merge(users::routes()).merge(settings::routes())
+    Router::new().merge(users::routes()).merge(settings::routes()).merge(templates::routes())
 }

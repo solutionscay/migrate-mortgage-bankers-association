@@ -1063,7 +1063,7 @@ fn seed_settings_and_activity(
     // Settings rows from migration 0001 carry the time the migration ran; pin them so the dump does not depend on it.
     tx.execute("UPDATE app_settings SET modified_at = ?1 WHERE modified_by IS NULL", [&at])?;
     // D-18 document templates for UI-30 (texts are synthetic).
-    crate::admin::settings::seed_document_templates(tx, &at, a)?;
+    crate::admin::templates::seed_document_templates(tx, &at, a)?;
     let day = 19 * 24 * 60; // 2026-11-21
     let rows = [
         (

@@ -455,8 +455,12 @@ No SSN field exists (D-06).
 
 ### UI-30 Configuración (settings, document templates, value lists) — admin
 
-- Readiness: behavior-ready. Routes: `GET /admin/settings`, `GET /admin/templates/{code}`, `GET /admin/value-lists`. Source: `objects/MBS.fmp12/layouts/165-Globals.txt` (globals become settings); 25 print layouts with fixed text (D-18).
+- Readiness: behavior-ready. Routes: `GET /admin/settings`, `GET /admin/templates/{code}`, `POST /admin/templates/{code}/preview`, `GET /admin/value-lists`. Source: `objects/MBS.fmp12/layouts/165-Globals.txt` (globals become settings); 25 print layouts with fixed text (D-18).
 - Tabs: Organización (name, logo, signers), Escuela (NMLS rate, CSBS constants), Correo (default template), Sesión (idle minutes), Plantillas de documentos (one editor per letter, certificate and policy), Listas de valores.
+- Plantillas de documentos (`/admin/templates/{code}`): one page per letter, certificate or policy. The page bar shows the title, the module and the last change; it shows no template code and no source layout.
+  - Left block Texto: Título (autosave) and a rich-text editor (vanilla JS in `app.js`, no framework). Toolbar: Negrita (Ctrl+B), Cursiva (Ctrl+I), Título, Lista, Insertar campo (menu of the merge fields of the module, grouped, plain Spanish labels; 05 "Document template merge fields"). Merge fields are chips that cannot be typed into; a token the module does not know is a red chip "Campo desconocido". Paste is plain text. The body saves when the editor loses focus (footer Guardando… / Guardado); Esc puts back the saved text; no Save button. The server keeps only the toolbar tags.
+  - Right block Vista previa: "Vista previa con" selects a real record of the module (school: enrollments, for example Elena Muestra Ficticia in Suscripción de Préstamos FHA; convention: registrations, for example #1283 María Ejemplo Demo, and sponsors; mail: students). The letter sheet (8.5 × 11 proportions, logo and organization name at the top, signer from settings at the bottom when the text has none) comes from `POST /admin/templates/{code}/preview` 400 ms after typing and when the record changes. Missing values show as an empty light placeholder.
+  - Hint text is plain: when the text saves, what Esc does, that fields fill from each letter's data.
 
 ### UI-31 Plantillas y remitentes de correo — admin
 

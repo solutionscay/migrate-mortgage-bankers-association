@@ -316,6 +316,27 @@
                 <div class="row" style="margin-top:8px"><button class="btn btn-sm" type="button"><svg class="i i-sm"><use href="#i-upload"/></svg>Escoger archivo</button><span class="field-hint">XLSX, hasta 5 MB</span></div>
               </div>
             </div>
+
+            <h3 class="g-sub">Editor de texto con campos (UI-30 Plantillas de documentos)</h3>
+            <div class="rte" data-rte style="max-width:640px">
+              <div class="rte-bar" role="toolbar" aria-label="Formato del texto">
+                <button type="button" class="rte-btn" data-cmd="bold" aria-pressed="false" title="Negrita (Ctrl+B)"><b>B</b><span class="sr-only">Negrita</span></button>
+                <button type="button" class="rte-btn" data-cmd="italic" aria-pressed="false" title="Cursiva (Ctrl+I)"><i>I</i><span class="sr-only">Cursiva</span></button>
+                <button type="button" class="rte-btn" data-cmd="heading" aria-pressed="false" title="Título de sección">Título</button>
+                <button type="button" class="rte-btn" data-cmd="list" aria-pressed="false" title="Lista con viñetas"><svg class="i"><use href="#i-list"/></svg>Lista</button>
+                <span class="rte-sep" aria-hidden="true"></span>
+                <button type="button" class="rte-btn" id="rte-insert-demo" data-menu="rte-fields-demo" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-plus"/></svg>Insertar campo<svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+                <div class="menu rte-menu" id="rte-fields-demo" popover role="menu" aria-label="Campos">
+                  <div class="menu-note">Estudiante</div>
+                  <button type="button" role="menuitem" data-token="nombre" data-label="Nombre del estudiante">Nombre del estudiante</button>
+                  <button type="button" role="menuitem" data-token="curso" data-label="Curso">Curso</button>
+                  <button type="button" role="menuitem" data-token="fecha" data-label="Fecha del curso">Fecha del curso</button>
+                </div>
+              </div>
+              <div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Texto del documento (ejemplo)" style="min-height:120px"></div>
+              <div class="field-wrap"><textarea class="field rte-source" name="body_html" aria-label="Texto guardado" data-saved="&lt;p&gt;Estimado/a {{nombre}}:&lt;/p&gt;&lt;p&gt;Su curso &lt;b&gt;{{curso}}&lt;/b&gt; comienza el {{fecha}}. {{campo_viejo}}&lt;/p&gt;" hx-patch="#" hx-trigger="change">&lt;p&gt;Estimado/a {{nombre}}:&lt;/p&gt;&lt;p&gt;Su curso &lt;b&gt;{{curso}}&lt;/b&gt; comienza el {{fecha}}. {{campo_viejo}}&lt;/p&gt;</textarea></div>
+            </div>
+            <p class="field-hint" style="margin-top:8px">Los campos son fichas que no se escriben por dentro. Rojo: un campo que este documento no conoce. Vista previa con datos: <span class="mf-empty" title="Sin dato"></span> es un valor que falta.</p>
           </section>
 
           <!-- ============ Formulario ============ -->

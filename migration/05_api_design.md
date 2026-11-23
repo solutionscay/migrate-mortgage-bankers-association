@@ -60,7 +60,8 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/admin/settings` | page | query `settings_get` | UI-30 | AP-08 | `app_settings` keys; the logo upload. |
 | PATCH | `/admin/settings` | action | OP-SYS-01 | UI-30 | AP-08 | BR-SYS-03. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/admin/templates/{code}` | page | query `document_template_get` | UI-30 | AP-08 | Letter, certificate and policy texts (D-18). |
-| PATCH | `/admin/templates/{code}` | action | OP-SYS-02 | UI-30 | AP-08 | Sanitized HTML (allow-list). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
+| PATCH | `/admin/templates/{code}` | action | OP-SYS-02 | UI-30 | AP-08 | Sanitized HTML: only the editor toolbar tags `p`, `br`, `b`, `i`, `h2`, `ul`, `li`, no attributes; `{{token}}` text stays. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
+| POST | `/admin/templates/{code}/preview` | fragment | query `document_template_preview` | UI-30 | AP-08 | Form `body_html` (the editor's current text) and `record` (`enr:`, `reg:`, `spo:` or `stu:` + uuid). Returns the letter with merged data (see "Document template merge fields"). Writes nothing; CSRF required. |
 | GET | `/admin/value-lists` | page | query `value_list_get` | UI-30 | AP-08 | `value_list_items` grouped by list. |
 | POST | `/admin/value-lists` | action | OP-SYS-01 | UI-30 | AP-08 | Add, rename or reorder an item. A value that a CHECK constraint names cannot be removed (BR list in 07 "Validation and reference values"). |
 | GET | `/admin/certifications` | page | query `certification_list` | UI-32 | AP-08 | |
@@ -380,6 +381,20 @@ Superseded routes (replaced by the `PATCH` rows of the catalog; no whole-record 
 | `POST /admin/users/{id}`, `/admin/settings`, `/admin/templates/{code}`, `/admin/certifications/{id}`, `/admin/professors/{id}`, `/admin/mail/templates/{id}`, `/admin/mail/profiles/{email}` | `PATCH` on the same paths |
 
 Kept as `POST`: creates, commands and settle forms (`POST /registrations/{id}/payments`, `POST /payments/{id}/void`, `POST /students/{id}/enrollments/{kind}`, `POST /enrollments/{kind}/{id}` from the UI-20 dialog, `POST /admin/users`, `POST /admin/users/{id}/password`, `POST /account/password`, `POST /login`, imports and send-all).
+
+## Document template merge fields
+
+`document_templates.body_html` holds `{{token}}` merge fields (D-18). The template builder (UI-30) inserts them as chips with the label below; the preview route and the print pages (I5) fill them. Each module has its own list plus the organization fields. A token that is not in the list of the template's module is an unknown field: the editor shows it as a red chip "Campo desconocido"; the preview and print show an empty placeholder, as for a missing value. Dates print as "14 de septiembre de 2026", money as "$1,218.00" (integer cents).
+
+| Module | Record (`record`) | Token: label (source) |
+|---|---|---|
+| all | settings | `organizacion`: Nombre de la organización (`app_settings` `org.name`); `logo`: Logo de la organización (`logo_file_uuid`, `/files/{uuid}`); `firmante`, `titulo_firmante`: Firmante, Título del firmante (`school.signer_*`, or `convention.signer_*` for convention templates); `fecha_hoy`: Fecha de hoy |
+| school | `enr:` one `enrollments_course` row | `nombre`, `numero_estudiante`, `nmls`, `correo`, `compania` (`students` nombre, student_id, nmls, email or email_work, compania); `curso`, `fecha`, `horas`, `creditos` (`v_enrollments_course_lines` course, course_date, hours, credits); `semestre` (`calendar_course.semester`); `costo`, `pagado`, `balance`, `nota` (`v_enrollments_course_lines` costo, pago, balance, nota); `certificacion`, `fecha_graduacion` (latest `student_certifications` row: `certifications.description`, `graduation_date`) |
+| convention | `reg:` one `registration` row | `nombre`, `compania`, `correo` (`people` name_first + name_last, company, email); `registro` (registration_number); `tipo_registro`, `total`, `pagos`, `balance`, `llegada`, `salida` (`v_registration_totals` registration_type, total, payment_total, balance, arrival_date, departure_date); `evento`, `fecha`, `fecha_fin`, `lugar` (`events` name, date_start, date_end or date_start, location) |
+| convention | `spo:` one `sponsor` row | `nombre` (title + contact_name), `saludo` (greeting), `compania` and `auspiciador` (sponsor_name), `categoria` (type), `monto_solicitado`, `monto_recibido`, `monto_prometido` (requested_amount, amount_received, promised); `evento`, `fecha`, `fecha_fin`, `lugar` (`events` of the sponsor) |
+| mail | `stu:` one `students` row | `nombre`, `numero_estudiante`, `correo`, `compania` |
+
+The preview starts with a record that fills most fields: for school, the first student by student number in a confirmed course; for convention, a registration with payments, a balance and a hotel stay (sponsor letters start with a sponsor of the latest event); for mail, the first student. The seed tokens of earlier builds (`nombre`, `fecha`, `evento`, `curso`, `firmante`, `titulo_firmante`) are in these lists.
 
 ## Identity and account operations
 

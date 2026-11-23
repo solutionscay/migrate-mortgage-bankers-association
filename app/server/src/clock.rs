@@ -32,24 +32,32 @@ pub fn in_minutes(minutes: i64) -> String {
     fmt(now() + Duration::minutes(minutes))
 }
 
+const MONTHS: [&str; 12] = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+];
+
+/// "14 de septiembre de 2026" (letters and print pages). Takes `YYYY-MM-DD` or a stored timestamp.
+pub fn spanish_date(stored: &str) -> Option<String> {
+    use chrono::Datelike;
+    let d = chrono::NaiveDate::parse_from_str(stored.get(..10)?, "%Y-%m-%d").ok()?;
+    Some(format!("{} de {} de {}", d.day(), MONTHS[d.month0() as usize], d.year()))
+}
+
 /// "lunes 23 de noviembre de 2026" (page bar of UI-02).
 pub fn spanish_long_date(t: NaiveDateTime) -> String {
     use chrono::Datelike;
     const DAYS: [&str; 7] = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
-    const MONTHS: [&str; 12] = [
-        "enero",
-        "febrero",
-        "marzo",
-        "abril",
-        "mayo",
-        "junio",
-        "julio",
-        "agosto",
-        "septiembre",
-        "octubre",
-        "noviembre",
-        "diciembre",
-    ];
     let d = t.date();
     format!(
         "{} {} de {} de {}",
@@ -75,6 +83,9 @@ mod tests {
     fn spanish_formats() {
         let t = parse("2026-11-23 16:42:00").unwrap();
         assert_eq!(spanish_long_date(t), "lunes 23 de noviembre de 2026");
+        assert_eq!(spanish_date("2026-09-14").as_deref(), Some("14 de septiembre de 2026"));
+        assert_eq!(spanish_date("2026-11-23 16:42:00").as_deref(), Some("23 de noviembre de 2026"));
+        assert_eq!(spanish_date("x"), None);
         assert_eq!(spanish_time(t), "4:42 p. m.");
         assert_eq!(spanish_time(parse("2026-11-23 09:05:00").unwrap()), "9:05 a. m.");
     }
