@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar" id="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><a href="/offerings/{{ self.slug() }}">Ofrecimientos</a><span class="sep">/</span>{% if self.has_offering() %}<span id="of-crumb">{{ name }}</span>{% else %}<span>{{ kind.label() }}</span>{% endif %}</div>
+      <h1 class="title" id="of-title"><b>{{ name }}</b>{% if !sub.is_empty() %} <span class="sub">{{ sub }}</span>{% endif %}</h1>
+      <div class="actions">
+        <a class="btn" href="/enrollments/{{ self.slug() }}"><svg class="i"><use href="#i-list"/></svg>Matrículas</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {%- if let Some(n) = notice %}
+        <div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div>{{ n }}</div></div>
+        {%- endif %}
+        <div class="toolbar">
+          <span class="seg" role="group" aria-label="Tipo de ofrecimiento">
+            {%- for (href, label, on) in switch %}
+            <a class="btn" href="{{ href }}" aria-pressed="{{ on }}"{% if *on %} aria-current="page"{% endif %}>{{ label }}</a>
+            {%- endfor %}
+          </span>
+          {%- if !options.is_empty() %}
+          <select class="field" aria-label="{{ name_label }}" style="min-width:280px" name="o" hx-get="/offerings/{{ self.slug() }}" hx-trigger="change" hx-target="#main" hx-push-url="true">
+            {%- for (v, l) in options %}<option value="{{ v }}"{% if *v == uuid %} selected{% endif %}>{{ l }}</option>{% endfor %}
+          </select>
+          {%- endif %}
+          <span class="spacer"></span>
+          {%- if self.has_offering() && shell.is_admin %}
+          <button class="btn btn-sm btn-quiet admin-only" type="button" data-open="dlg-borrar"><svg class="i i-sm"><use href="#i-trash"/></svg>Borrar…</button>
+          {%- endif %}
+          <button class="btn btn-sm btn-quiet" type="button" data-open="dlg-nuevo"><svg class="i i-sm"><use href="#i-plus"/></svg>{{ new_label }}</button>
+        </div>
+        {%- if !self.has_offering() %}
+        <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin {{ kind.label()|lower }}</h4><p>Todavía no hay ofrecimientos de este tipo.</p><button class="btn btn-sm" type="button" data-open="dlg-nuevo"><svg class="i i-sm"><use href="#i-plus"/></svg>{{ new_label }}</button></div>
+        {%- else %}
+        <div class="tabs" role="tablist" aria-label="{{ name_label }}">
+          <a href="?tab=cal" role="tab" aria-selected="{{ !tab_det }}" aria-controls="tp-cal" id="tab-cal">Calendario<span class="tab-count">{{ rows.len() }}</span></a>
+          <a href="?tab=det" role="tab" aria-selected="{{ tab_det }}" aria-controls="tp-det" id="tab-det">Detalles</a>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-cal" aria-labelledby="tab-cal"{% if tab_det %} hidden{% endif %}>
+          <div class="block-head" style="border-top:0"><h3>Fechas del {% if self.is_seminar() %}seminario{% else %}curso{% endif %}</h3><span class="count">activas: Pendiente y Confirmado</span>
+            <div class="row"><form method="post" action="/offerings/{{ self.slug() }}/{{ uuid }}/calendar"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button class="btn btn-sm" type="submit" title="Fecha nueva: Pendiente, precios del ofrecimiento (BR-CRS-02)"><svg class="i i-sm"><use href="#i-plus"/></svg>{{ self.open_label() }}</button></form></div></div>
+          {%- if rows.is_empty() %}
+          <div class="empty"><svg class="i"><use href="#i-calendar"/></svg><h4>Sin fechas</h4><p>Abra una fecha para matricular estudiantes. Empieza como Pendiente con los precios del ofrecimiento.</p></div>
+          {%- else %}
+          <table class="t">
+            <colgroup><col style="width:110px"><col style="width:140px"><col style="width:130px"><col style="width:120px"><col style="width:130px"><col style="width:100px"><col style="width:90px"><col style="width:120px"><col><col style="width:36px"></colgroup>
+            <thead><tr><th aria-sort="descending">Fecha</th><th>Semestre</th><th>Estatus</th><th class="money">Precio socio</th><th class="money">Precio individual</th><th class="num">Matrícula</th><th class="num">Quórum</th><th class="num">Se necesitan</th><th class="money">Ingresos</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+            <tbody>
+              {%- for r in rows %}
+              <tr{% if r.selected %} aria-selected="true"{% endif %}>{% for (cid, cls, html) in r.cells %}<td{% if !cls.is_empty() %} class="{{ cls }}"{% endif %} id="cal-{{ r.uuid }}-{{ cid }}">{{ html|safe }}</td>{% endfor %}<td class="col-act"><button class="row-act" type="button" id="btn-cal-{{ loop.index }}" data-menu="menu-cal-{{ loop.index }}" aria-label="Acciones de la fila {{ r.date }}" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+              {%- endfor %}
+            </tbody>
+          </table>
+          {%- endif %}
+          <div class="block-body"><span class="field-hint">Una fecha no se borra: cámbiela a Cancelado (BR-CRS-05, AP-07). Se necesitan = quórum − matrícula, nunca menos de 0 (BR-CRS-03).</span></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-det" aria-labelledby="tab-det"{% if !tab_det %} hidden{% endif %}>
+          <div class="block-body grid cols-2">
+            <div class="form">
+              {%- for d in left %}
+              <label for="{{ d.id }}"{% if d.req %} class="req"{% endif %}>{{ d.label }}</label>{{ d.f.html()|safe }}
+              {%- endfor %}
+            </div>
+            <div class="form">
+              {%- for d in right %}
+              {%- if d.gap %}<span class="gap"></span>{% endif %}
+              <label for="{{ d.id }}">{{ d.label }}</label>{{ d.f.html()|safe }}
+              {%- endfor %}
+            </div>
+          </div>
+        </div>
+        {%- for r in rows %}
+        <div class="menu" id="menu-cal-{{ loop.index }}" popover role="menu">
+          <div class="menu-note">{{ r.date }} · {{ r.status }}</div>
+          <a role="menuitem" href="/calendar/{{ self.slug() }}/{{ r.uuid }}"><svg class="i"><use href="#i-calendar"/></svg>Fechas…</a>
+          <a role="menuitem" href="/calendar/{{ self.slug() }}/{{ r.uuid }}/enrollments"><svg class="i"><use href="#i-list"/></svg>Ver matrícula</a>
+          <a role="menuitem" href="/enrollments/{{ self.slug() }}/new?calendar={{ r.uuid }}"><svg class="i"><use href="#i-plus"/></svg>Matricular…</a>
+          <form method="post" action="/calendar/{{ self.slug() }}/{{ r.uuid }}/mail"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button type="submit" role="menuitem"><svg class="i"><use href="#i-mail"/></svg>Enviar correo a matriculados</button></form>
+        </div>
+        {%- endfor %}
+        {%- endif %}
+        {%- if let Some(f) = fecha %}
+        <dialog class="dlg wide" id="dlg-fecha" aria-labelledby="dlg-fecha-t">
+          <div class="dlg-head"><h2 id="dlg-fecha-t">{{ f.title }}</h2><a class="btn btn-icon btn-quiet" href="/offerings/{{ self.slug() }}/{{ uuid }}" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></a></div>
+          <div class="dlg-body"><div class="grid cols-2" style="gap:16px 24px">
+              <div class="form">
+                {%- for (id, label, fv) in f.fields %}{% if loop.index0 < f.half %}
+                <label for="{{ id }}">{{ label }}</label>{{ fv.html()|safe }}
+                {%- endif %}{% endfor %}
+              </div>
+              <div class="form">
+                {%- for (id, label, fv) in f.fields %}{% if loop.index0 >= f.half %}
+                <label for="{{ id }}">{{ label }}</label>{{ fv.html()|safe }}
+                {%- endif %}{% endfor %}
+                <span class="label">Matrícula</span><div class="field-wrap"><div class="value" id="fc-mat-{{ f.uuid }}">{{ f.enrolled }}</div></div>
+              </div>
+            </div>
+            {%- if f.has_days %}
+            <div class="block" style="margin-top:16px">
+              <div class="block-head"><h3>Días de clase</h3><span class="count">{{ f.day_count_note }}</span></div>
+              {%- if let Some(e) = f.add_error %}
+              <div class="error-summary" role="alert" style="margin:8px 12px"><b>No se añadió el día.</b><ul><li><a href="#fd-date">Fecha</a>: {{ e }}</li></ul></div>
+              {%- endif %}
+              <form method="post" action="/calendar/{{ self.slug() }}/{{ f.uuid }}/dates" id="f-dia"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"></form>
+              <table class="t">
+                <colgroup><col style="width:136px"><col style="width:130px"><col style="width:200px">{% if f.has_note %}<col>{% endif %}<col style="width:36px"></colgroup>
+                <thead><tr><th>Fecha</th><th>Tipo</th><th>Profesor</th>{% if f.has_note %}<th>Nota</th>{% endif %}<th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                <tbody>
+                  {%- for d in f.days %}
+                  <tr><td>{{ d.date }}</td><td><span class="tag{{ d.tag() }}">{{ d.kind }}</span></td><td>{% if d.professor.is_empty() %}<span class="muted">—</span>{% else %}{{ d.professor }}{% endif %}</td>{% if f.has_note %}<td>{% if d.note.is_empty() %}<span class="muted">—</span>{% else %}{{ d.note }}{% endif %}</td>{% endif %}<td class="col-act"><button class="row-act" type="button" data-menu="menu-dia-{{ d.n }}" aria-label="Acciones del día {{ d.date }}" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  {%- endfor %}
+                  {%- if f.can_add %}
+                  <tr class="add-row"><td><input class="field" id="fd-date" name="date" form="f-dia" value="{{ f.add_date }}" placeholder="m/d/aaaa" aria-label="Fecha nueva"{% if f.add_error.is_some() %} aria-invalid="true"{% endif %}></td><td><select class="field" name="status" form="f-dia" aria-label="Tipo de día">{% for t in self.day_types() %}<option>{{ t }}</option>{% endfor %}</select></td><td><select class="field" name="professor" form="f-dia" aria-label="Profesor"><option value="">Sin profesor</option>{% for (v, l) in f.professors %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></td>{% if f.has_note %}<td><input class="field" name="note" form="f-dia" placeholder="Nota" aria-label="Nota"></td>{% endif %}<td class="col-act"><button class="btn btn-sm btn-icon btn-primary" type="submit" form="f-dia" aria-label="Añadir día"><svg class="i i-sm"><use href="#i-plus"/></svg></button></td></tr>
+                  {%- else %}
+                  <tr><td colspan="{% if f.has_note %}5{% else %}4{% endif %}"><span class="field-hint">Un curso corto tiene hasta 15 fechas: quite una para añadir otra.</span></td></tr>
+                  {%- endif %}
+                </tbody>
+              </table>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Un Día de Fiesta sale en las cartas como «No habrá clases el …» (BR-CRS-06). Cursos cortos: hasta 15 fechas.</p>
+            {%- else %}
+            <p class="field-hint" style="margin-top:12px">Un seminario tiene una sola fecha: cámbiela arriba.</p>
+            {%- endif %}
+          </div>
+          <div class="dlg-foot"><span class="left">Cada campo se guarda al salir de él · la fecha no se borra: use Cancelado (AP-07)</span><a class="btn btn-primary" href="/offerings/{{ self.slug() }}/{{ uuid }}">Cerrar</a></div>
+        </dialog>
+        {%- for d in f.days %}
+        <div class="menu" id="menu-dia-{{ d.n }}" popover role="menu">
+          <div class="menu-note">{{ d.date }}</div>
+          <form method="post" action="/calendar/{{ self.slug() }}/{{ f.uuid }}/dates/{{ d.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE"><button type="submit" role="menuitem" class="danger act-remove"><svg class="i"><use href="#i-trash"/></svg>Quitar día</button></form>
+        </div>
+        {%- endfor %}
+        {%- endif %}
+        <dialog class="dlg" id="dlg-nuevo" aria-labelledby="dlg-nuevo-t">
+          <form method="post" action="/offerings/{{ self.slug() }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          <div class="dlg-head"><h2 id="dlg-nuevo-t">{{ new_label }}</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body">
+            {%- if let Some(e) = new_error %}<div class="error-summary" role="alert" style="margin-bottom:12px"><b>Revise el formulario.</b><ul><li><a href="#nv-nom">{{ name_label }}</a>: {{ e }}</li></ul></div>{% endif %}
+            <div class="form">
+              <label for="nv-nom" class="req">{{ name_label }}</label><div class="field-wrap"><input class="field" id="nv-nom" name="name" value="{{ new_name }}" autofocus{% if new_error.is_some() %} aria-invalid="true"{% endif %}></div>
+              <label for="nv-pm">Precio afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="nv-pm" name="member_price" inputmode="decimal"></span></div>
+              <label for="nv-pi">Precio no afiliado</label><div class="field-wrap"><span class="adorn" style="width:160px"><span class="pre">$</span><input class="field money" id="nv-pi" name="individual_price" inputmode="decimal"></span><div class="field-hint">El resto se completa en Detalles; cada campo se guarda al salir.</div></div>
+            </div>
+          </div>
+          <div class="dlg-foot"><span class="left">Esc cierra</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Crear</button></div>
+          </form>
+        </dialog>
+        {%- if self.has_offering() && shell.is_admin %}
+        <dialog class="dlg" id="dlg-borrar" aria-labelledby="dlg-borrar-t">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-t">¿Borrar {{ name }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          {%- if let Some(e) = delete_error %}
+          <div class="dlg-body"><div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div>{{ e }}</div></div></div>
+          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
+          {%- else if !rows.is_empty() %}
+          <div class="dlg-body"><p>Este ofrecimiento tiene {{ rows.len() }} fecha{% if rows.len() != 1 %}s{% endif %} en el calendario. Un ofrecimiento con fechas o matrículas no se borra (AP-04).</p></div>
+          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
+          {%- else %}
+          <form method="post" action="/offerings/{{ self.slug() }}/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-body"><p>Se borra <b>{{ name }}</b>. No tiene fechas ni matrículas.</p></div>
+          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+          </form>
+          {%- endif %}
+        </dialog>
+        {%- endif %}
+      </div>
+{% endblock %}

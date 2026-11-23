@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block body_state %} data-open="dlg-mat"{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><a href="/students">Estudiantes</a><span class="sep">/</span><a href="/students/{{ student }}">{{ name }}</a></div>
+      <h1 class="title"><b>{{ name }}</b>{% if !company.is_empty() %} <span class="sub">· {{ company }}</span>{% endif %}</h1>
+      <div class="actions">
+        <span class="tag lg{% if status_text == "Afiliado ACTIVO" %} info{% endif %}">{{ status_text }}</span>
+        <a class="btn" href="/students/{{ student }}"><svg class="i"><use href="#i-user"/></svg>Volver al estudiante</a>
+        <button class="btn btn-primary" type="button" data-open="dlg-mat"><svg class="i"><use href="#i-plus"/></svg>Matricular</button>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="block">
+          <div class="block-head"><h3>{{ kind_label }}</h3><span class="count">{{ lines.len() }} matrícula{% if lines.len() != 1 %}s{% endif %}</span></div>
+          {%- if lines.is_empty() %}
+          <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin matrículas</h4><p>Este estudiante no tiene matrículas de este tipo.</p></div>
+          {%- else %}
+          <table class="t">
+            <colgroup><col><col style="width:120px"><col style="width:120px"><col style="width:120px"></colgroup>
+            <thead><tr><th>Ofrecimiento</th><th>Estatus</th><th class="money">Costo</th><th class="money">Balance</th></tr></thead>
+            <tbody>
+              {%- for (id, off, st, cost, bal) in lines %}
+              <tr><td><a href="/enrollments/{{ self.kind_slug() }}/{{ id }}">{{ off }}</a></td><td>{% if st.is_empty() %}<span class="muted">—</span>{% else %}{{ st }}{% endif %}</td><td class="money">{{ cost }}</td><td class="money">{{ bal }}</td></tr>
+              {%- endfor %}
+            </tbody>
+          </table>
+          {%- endif %}
+        </div>
+        {{ dialog|safe }}
+      </div>
+{% endblock %}

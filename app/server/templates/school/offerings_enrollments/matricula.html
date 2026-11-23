@@ -1,0 +1,82 @@
+{#- UI-20 Matrícula: the create/settle dialog (Guardar: OP-ENR-04/08; Matricular: OP-ENR-01..03). Keyboard: Curso has
+    autofocus (Estatus on an existing enrollment); Tab follows the reading order; Enter and Ctrl+S submit; Esc closes. -#}
+  <dialog class="dlg sch-dlg-mat" id="dlg-mat" aria-labelledby="dlg-mat-t">
+    <form method="post" action="{{ action }}" novalidate><input type="hidden" name="_csrf" value="{{ csrf }}"><input type="hidden" name="next" value="{{ next }}">{% if !student_hidden.is_empty() && student_options.is_empty() %}<input type="hidden" name="student" value="{{ student_hidden }}">{% endif %}{% if !is_new %}<input type="hidden" name="offering" value="{{ offering }}">{% endif %}
+    <div class="dlg-head"><h2 id="dlg-mat-t">{{ title }}</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body">
+      {%- if !errors.is_empty() %}
+      <div class="error-summary" role="alert" style="margin-bottom:12px"><b>Revise {{ self.errors_len() }} campo{% if self.errors_len() != 1 %}s{% endif %} antes de guardar.</b><ul>{% for (n, l, m) in errors %}<li><a href="#mt-{{ n }}">{{ l }}</a>: {{ m }}</li>{% endfor %}</ul></div>
+      {%- endif %}
+      {%- if cancelled %}
+      <div class="banner" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-ban"/></svg><div>Matrícula dada de baja: sigue en el archivo con su pago.</div></div>
+      {%- endif %}
+      <div class="sch-mat-top">
+        <div class="form">
+          {%- if let Some(line) = student_line %}
+          <span class="label">Estudiante</span><div class="field-wrap"><div class="value">{{ line }}</div></div>
+          {%- else %}
+          <label for="mt-student" class="req">Estudiante</label><div class="field-wrap"><select class="field" id="mt-student" name="student" hx-get="{{ self.picker_url() }}" hx-include="closest form" hx-trigger="change" hx-target="#mat-fecha" hx-swap="outerHTML"{% if self.err("student").is_some() %} aria-invalid="true"{% endif %}><option value="">Escoja un estudiante…</option>{% for (v, l) in student_options %}<option value="{{ v }}"{% if self.is_sel_stu(v) %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>{% if let Some(e) = self.err("student") %}<div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</div>
+          {%- endif %}
+          <label for="mt-offering" class="req">{{ offering_label }}</label><div class="field-wrap"><select class="field" id="mt-offering" name="offering"{% if is_new %} autofocus hx-get="{{ self.picker_url() }}" hx-include="closest form" hx-trigger="change" hx-target="#mat-fecha" hx-swap="outerHTML"{% else %} disabled{% endif %}>{% for (v, l) in offerings %}<option value="{{ v }}"{% if self.is_sel_off(v) %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+          <label for="mt-calendar" class="req">Fecha</label>{{ pick.render().unwrap_or_default()|safe }}
+          <label for="mt-status">Estatus</label><div class="field-wrap"><select class="field" id="mt-status" name="status" style="width:160px"{% if !is_new %} autofocus{% endif %}>{% if !self.is_course() %}<option value=""{% if v_status.is_empty() %} selected{% endif %}>—</option>{% endif %}{% for s in statuses %}<option{% if *s == v_status %} selected{% endif %}>{{ s }}</option>{% endfor %}</select>{% if let Some(e) = self.err("status") %}<div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</div>
+        </div>
+        {{ pick.price.html()|safe }}
+      </div>
+      <div class="grid cols-2" style="margin-top:16px;gap:16px 24px">
+        <div class="form">
+          <label for="mt-costeado_por">Costeado por</label><div class="field-wrap"><select class="field" id="mt-costeado_por" name="costeado_por"><option{% if v_payer == "COMPAÑIA" %} selected{% endif %}>COMPAÑIA</option><option{% if v_payer == "INDIVIDUAL" %} selected{% endif %}>INDIVIDUAL</option></select></div>
+          <label for="mt-pago">Pago</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="mt-pago" name="pago" value="{{ v_pago }}" inputmode="decimal"{% if self.err("pago").is_some() %} aria-invalid="true" aria-describedby="mt-pago-e"{% endif %}></span>{% if let Some(e) = self.err("pago") %}<div class="field-error" id="mt-pago-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</div>
+          <label for="mt-fecha_de_pago">Fecha de pago</label><div class="field-wrap"><input class="field" id="mt-fecha_de_pago" name="fecha_de_pago" value="{{ v_fecha }}" placeholder="m/d/aaaa"{% if self.err("fecha_de_pago").is_some() %} aria-invalid="true" aria-describedby="mt-fp-e"{% endif %}>{% if let Some(e) = self.err("fecha_de_pago") %}<div class="field-error" id="mt-fp-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</div>
+          {%- if self.is_course() %}
+          <span class="label">Factura</span><div class="field-wrap"><div class="value">{{ invoice }}</div></div>
+          {%- else %}
+          <label for="mt-check_number">Ck # / Factura</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 1fr"><input class="field" id="mt-check_number" name="check_number" value="{{ v_check }}" aria-label="Número de cheque"><div class="value">{{ invoice }}</div></div>
+          {%- endif %}
+          <span class="label">Balance</span><div class="field-wrap"><div class="value money sch-bal">{{ balance }}</div><div class="field-hint">Costo − pago (BR-ENR-02)</div></div>
+        </div>
+        <div class="form">
+          <label for="mt-expectations">Expectativas del curso</label><div class="field-wrap"><textarea class="field" id="mt-expectations" name="expectations" rows="3">{{ v_expect }}</textarea></div>
+          <label for="mt-notes">{{ notes_label }}</label><div class="field-wrap"><textarea class="field" id="mt-notes" name="notes" rows="3"{% if self.is_course() %} placeholder="Cambios de dirección, nombre o compañía"{% endif %}>{{ v_notes }}</textarea></div>
+        </div>
+      </div>
+      {%- if self.is_course() %}
+      <fieldset class="sch-notas">
+          <legend>Notas · archivo académico</legend>
+          <div class="sch-grades">{% for g in grades %}<label class="sch-g"><span>{{ g.label }}</span><input class="field num" id="mt-{{ g.name }}" name="{{ g.name }}" value="{{ g.value }}" inputmode="decimal"{% if let Some(a) = g.aria %} aria-label="{{ a }}"{% endif %}{% if g.error.is_some() %} aria-invalid="true"{% endif %}></label>{% endfor %}</div>
+          <div class="sch-grades2">
+            {%- for g in grades2 %}
+            <label class="sch-g"><span>{{ g.label }}</span><input class="field num" id="mt-{{ g.name }}" name="{{ g.name }}" value="{{ g.value }}" inputmode="decimal"{% if g.error.is_some() %} aria-invalid="true" aria-describedby="mt-{{ g.name }}-e"{% endif %}>{% if let Some(e) = g.error %}<div class="field-error" id="mt-{{ g.name }}-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</label>
+            {%- endfor %}
+            <label class="sch-g sch-score"><span>Puntuación</span><input class="field num" id="mt-puntuacion" name="puntuacion" value="{{ v_score }}" inputmode="numeric"{% if score_error.is_some() %} aria-invalid="true" aria-describedby="mt-sc-e"{% endif %}>{% if let Some(e) = score_error %}<div class="field-error" id="mt-sc-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</label>
+            <div class="sch-result">{% if score_error.is_some() %}{% else if let Some(l) = letter %}<span class="sch-letter lg">{{ l }}</span>{% if passed %}<span class="tag ok">Aprobado</span>{% else %}<span class="tag err">No aprobado</span>{% endif %}{% else %}<span class="muted">Sin puntuación: no hay letra todavía.</span>{% endif %}</div>
+          </div>
+          <div class="field-hint">Con promedio final, la puntuación toma su valor (BR-ENR-03). Letra: 90 A, 80 B, 70 C, 60 D, menos F (BR-ENR-04). Aprueba con más de 69 (BR-ENR-05).</div>
+      </fieldset>
+      {%- endif %}
+    </div>
+    {%- if is_new %}
+    <div class="dlg-foot"><span class="left">Ctrl+S guarda · Esc cierra</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Matricular</button></div>
+    {%- else %}
+    <div class="dlg-foot">
+      {%- if paid > 0 %}<span class="sch-blocked"><button class="btn btn-danger" type="button" disabled aria-describedby="del-hint"><svg class="i"><use href="#i-trash"/></svg>Borrar</button><span class="field-hint" id="del-hint">Tiene un pago: use Dar de baja (BR-ENR-08)</span></span>
+      {%- else if is_admin %}<button class="btn btn-danger" type="button" data-open="dlg-mat-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar…</button>
+      {%- endif %}
+      <span class="left"></span>
+      {%- if !cancelled %}<button class="btn" type="submit" form="f-baja"><svg class="i"><use href="#i-ban"/></svg>Dar de baja</button>{% endif %}
+      <button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+    {%- endif %}
+    </form>
+    {%- if !is_new %}
+    <form method="post" action="/enrollments/{{ kind.slug() }}/{{ uuid }}/cancel" id="f-baja"><input type="hidden" name="_csrf" value="{{ csrf }}"></form>
+    {%- endif %}
+  </dialog>
+  {%- if !is_new && paid == 0 && is_admin %}
+  <dialog class="dlg" id="dlg-mat-borrar" aria-labelledby="dlg-mat-borrar-t">
+    <form method="post" action="/enrollments/{{ kind.slug() }}/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ csrf }}"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="confirm" value="1">
+    <div class="dlg-head danger"><h2 id="dlg-mat-borrar-t">¿Quitar la matrícula?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-body"><p>Se quita la matrícula de <b>{{ delete_title }}</b>. No tiene pagos, así que se puede borrar (BR-ENR-08).</p></div>
+    <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
+    </form>
+  </dialog>
+  {%- endif %}

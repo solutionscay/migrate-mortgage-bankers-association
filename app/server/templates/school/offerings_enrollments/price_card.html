@@ -1,0 +1,9 @@
+<div class="sch-price{{ class }}" id="mat-price"{% if oob %} hx-swap-oob="true"{% endif %} aria-live="polite">
+            <div class="k">{{ k }}</div>
+            <div class="v{% if v == "—" %} muted{% endif %}">{{ v }}</div>
+            <div class="why">{% if why_ok %}<svg class="i i-sm"><use href="#i-check"/></svg>{% else if class == " ind" %}<svg class="i i-sm"><use href="#i-info"/></svg>{% endif %}{{ why }}{% if let Some(a) = affiliate %} <span class="muted">({{ a }})</span>{% endif %}</div>
+            {%- if let Some(a) = alt %}
+            <div class="alt">{{ a }}</div>
+            {%- endif %}
+            <div class="note">{{ note }}</div>
+          </div>

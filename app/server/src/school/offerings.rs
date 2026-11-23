@@ -319,6 +319,36 @@ pub fn add_class_date(
     Ok(uuid)
 }
 
+/// OP-CRS-03 with the add row of UI-19: sets the day type (BR-CRS-06) and, for a course date, the note of a class
+/// date just added in the same transaction.
+pub fn describe_class_date(
+    tx: &Transaction,
+    kind: Kind,
+    date_uuid: &str,
+    day_type: &str,
+    note: Option<&str>,
+) -> DResult<()> {
+    if !DAY_TYPES.contains(&day_type) {
+        return Err(DomainError::Validation("status", "Escoja Día de Clase o Día de Fiesta.".into()));
+    }
+    match kind {
+        Kind::Course => {
+            tx.execute(
+                "UPDATE calendar_course_dates SET status = ?1, note = ?2 WHERE uuid = ?3",
+                params![day_type, note, date_uuid],
+            )?;
+        }
+        Kind::ShortCourse => {
+            tx.execute(
+                "UPDATE calendar_short_course_dates SET status = ?1 WHERE uuid = ?2",
+                params![day_type, date_uuid],
+            )?;
+        }
+        Kind::Seminar => return Err(DomainError::NotFound),
+    }
+    Ok(())
+}
+
 /// The lowest free repetition 1..15.
 fn next_free_repetition(conn: &Connection, calendar: &str) -> rusqlite::Result<i64> {
     let used: Vec<i64> = conn

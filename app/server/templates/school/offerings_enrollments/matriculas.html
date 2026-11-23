@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Matrículas{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar" id="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><span>Matrículas</span></div>
+      <h1 class="title"><b>Matrículas</b>{% if !sub.is_empty() %} <span class="sub">{{ sub }}</span>{% endif %}</h1>
+      <div class="actions">
+        {%- if self.is_course() && !calendar.is_empty() %}
+        <a class="btn" href="/exports/grades.xlsx?calendar={{ self.cal_q() }}" download><svg class="i"><use href="#i-file"/></svg>Exportar notas (XLSX)</a>
+        <a class="btn" href="/grades/import"><svg class="i"><use href="#i-upload"/></svg>Importar notas</a>
+        {%- endif %}
+        {%- if !calendar.is_empty() %}
+        <span class="split"><button class="btn" type="button" data-menu="menu-mat-print"><svg class="i"><use href="#i-print"/></svg>Imprimir</button><button class="btn" type="button" data-menu="menu-mat-print" aria-haspopup="menu" aria-expanded="false" aria-label="Más impresos"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button></span>
+        <a class="btn btn-primary" href="/enrollments/{{ self.slug() }}/new?calendar={{ self.cal_q() }}"><svg class="i"><use href="#i-plus"/></svg>Matricular</a>
+        {%- endif %}
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {%- if let Some(n) = notice %}
+        <div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div>{{ n }}</div></div>
+        {%- endif %}
+        {%- if let Some(r) = refusal %}
+        <div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div>{{ r }}</div></div>
+        {%- endif %}
+        <form class="toolbar" method="get" action="/enrollments/{{ self.slug() }}" hx-get="/enrollments/{{ self.slug() }}" hx-trigger="change, search from:find input" hx-target="#main" hx-push-url="true">
+          <span class="seg" role="group" aria-label="Tipo">
+            {%- for (href, label, on) in switch %}
+            <a class="btn" href="{{ href }}" aria-pressed="{{ on }}"{% if *on %} aria-current="page"{% endif %}>{{ label }}</a>
+            {%- endfor %}
+          </span>
+          <select class="field" name="calendar" aria-label="Fecha del curso" style="min-width:330px">
+            {%- if calendars.is_empty() %}<option value="">Sin fechas</option>{% endif %}
+            {%- for (v, l) in calendars %}<option value="{{ v }}"{% if self.is_sel_cal(v) %} selected{% endif %}>{{ l }}</option>{% endfor %}
+          </select>
+          <select class="field" name="status" aria-label="Estatus">{% for (v, l) in statuses %}<option value="{{ v }}"{% if self.is_sel_st(v) %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+          <label class="search"><span class="sr-only">Buscar matrícula</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ q }}" placeholder="Nombre o factura"></label>
+        </form>
+        {%- if lines.is_empty() %}
+        <div class="empty"><svg class="i"><use href="#i-inbox"/></svg>{% if total_lines == 0 %}<h4>Sin matrículas</h4><p>Esta fecha no tiene estudiantes matriculados.</p>{% if !calendar.is_empty() %}<a class="btn btn-sm" href="/enrollments/{{ self.slug() }}/new?calendar={{ self.cal_q() }}"><svg class="i i-sm"><use href="#i-plus"/></svg>Matricular</a>{% endif %}{% else %}<h4>Sin resultados</h4><p>Ninguna matrícula de esta fecha coincide con el filtro.</p>{% endif %}</div>
+        {%- else %}
+        <div class="table-wrap">
+          <table class="t">
+            {%- if self.is_course() %}
+            <colgroup><col><col style="width:92px"><col style="width:104px"><col style="width:92px"><col style="width:92px"><col style="width:92px"><col style="width:70px"><col style="width:84px"><col style="width:76px"><col style="width:84px"><col style="width:90px"><col style="width:36px"></colgroup>
+            <thead><tr><th aria-sort="ascending">Nombre</th><th>Factura #</th><th>Costeado por</th><th class="money">Costo</th><th class="money">Pago</th><th class="money">Balance</th><th class="num">Examen</th><th class="num">Prom. asig.</th><th class="num">Asist.</th><th class="num">Prom. final</th><th>Estatus</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+            {%- else %}
+            <colgroup><col><col style="width:110px"><col style="width:120px"><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:120px"><col style="width:36px"></colgroup>
+            <thead><tr><th aria-sort="ascending">Nombre</th><th>Factura #</th><th>Costeado por</th><th class="money">Costo</th><th class="money">Pago</th><th class="money">Balance</th><th>Estatus</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+            {%- endif %}
+            <tbody>
+              {%- for l in lines %}
+              <tr{% if l.paid > 0 %} class="row-money"{% endif %}><td><a href="/enrollments/{{ self.slug() }}/{{ l.uuid }}">{{ l.name }}</a></td><td>{{ l.invoice }}</td><td>{{ l.payer }}</td><td class="money">{{ self.usd(l.cost) }}</td><td class="money">{{ self.usd(l.paid) }}</td><td class="money">{{ self.usd(l.balance) }}</td>{% if self.is_course() %}{% for g in l.grades %}<td class="num{% if g.is_empty() %} muted{% endif %}">{% if g.is_empty() %}—{% else %}{{ g }}{% endif %}</td>{% endfor %}{% endif %}<td>{% if l.status.is_empty() %}<span class="muted">—</span>{% else %}<span class="tag{{ l.tag() }}">{{ l.status }}</span>{% endif %}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-enr-{{ l.n }}" aria-label="Acciones de {{ l.name }}" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+              {%- endfor %}
+            </tbody>
+            <tfoot><tr><td>{{ summary }}</td><td></td><td></td><td class="money">{{ self.usd(sum_cost) }}</td><td class="money">{{ self.usd(sum_paid) }}</td><td class="money">{{ self.usd(sum_balance) }}</td><td colspan="{% if self.is_course() %}6{% else %}2{% endif %}"></td></tr></tfoot>
+          </table>
+        </div>
+        {%- endif %}
+        <p class="field-hint" style="margin-top:8px">{% if self.is_short() %}CSV CSBS en Imprimir (BR-RPT-06). {% endif %}{% if self.is_course() %}Importar notas actualiza esta fecha por serial (BR-ENR-06). {% endif %}Una matrícula con pago no se borra: se da de baja (BR-ENR-08).</p>
+        {%- for l in lines %}
+        <div class="menu" id="menu-enr-{{ l.n }}" popover role="menu">
+          {%- if l.paid > 0 %}<div class="menu-note">Con pago: se da de baja, no se borra (BR-ENR-08)</div>{% endif %}
+          <a role="menuitem" href="/enrollments/{{ self.slug() }}/{{ l.uuid }}"><svg class="i"><use href="#i-file"/></svg>Abrir matrícula</a>
+          {%- if l.status != "BAJA" && l.status != "Canceló" %}
+          <form method="post" action="/enrollments/{{ self.slug() }}/{{ l.uuid }}/cancel"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button type="submit" role="menuitem"><svg class="i"><use href="#i-ban"/></svg>Dar de baja</button></form>
+          {%- endif %}
+          {%- if l.paid == 0 && shell.is_admin %}
+          <hr class="admin-only">
+          <a role="menuitem" class="danger act-remove admin-only" href="/enrollments/{{ self.slug() }}/{{ l.uuid }}?quitar=1" data-open="dlg-quitar-{{ l.n }}"><svg class="i"><use href="#i-trash"/></svg>Quitar matrícula…<span class="admin-mark">admin</span></a>
+          {%- endif %}
+        </div>
+        {%- if l.paid == 0 && shell.is_admin %}
+        <dialog class="dlg" id="dlg-quitar-{{ l.n }}" aria-labelledby="dlg-quitar-{{ l.n }}-t">
+          <form method="post" action="/enrollments/{{ self.slug() }}/{{ l.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="confirm" value="1">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-{{ l.n }}-t">¿Quitar la matrícula?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita la matrícula de <b>{{ l.name }}</b>. No tiene pagos, así que se puede borrar (BR-ENR-08).</p></div>
+          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
+          </form>
+        </dialog>
+        {%- endif %}
+        {%- endfor %}
+        {%- if !calendar.is_empty() %}
+        <div class="menu" id="menu-mat-print" popover role="menu">
+          <div class="menu-note">Impresos de esta fecha</div>
+          <a role="menuitem" href="/print/school/lista-de-matricula?calendar={{ self.cal_q() }}">Lista de matrícula</a>
+          <a role="menuitem" href="/print/school/listado-por-compania?calendar={{ self.cal_q() }}">Listado por compañía</a>
+          <a role="menuitem" href="/print/school/lista-de-facturacion?calendar={{ self.cal_q() }}">Lista de facturación</a>
+          <a role="menuitem" href="/print/school/hoja-de-asistencia?calendar={{ self.cal_q() }}">Hoja de asistencia</a>
+          <a role="menuitem" href="/print/school/lista-para-puerta?calendar={{ self.cal_q() }}">Lista para puerta</a>
+          {%- if self.is_course() %}<a role="menuitem" href="/print/school/carta-de-notas?calendar={{ self.cal_q() }}">Carta indicando notas</a>{% endif %}
+          <a role="menuitem" href="/print/school/certificados?calendar={{ self.cal_q() }}">Certificados</a>
+          <a role="menuitem" href="/print/school/etiquetas?calendar={{ self.cal_q() }}">Etiquetas</a>
+          {%- if self.is_short() %}<a role="menuitem" href="/exports/csbs.csv?calendar={{ self.cal_q() }}">CSV CSBS</a>{% endif %}
+        </div>
+        {%- endif %}
+        {{ dialog|safe }}
+      </div>
+{% endblock %}

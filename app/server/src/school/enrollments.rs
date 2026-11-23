@@ -134,6 +134,119 @@ pub fn delete_enrollment(tx: &Transaction, who: &Who, kind: Kind, enrollment: &s
     Ok(())
 }
 
+/// The settle form of UI-20 (OP-ENR-04, OP-ENR-08): what Guardar or Matricular writes in one transaction. Values
+/// are parsed by the screen; [`settle`] checks the value lists and ranges again. Money in cents, dates ISO.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Settle {
+    pub status: Option<String>,
+    pub costeado_por: Option<String>,
+    pub pago: i64,
+    pub fecha_de_pago: Option<String>,
+    /// Seminar and short course only (the course table has no check number).
+    pub check_number: Option<String>,
+    pub expectations: Option<String>,
+    /// Course: `indicar_cambios`; seminar and short course: `notas`.
+    pub notes: Option<String>,
+    /// Course only: the grade columns in [`GRADE_COLUMNS`] order (0..100).
+    pub grades: Vec<Option<f64>>,
+    /// Course only: the score (0..100). Replaced by the rounded final average when that is set (BR-ENR-03).
+    pub puntuacion: Option<i64>,
+}
+
+/// The grade columns of a course enrollment, in screen order.
+pub const GRADE_COLUMNS: &[&str] = &[
+    "examen",
+    "primera",
+    "segunda",
+    "tercera",
+    "cuarta",
+    "quinta",
+    "sexta",
+    "septima",
+    "octava",
+    "promedio_asignaciones",
+    "asistencia_y_puntualidad",
+    "promedio_final",
+];
+
+/// OP-ENR-04 / OP-ENR-08: writes the settle form of one enrollment in the caller's transaction (both roles,
+/// AP-03). BR-ENR-03: with a final average, the score takes its rounded value. The price is never written here
+/// (BR-ENR-01). One `enrollment.save` audit row.
+pub fn settle(tx: &Transaction, who: &Who, kind: Kind, enrollment: &str, s: &Settle) -> DResult<()> {
+    policy::ap03_domain(who)?;
+    pago(tx, kind, enrollment)?;
+    let statuses = if kind == Kind::Course { COURSE_STATUSES } else { IRREGULAR_STATUSES };
+    if let Some(st) = &s.status {
+        if !statuses.contains(&st.as_str()) {
+            return Err(DomainError::Validation("status", "Escoja un estatus de la lista.".into()));
+        }
+    } else if kind == Kind::Course {
+        return Err(DomainError::Validation("status", "Escoja ACTIVO o BAJA.".into()));
+    }
+    if let Some(p) = &s.costeado_por {
+        if !PAYERS.contains(&p.as_str()) {
+            return Err(DomainError::Validation("costeado_por", "Escoja COMPAÑIA o INDIVIDUAL.".into()));
+        }
+    }
+    if s.pago < 0 {
+        return Err(DomainError::Validation("pago", "El pago no puede ser negativo.".into()));
+    }
+    let t = kind.enrollment_table();
+    match kind {
+        Kind::Course => {
+            let mut grades = s.grades.clone();
+            grades.resize(GRADE_COLUMNS.len(), None);
+            if grades.iter().flatten().any(|g| !(0.0..=100.0).contains(g)) {
+                return Err(DomainError::Validation("grades", "Use notas entre 0 y 100.".into()));
+            }
+            let score = grades[11].map(|f| f.round() as i64).or(s.puntuacion);
+            if score.is_some_and(|v| !(0..=100).contains(&v)) {
+                return Err(DomainError::Validation("puntuacion", "La puntuación va de 0 a 100.".into()));
+            }
+            let sets: Vec<String> =
+                GRADE_COLUMNS.iter().enumerate().map(|(i, c)| format!("{c} = ?{}", i + 8)).collect();
+            let sql = format!(
+                "UPDATE {t} SET status = ?1, costeado_por = ?2, pago = ?3, fecha_de_pago = ?4, expectations = ?5,
+                   indicar_cambios = ?6, puntuacion = ?7, {} WHERE uuid = ?20",
+                sets.join(", ")
+            );
+            let mut values: Vec<rusqlite::types::Value> = vec![
+                s.status.clone().into(),
+                s.costeado_por.clone().into(),
+                s.pago.into(),
+                s.fecha_de_pago.clone().into(),
+                s.expectations.clone().into(),
+                s.notes.clone().into(),
+                score.into(),
+            ];
+            values.extend(grades.iter().map(|g| rusqlite::types::Value::from(*g)));
+            values.push(enrollment.to_owned().into());
+            tx.execute(&sql, rusqlite::params_from_iter(values))?;
+        }
+        Kind::Seminar | Kind::ShortCourse => {
+            tx.execute(
+                &format!(
+                    "UPDATE {t} SET status = ?1, costeado_por = ?2, pago = ?3, date_of_payment = ?4, check_number = ?5,
+                       expectations = ?6, notas = ?7 WHERE uuid = ?8"
+                ),
+                params![
+                    s.status,
+                    s.costeado_por,
+                    s.pago,
+                    s.fecha_de_pago,
+                    s.check_number,
+                    s.expectations,
+                    s.notes,
+                    enrollment
+                ],
+            )?;
+        }
+    }
+    crate::audit::stamp_modified(tx, t, "uuid", &enrollment, &who.actor)?;
+    crate::audit::log(tx, who.actor.user_id, "enrollment.save", Some(t), Some(enrollment), None)?;
+    Ok(())
+}
+
 /// One course enrollment as `v_enrollments_course_lines` shows it (UI-15 Cursos tab, UI-21).
 #[derive(Debug, Clone, PartialEq)]
 pub struct CourseLine {
