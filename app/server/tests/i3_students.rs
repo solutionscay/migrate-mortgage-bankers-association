@@ -52,7 +52,10 @@ async fn ui14_students_list_search_and_filters() {
     let res = app.get("/students", Some(&staff)).await;
     assert_eq!(res.status(), StatusCode::OK);
     let html = body(res).await;
-    assert!(html.contains("<b>Estudiantes</b> <span class=\"sub\">· 80 en total, 40 activos</span>"));
+    // The active count comes from v_student_academic (BAJA does not count since 0003, D-95).
+    let active = app.count("SELECT COUNT(*) FROM v_student_academic WHERE status = 'ACTIVO'");
+    assert!(active > 0 && active < 80);
+    assert!(html.contains(&format!("<b>Estudiantes</b> <span class=\"sub\">· 80 en total, {active} activos</span>")));
     assert!(html.contains("Elena Muestra Ficticia") && html.contains("1–50 de 80"));
     assert!(!html.contains("Borrar estudiante"), "staff sees no delete (AP-04)");
 

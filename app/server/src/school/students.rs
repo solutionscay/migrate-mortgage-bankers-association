@@ -271,7 +271,8 @@ pub fn academic(conn: &Connection, student: &str) -> DResult<Academic> {
     if let Some(d) = &a.last_course_date {
         a.last_course = conn
             .query_row(
-                "SELECT course FROM v_enrollments_course_lines WHERE student_uuid = ?1 AND course_date = ?2 LIMIT 1",
+                "SELECT course FROM v_enrollments_course_lines WHERE student_uuid = ?1 AND course_date = ?2
+                   AND course_status IN ('Confirmado', 'Completado') ORDER BY serial DESC LIMIT 1",
                 [student, d],
                 |r| r.get(0),
             )

@@ -288,7 +288,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 ### UI-14 Estudiantes (students list)
 
 - Readiness: behavior-ready. Route: `GET /students`. Source: `objects/MBS.fmp12/layouts/42-Lista_de_Estudiantes.txt`, `objects/MBS.fmp12/layouts/45-Tabla_de_Estudiantes.txt`; Quick Find override (MBS script 45).
-- Search: 0 hits shows a message, 1 hit opens UI-15, more shows the list (OP-STU-05). Columns: name, company, e-mail, phone, status (ACTIVO / INACTIVO from `v_student_academic`).
+- Search: 0 hits shows a message, 1 hit opens UI-15, more shows the list (OP-STU-05). Columns: name, company, e-mail, phone, status (ACTIVO / INACTIVO from `v_student_academic`; a BAJA enrollment does not count, D-95).
 
 ### UI-15 Estudiante (student) — meaty
 
@@ -296,7 +296,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 - Source: `objects/MBS.fmp12/layouts/43-Estudiante.txt`; scripts MBS 33-35, 37-39, 41-43, 48; menus New Record / Duplicate Record overrides. Before screen: none.
 - Data: `student_get`: student, affiliate, `v_student_academic`, `v_student_certification_progress`, enrollments per kind, interests.
 - Commands: OP-STU-01 to OP-STU-04, OP-CRT-02, OP-ENR-01 to OP-ENR-03 (through UI-20), print certificate (OP-CRT-03), transcript (`/print/school/transcripcion-de-creditos`).
-- Hierarchy: header (name, company, status badge, affiliate badge when the affiliate is ACTIVO); summary tiles (average, credits, hours, last course date) (BR-STU-06); tabs Certificaciones, Cursos especializados, Seminarios, Cursos cortos, Datos personales.
+- Hierarchy: header (name, company, status badge, affiliate badge when the affiliate is ACTIVO); summary tiles (average, credits, hours, last course date and name: Confirmado or Completado rows only, D-96) (BR-STU-06); tabs Certificaciones, Cursos especializados, Seminarios, Cursos cortos, Datos personales.
 - States: new student shows Datos personales only until saved; delete refused with enrollments (409).
 - Save: per-field autosave (design system "Save model"); no Edit, Cancel or Guardar button on the page. The "Nuevo estudiante" dialog keeps Guardar (it creates the record).
 

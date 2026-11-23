@@ -14,6 +14,7 @@ use std::path::Path;
 pub const MIGRATIONS: &[(i64, &str, &str)] = &[
     (1, "0001_schema", include_str!("../migrations/0001_schema.sql")),
     (2, "0002_door_no_asistio", include_str!("../migrations/0002_door_no_asistio.sql")),
+    (3, "0003_student_status_last_course", include_str!("../migrations/0003_student_status_last_course.sql")),
 ];
 
 #[derive(Debug)]
@@ -224,7 +225,7 @@ mod tests {
              INSERT INTO payments (uuid, registration_uuid, payment) VALUES ('pay', 'r', 100);",
         )
         .unwrap();
-        assert_eq!(migrate(&mut conn).unwrap(), ["0002_door_no_asistio"]);
+        assert_eq!(migrate(&mut conn).unwrap(), ["0002_door_no_asistio", "0003_student_status_last_course"]);
         let n = |sql: &str| conn.query_row(sql, [], |r| r.get::<_, i64>(0)).unwrap();
         assert_eq!(n("SELECT COUNT(*) FROM registration_items WHERE registration_uuid = 'r'"), 1);
         assert_eq!(n("SELECT COUNT(*) FROM payments WHERE registration_uuid = 'r'"), 1);
@@ -239,6 +240,59 @@ mod tests {
             [],
         )
         .unwrap();
+        integrity_check(&conn).unwrap();
+        foreign_key_check(&conn).unwrap();
+    }
+
+    /// 0003 recreates `v_student_academic` only (D-95, D-96): every row stays; a BAJA enrollment no longer makes a
+    /// student ACTIVO; the last course date skips Pendiente and Cancelado rows.
+    #[test]
+    fn migration_0003_keeps_data_and_changes_the_view() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        set_pragmas(&conn, false).unwrap();
+        conn.execute_batch("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, sha256 TEXT NOT NULL, applied_at TEXT NOT NULL);").unwrap();
+        for (v, name, sql) in &MIGRATIONS[..2] {
+            conn.execute_batch("PRAGMA foreign_keys = OFF;").unwrap();
+            conn.execute_batch(&strip_transaction(sql)).unwrap();
+            conn.execute_batch("PRAGMA foreign_keys = ON;").unwrap();
+            conn.execute(
+                "INSERT INTO schema_migrations VALUES (?1, ?2, ?3, 'x')",
+                rusqlite::params![v, name, sha256_hex(sql.as_bytes())],
+            )
+            .unwrap();
+        }
+        conn.execute_batch(
+            "INSERT INTO students (uuid, nombre) VALUES ('baja', 'Solo BAJA'), ('ok', 'Activo');
+             INSERT INTO courses (uuid, course) VALUES ('c', 'Curso');
+             INSERT INTO calendar_course (uuid, course_uuid, status) VALUES ('conf', 'c', 'Confirmado'), ('pend', 'c', 'Pendiente');
+             INSERT INTO calendar_course_dates (uuid, calendar_course_uuid, date) VALUES ('d1', 'conf', '2026-09-14'), ('d2', 'pend', '2027-01-25');
+             INSERT INTO enrollments_course (uuid, serial, student_uuid, course_uuid, course_calendar_uuid, status) VALUES
+               ('e1', 1, 'baja', 'c', 'conf', 'BAJA'),
+               ('e2', 2, 'ok', 'c', 'conf', 'ACTIVO'),
+               ('e3', 3, 'ok', 'c', 'pend', 'ACTIVO');",
+        )
+        .unwrap();
+        let status = |c: &Connection, s: &str| -> (String, Option<String>) {
+            c.query_row("SELECT status, last_course_date FROM v_student_academic WHERE student_uuid = ?1", [s], |r| {
+                Ok((r.get(0)?, r.get(1)?))
+            })
+            .unwrap()
+        };
+        assert_eq!(status(&conn, "baja").0, "ACTIVO", "before 0003 BAJA counted");
+        assert_eq!(status(&conn, "ok").1.as_deref(), Some("2027-01-25"), "before 0003 Pendiente counted");
+        let rows = |c: &Connection| -> i64 {
+            c.query_row(
+                "SELECT (SELECT COUNT(*) FROM students) + (SELECT COUNT(*) FROM enrollments_course) + (SELECT COUNT(*) FROM calendar_course)",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap()
+        };
+        let before = rows(&conn);
+        assert_eq!(migrate(&mut conn).unwrap(), ["0003_student_status_last_course"]);
+        assert_eq!(rows(&conn), before, "no data changes");
+        assert_eq!(status(&conn, "baja"), ("INACTIVO".to_owned(), Some("2026-09-14".to_owned())));
+        assert_eq!(status(&conn, "ok"), ("ACTIVO".to_owned(), Some("2026-09-14".to_owned())));
         integrity_check(&conn).unwrap();
         foreign_key_check(&conn).unwrap();
     }

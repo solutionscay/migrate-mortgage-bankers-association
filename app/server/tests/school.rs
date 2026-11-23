@@ -128,6 +128,24 @@ fn t07_08_student_status_is_live() {
     assert_eq!(students::academic(&conn, &s).unwrap().status, "INACTIVO", "only Pendiente");
     assert!(is_saved(&patched(&mut conn, &staff(), Resource::Calendar(Kind::Course), &cal, "status", "Confirmado")));
     assert_eq!(students::academic(&conn, &s).unwrap().status, "ACTIVO", "Confirmado");
+    // D-95: a BAJA enrollment does not count.
+    let e: String = one(&conn, "SELECT uuid FROM enrollments_course WHERE student_uuid = ?1", &s);
+    assert!(is_saved(&patched(&mut conn, &staff(), Resource::Enrollment(Kind::Course), &e, "status", "BAJA")));
+    assert_eq!(students::academic(&conn, &s).unwrap().status, "INACTIVO", "BAJA only");
+}
+
+/// D-95, D-96 on the seed: Héctor (a BAJA enrollment in a Confirmado row only) is INACTIVO; Elena's "Último curso" is
+/// Suscripción de Préstamos FHA on 9/14/2026 (her later TILA row is Pendiente and does not count).
+#[test]
+fn d95_d96_seeded_status_and_last_course() {
+    let conn = seeded();
+    let hector = uuid_of(&conn, "students", "nombre", "Héctor Muestra Demo");
+    assert_eq!(students::academic(&conn, &hector).unwrap().status, "INACTIVO");
+    let elena = uuid_of(&conn, "students", "nombre", "Elena Muestra Ficticia");
+    let a = students::academic(&conn, &elena).unwrap();
+    assert_eq!(a.status, "ACTIVO");
+    assert_eq!(a.last_course_date.as_deref(), Some("2026-09-14"));
+    assert_eq!(a.last_course.as_deref(), Some("Suscripción de Préstamos FHA"));
 }
 
 // --- T-07-09 (BR-CRT-02..04) ----------------------------------------------------------------------------------------
