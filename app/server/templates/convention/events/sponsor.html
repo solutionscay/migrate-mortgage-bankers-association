@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/events">Convenciones</a><span class="sep">/</span><a href="/events/{{ event_uuid }}">{{ event_name }}</a><span class="sep">/</span><a href="/events/{{ event_uuid }}?tab=sponsors">Auspiciadores</a><span class="sep">/</span><span>{{ name }}</span></div>
+      <h1 class="title"><b>Auspiciador</b> · <span id="sp-name">{{ name }}</span> <span class="title-tag" id="sp-tag">{{ tag()|safe }}</span></h1>
+      <div class="actions">
+        <a class="btn" href="/events/{{ event_uuid }}?tab=sponsors"><svg class="i"><use href="#i-chevron-left"/></svg>Volver</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="grid cols-2">
+          <div class="form">
+            <label for="s-nombre" class="req">Auspiciador</label>{{ f("sponsor_name")|safe }}
+            <label for="s-cat">Categoría</label>{{ f("type")|safe }}
+            <label for="s-contacto">Contacto</label>{{ f("contact_name")|safe }}
+            <label for="s-titulo">Título</label>{{ f("title")|safe }}
+            <label for="s-saludo">Saludo</label>{{ f("greeting")|safe }}
+            <label for="s-tel">Teléfono</label>{{ f("phone")|safe }}
+            <span class="gap"></span>
+            <label for="s-dir">Dirección</label>{{ f("address")|safe }}
+            <label for="s-ciudad">Ciudad/Estado/Zip</label><div class="inline-fields" style="grid-template-columns:1fr 56px 80px">{{ f("city")|safe }}{{ f("state")|safe }}{{ f("zip")|safe }}</div>
+          </div>
+          <div>
+            <div class="form">
+              <label for="s-pedido">Pedido</label>{{ f("requested_amount")|safe }}
+              <label for="s-prometido">Prometido</label>{{ f("promised")|safe }}
+              <label for="s-recibido">Recibido</label>{{ f("amount_received")|safe }}
+              <span class="gap"></span>
+              <span class="label">Logo</span><div class="field-wrap">{{ logo|safe }}</div>
+              <span class="label">Convención</span><div class="field-wrap"><div class="pick pick-fixed">{{ event_name }} <span class="meta">{{ event_dates }}</span></div></div>
+            </div>
+            <div class="block" style="margin-top:24px">
+              <div class="block-head"><h3>Impresos</h3></div>
+              <div class="block-body row">
+                <a class="btn" href="/print/convention/carta-auspicio-espanol?event={{ event_uuid }}&amp;sponsor={{ uuid }}"><svg class="i"><use href="#i-print"/></svg>Carta (ES)</a>
+                <a class="btn" href="/print/convention/carta-auspicio-ingles?event={{ event_uuid }}&amp;sponsor={{ uuid }}"><svg class="i"><use href="#i-print"/></svg>Carta (EN)</a>
+                <a class="btn" href="/print/convention/labels-carta-auspiciadores?event={{ event_uuid }}&amp;sponsor={{ uuid }}"><svg class="i"><use href="#i-print"/></svg>Etiqueta</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}

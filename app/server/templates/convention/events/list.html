@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Convenciones{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/people">Convención</a><span class="sep">/</span><span>Convenciones</span></div>
+      <h1 class="title"><b>Convenciones</b> <span class="sub">· {{ rows.len() }}</span></h1>
+      <div class="actions">
+        <a class="btn btn-primary" href="/events/new"><svg class="i"><use href="#i-plus"/></svg>Nueva convención</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:8px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        <form class="toolbar" method="get" action="/events" hx-get="/events" hx-trigger="input changed delay:300ms from:find input, change from:find select" hx-target="#main" hx-push-url="true">
+          <label class="search"><span class="sr-only">Buscar</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ q }}" placeholder="Nombre o lugar"></label>
+          <select class="field" name="status" aria-label="Estatus"><option value="">Todos los estatus</option><option value="Activo"{% if status == "Activo" %} selected{% endif %}>Activo</option><option value="Inactivo"{% if status == "Inactivo" %} selected{% endif %}>Inactivo</option></select>
+        </form>
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)">
+<table class="t">
+<colgroup><col><col><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:100px"><col style="width:130px"><col style="width:36px"></colgroup>
+<thead><tr><th>Nombre</th><th>Lugar</th><th aria-sort="descending"><button class="sort" type="button">Comienza <svg class="i"><use href="#i-sort"/></svg></button></th><th>Termina</th><th>Estatus</th><th class="num">Registros</th><th class="money">Total</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{% for e in rows %}<tr><td><a href="/events/{{ e.uuid }}">{{ e.name }}</a></td><td>{{ e.location }}</td><td>{{ e.start }}</td><td>{{ e.end }}</td><td>{{ tag(e.status)|safe }}</td><td class="num">{{ e.registrations }}</td><td class="money">{{ usd(e.total) }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-ev-{{ e.uuid }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{% else %}<tr><td colspan="8" class="muted">Ninguna convención coincide con la búsqueda.</td></tr>
+{% endfor %}</tbody>
+</table>
+        </div>
+        <div class="pager"><span>{% if rows.is_empty() %}0 de 0{% else %}1–{{ rows.len() }} de {{ rows.len() }}{% endif %}</span><div class="pages"><button class="btn btn-sm btn-icon" type="button" disabled aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></button><button class="btn btn-sm" type="button" aria-current="page">1</button><button class="btn btn-sm btn-icon" type="button" disabled aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></button></div></div>
+        {% for e in rows %}
+        <div class="menu" id="menu-ev-{{ e.uuid }}" popover role="menu">
+          <a href="/events/{{ e.uuid }}" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Abrir convención</a>
+          <a href="/registrations?event={{ e.uuid }}" role="menuitem"><svg class="i"><use href="#i-list"/></svg>Ver registros</a>
+          <a href="/events/{{ e.uuid }}/door" role="menuitem"><svg class="i"><use href="#i-check"/></svg>Registro en puerta</a>
+          {% if shell.is_admin %}<hr class="admin-only">
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-open="dlg-borrar-{{ e.uuid }}"><svg class="i"><use href="#i-trash"/></svg>Borrar convención…<span class="admin-mark">admin</span></button>{% endif %}
+        </div>
+        {% if shell.is_admin %}{% if e.registrations > 0 %}<dialog class="dlg" id="dlg-borrar-{{ e.uuid }}" aria-labelledby="dlg-borrar-{{ e.uuid }}-t">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-{{ e.uuid }}-t">No se puede borrar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>{{ e.name }} tiene {{ e.registrations }} registro{% if e.registrations != 1 %}s{% endif %}.</b> Una convención con registros no se borra (AP-04). Cambie el estatus a Inactivo.</div></div></div>
+          <div class="dlg-foot"><span class="left">409 · Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+        </dialog>{% else %}<dialog class="dlg" id="dlg-borrar-{{ e.uuid }}" aria-labelledby="dlg-borrar-{{ e.uuid }}-t">
+          <form method="post" action="/events/{{ e.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-{{ e.uuid }}-t">¿Borrar la convención?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se borra <b>{{ e.name }}</b> con sus actividades, planes, auspiciadores y archivos de facturación. No tiene registros.</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+          </form>
+        </dialog>{% endif %}{% endif %}
+        {% endfor %}
+      </div>
+{% endblock %}

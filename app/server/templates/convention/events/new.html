@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Nueva convención{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/people">Convención</a><span class="sep">/</span><a href="/events">Convenciones</a><span class="sep">/</span><span>Nueva convención</span></div>
+      <h1 class="title"><b>Convención</b> · Nueva</h1>
+      <div class="actions"><a class="btn" href="/events"><svg class="i"><use href="#i-chevron-left"/></svg>Volver</a></div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <form method="post" action="/events" class="stack" style="max-width:720px">
+          <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          {% if !errors.is_empty() %}<div class="error-summary" role="alert"><b>No se creó la convención.</b><ul>{% for m in errors %}<li>{{ m }}</li>{% endfor %}</ul></div>{% endif %}
+          <div class="form">
+            <label for="n-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="n-nombre" name="name" value="{{ f.name }}" required autofocus></div>
+            <label for="n-lugar">Lugar</label><div class="field-wrap"><input class="field" id="n-lugar" name="location" value="{{ f.location }}"></div>
+            <label for="n-ini">Comienza</label><div class="field-wrap"><input class="field" id="n-ini" name="date_start" value="{{ f.date_start }}" inputmode="numeric" placeholder="5/6/2027"></div>
+            <label for="n-fin">Termina</label><div class="field-wrap"><input class="field" id="n-fin" name="date_end" value="{{ f.date_end }}" inputmode="numeric" placeholder="vacío = Comienza"><div class="field-hint">Vacío toma la fecha de Comienza (BR-EVT-01). Estatus Activo.</div></div>
+          </div>
+          <div class="row"><button class="btn btn-primary" type="submit">Guardar</button><a class="btn" href="/events">Cancelar</a></div>
+        </form>
+      </div>
+{% endblock %}

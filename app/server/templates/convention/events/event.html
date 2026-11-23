@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/people">Convención</a><span class="sep">/</span><a href="/events">Convenciones</a><span class="sep">/</span><span>{{ name }}</span></div>
+      <h1 class="title"><b>Convención</b> · <span id="ev-name">{{ name }}</span> <span class="title-tag" id="ev-tag">{{ tag()|safe }}</span></h1>
+      <div class="actions">
+        <a class="btn btn-quiet" href="/registrations?event={{ uuid }}">Ver registros</a><a class="btn" href="/events/{{ uuid }}/door"><svg class="i"><use href="#i-check"/></svg>Registro en puerta</a><span class="split"><a class="btn" href="/print/convention/lista-de-facturacion?event={{ uuid }}"><svg class="i"><use href="#i-print"/></svg>Imprimir</a><button class="btn" type="button" id="btn-print" data-menu="menu-print" aria-haspopup="menu" aria-expanded="false" aria-label="Más impresos"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button></span><button class="btn btn-icon" type="button" id="btn-ev-more" data-menu="menu-ev-more" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones"><svg class="i"><use href="#i-more"/></svg></button>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        {% if let Some(e) = error %}<div class="banner err" role="alert" style="margin-bottom:12px"><svg class="i"><use href="#i-alert"/></svg><div><b>No se guardó.</b> {{ e }}</div></div>{% endif %}
+        <div class="ev-head">
+          <div class="form">
+            <label for="e-nombre" class="req">Nombre</label>{{ f_name|safe }}
+            <label for="e-lugar">Lugar</label>{{ f_location|safe }}
+            <span class="label">PDF</span><div class="field-wrap">{{ pdf|safe }}</div>
+          </div>
+          <div class="form">
+            <label for="e-ini">Comienza</label>{{ f_start|safe }}
+            <label for="e-fin">Termina</label>{{ f_end|safe }}
+            <label for="e-st">Estatus</label>{{ f_status|safe }}
+          </div>
+          <div class="ev-stats" id="ev-stats">{{ stats|safe }}</div>
+        </div>
+
+        <div class="tabs ev-tabs" role="tablist" aria-label="Convención">
+          <a href="/events/{{ uuid }}?tab=items" hx-get="/events/{{ uuid }}?tab=items" hx-target="#main" hx-push-url="true" role="tab" aria-selected="{{ tab_attr("items") }}" aria-controls="tp-act" id="tab-act">Actividades<span class="tab-count">{{ n_items }}</span></a>
+          <a href="/events/{{ uuid }}?tab=sponsors" hx-get="/events/{{ uuid }}?tab=sponsors" hx-target="#main" hx-push-url="true" role="tab" aria-selected="{{ tab_attr("sponsors") }}" aria-controls="tp-aus" id="tab-aus">Auspiciadores<span class="tab-count">{{ n_sponsors }}</span></a>
+          <a href="/events/{{ uuid }}?tab=billing" hx-get="/events/{{ uuid }}?tab=billing" hx-target="#main" hx-push-url="true" role="tab" aria-selected="{{ tab_attr("billing") }}" aria-controls="tp-fac" id="tab-fac">Facturación<span class="tab-count">{{ n_billing }}</span></a>
+        </div>
+{%- if tab == "items" %}
+        <div class="tabpanel" role="tabpanel" id="tp-act" aria-labelledby="tab-act">
+<table class="t">
+<colgroup><col style="width:92px"><col style="width:84px"><col style="width:92px"><col style="width:84px"><col style="width:100px"><col><col style="width:150px"><col style="width:50px"><col style="width:100px"><col style="width:36px"></colgroup>
+<thead>
+          <tr class="group"><th colspan="2" class="g">COMIENZA</th><th colspan="2" class="g">TERMINA</th><th colspan="6"></th></tr><tr><th>Fecha</th><th>Hora</th><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Nombre</th><th>Lugar/Salón</th><th class="num">Qty</th><th class="money">Precio</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{% for i in items %}<tr><td>{{ i.d1 }}</td><td>{{ i.t1 }}</td><td>{{ i.d2 }}</td><td>{{ i.t2 }}</td><td>{{ i.kind }}</td><td><a href="/event-items/{{ i.uuid }}">{{ i.name }}</a></td>{% if i.room.is_empty() %}<td class="muted">—</td>{% else %}<td class="">{{ i.room }}</td>{% endif %}<td class="num">{{ i.qty }}</td><td class="money">{{ usd(i.price) }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-act-{{ i.uuid }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{% else %}<tr><td colspan="10" class="muted">Sin actividades. Añada la primera: hotel, seminario, comida o foro.</td></tr>
+{% endfor %}<tr class="add-row"><td colspan="10"><button class="btn btn-sm btn-primary" type="button" data-open="dlg-act-nueva"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir actividad</button></td></tr>
+</tbody>
+<tfoot><tr><td colspan="8" style="text-align:right">Total</td><td class="money">{{ usd(totals.price) }}</td><td></td></tr></tfoot>
+</table>
+        </div>
+        {% for i in items %}
+        <div class="menu" id="menu-act-{{ i.uuid }}" popover role="menu">
+          <a href="/event-items/{{ i.uuid }}" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Ver detalle</a>
+          <a href="/print/convention/lista-de-facturacion-por-actividad?event={{ uuid }}&amp;event_item={{ i.uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Lista de facturación por actividad</a>
+          <hr>
+          <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-act-{{ i.uuid }}"><svg class="i"><use href="#i-trash"/></svg>Quitar actividad…</button>
+        </div>
+        {% if i.used > 0 %}<dialog class="dlg" id="dlg-quitar-act-{{ i.uuid }}" aria-labelledby="dlg-quitar-act-{{ i.uuid }}-t">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-act-{{ i.uuid }}-t">No se puede quitar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>{{ i.name }} ({{ i.d1 }}) está en {{ i.used }} registro{% if i.used != 1 %}s{% endif %}.</b> Quite la actividad de esos registros primero.</div></div></div>
+          <div class="dlg-foot"><span class="left">409 · usada en registros</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+        </dialog>{% else %}<dialog class="dlg" id="dlg-quitar-act-{{ i.uuid }}" aria-labelledby="dlg-quitar-act-{{ i.uuid }}-t">
+          <form method="post" action="/event-items/{{ i.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-act-{{ i.uuid }}-t">¿Quitar la actividad?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita <b>{{ i.name }}</b> ({{ i.d1 }}) de {{ name }} y de sus planes. Ningún registro la usa.</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar</button></div>
+          </form>
+        </dialog>{% endif %}
+        {% endfor %}
+        <dialog class="dlg" id="dlg-act-nueva" aria-labelledby="dlg-act-nueva-t">
+          <form method="post" action="/events/{{ uuid }}/items">
+            <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-act-nueva-t">Añadir actividad</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body">
+              {% if let Some(e) = error %}<div class="error-summary" role="alert" style="margin-bottom:8px"><b>No se añadió.</b><ul><li>{{ e }}</li></ul></div>{% endif %}
+              <div class="form">
+                <label for="na-tipo" class="req">Tipo</label><div class="field-wrap"><select class="field" id="na-tipo" name="type">{% for t in types() %}<option{{ sel(t, new_item.kind) }}>{{ t }}</option>{% endfor %}</select></div>
+                <label for="na-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="na-nombre" name="name" value="{{ new_item.name }}" required autofocus></div>
+                <label for="na-fecha">Fecha</label><div class="field-wrap"><input class="field" id="na-fecha" name="date_start" value="{{ new_item.date_start }}" inputmode="numeric" placeholder="5/7/2027"><div class="field-hint">Termina el mismo día (BR-EVT-01).</div></div>
+                <label for="na-h1">Hora comienza</label><div class="field-wrap"><input class="field" id="na-h1" name="time_start" value="{{ new_item.time_start }}" placeholder="7:00 PM"></div>
+                <label for="na-h2">Hora termina</label><div class="field-wrap"><input class="field" id="na-h2" name="time_end" value="{{ new_item.time_end }}" placeholder="11:00 PM"></div>
+                <label for="na-lugar">Lugar/Salón</label><div class="field-wrap"><input class="field" id="na-lugar" name="location_room" value="{{ new_item.location_room }}"></div>
+                <label for="na-precio">Precio</label><div class="field-wrap"><span class="adorn"><span class="pre">$</span><input class="field money" id="na-precio" name="price" value="{{ new_item.price }}" inputmode="decimal" placeholder="0.00"></span></div>
+                <label for="na-qty">Qty. por persona</label><div class="field-wrap"><input class="field num" id="na-qty" name="qty" value="{{ new_item.qty }}" inputmode="numeric"></div>
+              </div>
+            </div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+          </form>
+        </dialog>
+{%- else if tab == "sponsors" %}
+        <div class="tabpanel" role="tabpanel" id="tp-aus" aria-labelledby="tab-aus">
+          <div class="toolbar plain-toolbar">
+            <a class="btn btn-sm" href="/print/convention/lista-solicitudes-de-auspicio?event={{ uuid }}"><svg class="i i-sm"><use href="#i-print"/></svg>Lista de auspiciadores</a>
+            <a class="btn btn-sm" href="/print/convention/labels-carta-auspiciadores?event={{ uuid }}"><svg class="i i-sm"><use href="#i-print"/></svg>Etiquetas de cartas</a>
+            <a class="btn btn-sm" href="/print/convention/carta-auspicio-espanol?event={{ uuid }}"><svg class="i i-sm"><use href="#i-print"/></svg>Solicitudes (ES)</a>
+            <a class="btn btn-sm" href="/print/convention/carta-auspicio-ingles?event={{ uuid }}"><svg class="i i-sm"><use href="#i-print"/></svg>Solicitudes (EN)</a>
+            <span class="spacer"></span>
+            <span class="sp-sum">Prometido + recibido <b>{{ usd(totals.sponsor_total) }}</b></span>
+          </div>
+<form id="f-sp-nuevo" method="post" action="/events/{{ uuid }}/sponsors"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"></form>
+<table class="t">
+<colgroup><col><col style="width:104px"><col><col style="width:120px"><col style="width:112px"><col style="width:112px"><col style="width:112px"><col style="width:36px"></colgroup>
+<thead><tr><th>Auspiciador</th><th>Tipo</th><th>Contacto</th><th>Teléfono</th><th class="money">Pedido</th><th class="money">Recibido</th><th class="money">Prometido</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{% for s in sponsors %}<tr><td><a href="/sponsors/{{ s.uuid }}">{{ s.name }}</a></td><td>{{ s.kind }}</td><td>{{ s.contact }}</td><td>{{ s.phone }}</td><td class="money">{{ usd_opt(s.requested) }}</td><td class="money">{{ usd_opt(s.received) }}</td><td class="money">{{ usd_opt(s.promised) }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-sp-{{ s.uuid }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{% else %}<tr><td colspan="8" class="muted">Sin auspiciadores. Añada el primero en la fila de abajo.</td></tr>
+{% endfor %}<tr class="add-row"><td><input class="field" form="f-sp-nuevo" name="sponsor_name" value="{{ new_sponsor.sponsor_name }}" placeholder="Auspiciador nuevo" aria-label="Auspiciador nuevo" required></td><td><select class="field" form="f-sp-nuevo" name="type" aria-label="Tipo">{% for c in categories() %}<option{{ sel(c, new_sponsor.kind) }}>{{ c }}</option>{% endfor %}</select></td><td><input class="field" form="f-sp-nuevo" name="contact_name" value="{{ new_sponsor.contact_name }}" placeholder="Contacto" aria-label="Contacto"></td><td></td><td><input class="field money" form="f-sp-nuevo" name="requested_amount" value="{{ new_sponsor.requested_amount }}" placeholder="0.00" aria-label="Pedido" inputmode="decimal"></td><td colspan="3"><button class="btn btn-sm btn-primary" form="f-sp-nuevo" type="submit" style="width:100%"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></td></tr>
+</tbody>
+<tfoot><tr><td colspan="4" style="text-align:right">Totales</td><td class="money">{{ usd(sp_requested) }}</td><td class="money">{{ usd(totals.sponsor_received) }}</td><td class="money">{{ usd(totals.sponsor_promised) }}</td><td></td></tr></tfoot>
+</table>
+        </div>
+        {% for s in sponsors %}
+        <div class="menu" id="menu-sp-{{ s.uuid }}" popover role="menu">
+          <a href="/sponsors/{{ s.uuid }}" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Ver auspiciador</a>
+          <a href="/print/convention/carta-auspicio-espanol?event={{ uuid }}&amp;sponsor={{ s.uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Carta (ES)</a>
+          <a href="/print/convention/carta-auspicio-ingles?event={{ uuid }}&amp;sponsor={{ s.uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Carta (EN)</a>
+          <a href="/print/convention/labels-carta-auspiciadores?event={{ uuid }}&amp;sponsor={{ s.uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Etiqueta</a>
+          <hr>
+          <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-sp-{{ s.uuid }}"><svg class="i"><use href="#i-trash"/></svg>Quitar auspiciador…</button>
+        </div>
+        <dialog class="dlg" id="dlg-quitar-sp-{{ s.uuid }}" aria-labelledby="dlg-quitar-sp-{{ s.uuid }}-t">
+          <form method="post" action="/sponsors/{{ s.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-sp-{{ s.uuid }}-t">¿Quitar el auspiciador?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita <b>{{ s.name }}</b> de {{ name }}.{% if let Some(r) = s.received %} Tiene {{ usd(r) }} recibido.{% else %} No tiene dinero recibido.{% endif %}</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar</button></div>
+          </form>
+        </dialog>
+        {% endfor %}
+{%- else %}
+        <div class="tabpanel" role="tabpanel" id="tp-fac" aria-labelledby="tab-fac">
+          <div class="toolbar plain-toolbar">
+            <span class="field-hint">PDF de la lista de facturación enviados a contabilidad (OP-SPN-02).</span>
+            <span class="spacer"></span>
+            <label class="btn btn-sm"><svg class="i i-sm"><use href="#i-upload"/></svg>Subir PDF<input type="file" name="file" accept=".pdf" hidden hx-post="/events/{{ uuid }}/billing" hx-encoding="multipart/form-data" hx-trigger="change" hx-target="#main" aria-label="Subir PDF de facturación"></label>
+            <a class="btn btn-sm btn-primary" href="/print/convention/lista-de-facturacion?event={{ uuid }}"><svg class="i i-sm"><use href="#i-print"/></svg>Generar lista de facturación</a>
+          </div>
+<table class="t">
+<colgroup><col style="width:200px"><col><col style="width:36px"></colgroup>
+<thead><tr><th>Fecha de reporte</th><th>PDF</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{% for b in billing %}<tr><td>{{ b.when }}</td><td>{% if let Some(f) = b.file %}<a href="/files/{{ f.uuid }}" target="_blank" rel="noopener"><svg class="i i-sm"><use href="#i-file"/></svg> {{ f.filename }}</a>{% else %}<span class="muted">—</span>{% endif %}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-bill-{{ b.uuid }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{% else %}<tr><td colspan="3" class="muted">Sin archivos.</td></tr>
+{% endfor %}</tbody>
+</table>
+        </div>
+        {% for b in billing %}
+        <div class="menu" id="menu-bill-{{ b.uuid }}" popover role="menu">
+          {% if let Some(f) = b.file %}<a href="/files/{{ f.uuid }}" target="_blank" rel="noopener" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Abrir PDF</a>
+          <hr>{% endif %}
+          <button type="button" role="menuitem" class="danger act-remove" data-open="dlg-quitar-bill-{{ b.uuid }}"><svg class="i"><use href="#i-trash"/></svg>Quitar archivo…</button>
+        </div>
+        <dialog class="dlg" id="dlg-quitar-bill-{{ b.uuid }}" aria-labelledby="dlg-quitar-bill-{{ b.uuid }}-t">
+          <form method="post" action="/billing/{{ b.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-bill-{{ b.uuid }}-t">¿Quitar el archivo?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita <b>{% if let Some(f) = b.file %}{{ f.filename }}{% else %}el archivo{% endif %}</b> de la lista de facturación.</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar</button></div>
+          </form>
+        </dialog>
+        {% endfor %}
+{%- endif %}
+        <div class="menu" id="menu-print" popover role="menu">
+          <a href="/print/convention/lista-de-facturacion?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Lista de facturación</a>
+          <a href="/print/convention/factura-individual?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Registros individuos</a>
+          <a href="/print/convention/factura-convencionista?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Registros afiliados</a>
+          <a href="/print/convention/name-badge-principal?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Badges</a>
+          <a href="/print/convention/labels-sobres?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Etiquetas</a>
+          <a href="/print/convention/carta-auspicio-espanol?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-print"/></svg>Cartas a auspiciadores</a>
+        </div>
+        <div class="menu" id="menu-ev-more" popover role="menu">
+          <a href="/exports/accounting.csv?event={{ uuid }}" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Exportar contabilidad (CSV)</a>
+          {% if shell.is_admin %}<hr class="admin-only">
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-open="dlg-borrar-ev"><svg class="i"><use href="#i-trash"/></svg>Borrar convención…<span class="admin-mark">admin</span></button>{% endif %}
+        </div>
+        {% if shell.is_admin %}{% if registrations > 0 %}<dialog class="dlg" id="dlg-borrar-ev" aria-labelledby="dlg-borrar-ev-t">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-ev-t">No se puede borrar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>{{ name }} tiene {{ registrations }} registro{% if registrations != 1 %}s{% endif %}.</b> Una convención con registros no se borra (AP-04). Cambie el estatus a Inactivo.</div></div></div>
+          <div class="dlg-foot"><span class="left">409 · Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+        </dialog>{% else %}<dialog class="dlg" id="dlg-borrar-ev" aria-labelledby="dlg-borrar-ev-t">
+          <form method="post" action="/events/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-ev-t">¿Borrar la convención?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se borra <b>{{ name }}</b> con sus actividades, planes, auspiciadores y archivos de facturación. No tiene registros.</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+          </form>
+        </dialog>{% endif %}{% endif %}
+      </div>
+{% endblock %}

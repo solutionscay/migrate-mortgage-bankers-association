@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/events">Convenciones</a><span class="sep">/</span><a href="/events/{{ event_uuid }}">{{ event_name }}</a><span class="sep">/</span><span>{{ name }}</span></div>
+      <h1 class="title"><b>Actividad</b> · <span id="ai-name">{{ name }}</span> <span class="sub" id="ai-type">· {{ kind }}</span></h1>
+      <div class="actions">
+        <a class="btn" href="/events/{{ event_uuid }}?tab=items"><svg class="i"><use href="#i-chevron-left"/></svg>Volver</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="grid cols-2">
+          <div class="form">
+            <label for="a-tipo">Tipo</label>{{ f_type|safe }}
+            <label for="a-nombre" class="req">Nombre</label>{{ f_name|safe }}
+            <label for="a-lugar">Lugar/Salón</label>{{ f_room|safe }}
+            <label for="a-precio">Precio</label>{{ f_price|safe }}
+            <label for="a-qty">Qty. por persona</label>{{ f_qty|safe }}
+          </div>
+          <div class="form">
+            <label for="a-f1">Comienza</label>{{ f_start|safe }}
+            <label for="a-h1">Hora</label>{{ f_t1|safe }}
+            <label for="a-f2">Termina</label>{{ end_html()|safe }}
+            <label for="a-h2">Hora</label>{{ f_t2|safe }}
+            <span class="label">Convención</span><div class="field-wrap"><div class="pick pick-fixed">{{ event_name }} <span class="meta">{{ event_location }}</span></div></div>
+          </div>
+        </div>
+        <div class="block" style="margin-top:24px">
+          <div class="block-head"><h3>Registros con esta actividad</h3><span class="count">{{ line_count }}</span>
+            <div class="row"><a class="btn btn-sm" href="/print/convention/lista-de-facturacion-por-actividad?event={{ event_uuid }}&amp;event_item={{ uuid }}"><svg class="i i-sm"><use href="#i-print"/></svg>Lista de facturación por actividad</a></div></div>
+<table class="t">
+<colgroup><col style="width:70px"><col><col><col style="width:80px"><col style="width:110px"><col style="width:130px"></colgroup>
+<thead><tr><th class="num">#</th><th>Nombre</th><th>Compañía</th><th class="num">Qty.</th><th class="money">Total</th><th>Estatus</th></tr></thead>
+<tbody>
+{% for l in lines %}<tr><td class="num">{{ l.number }}</td><td><a href="/registrations/{{ l.reg_uuid }}">{{ l.name }}</a></td><td>{{ l.company }}</td><td class="num">{{ l.qty }}</td><td class="money">{{ usd(l.total) }}</td><td><span class="{{ tag_class(l.status) }}">{{ l.status }}</span></td></tr>
+{% else %}<tr><td colspan="6" class="muted">Ningún registro tiene esta actividad.</td></tr>
+{% endfor %}</tbody>
+<tfoot><tr><td colspan="3" style="text-align:right">{{ lines.len() }} de {{ line_count }} registros</td><td class="num">{{ line_qty }}</td><td class="money">{{ usd(line_total) }}</td><td></td></tr></tfoot>
+</table>
+        </div>
+      </div>
+{% endblock %}
