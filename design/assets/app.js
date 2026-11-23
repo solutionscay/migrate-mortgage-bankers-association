@@ -6,6 +6,9 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
   const params = new URLSearchParams(location.search);
+  // Served by the app (<body data-app="server">): the server sets role, user name and page state, and forms post
+  // for real. The demo-only stubs below stay off.
+  const live = document.body.dataset.app === "server";
 
   // ---- Active module and nav tab (a template variable in the real app) ----
   function markCurrent() {
@@ -149,6 +152,7 @@
 
   // Demo forms do not post anywhere.
   document.addEventListener("submit", (e) => {
+    if (live) return;
     e.preventDefault();
     const d = e.target.closest("dialog");
     if (d) d.close();
@@ -214,12 +218,14 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     markCurrent();
-    let role = params.get("role");
-    if (!role) { try { role = localStorage.getItem("mba-role"); } catch (_) {} }
-    setRole(role === "staff" ? "staff" : "admin");
+    if (!live) {
+      let role = params.get("role");
+      if (!role) { try { role = localStorage.getItem("mba-role"); } catch (_) {} }
+      setRole(role === "staff" ? "staff" : "admin");
+    }
     // Hooks: ?state=<name>, ?tab=<tab id>, ?scroll=<px> or ?at=<element id>, ?open=<dialog id>
     // (else <body data-open="dialog id">), ?menu=<button id>.
-    setState(params.get("state"));
+    setState(live ? document.body.dataset.state : params.get("state"));
     // Static save states: ?state=guardando shows "Guardando…"; any visible invalid field counts as unsaved.
     if (params.get("state")) $$("[hx-patch][aria-invalid=true]").filter((el) => el.offsetParent).forEach((el) =>
       (el.closest(".field-wrap, tr, .status-slot") || el).setAttribute("data-unsaved", ""));
