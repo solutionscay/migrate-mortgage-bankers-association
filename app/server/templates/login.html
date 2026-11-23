@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+  {% include "partials/head.html" %}
+  <title>Iniciar sesión · MBA</title>
+</head>
+<body class="ma-login-page" data-app="server" data-module="inicio" data-nav=""{% if error.is_some() %} data-state="error"{% endif %}>
+  {% include "partials/icons.html" %}
+  <div class="ma-login">
+    <header class="topbar"><span class="brand">MBA <small>Convención y Escuela</small></span></header>
+    <main class="ma-login-main">
+      <form class="block ma-login-box" method="post" action="/login">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="block-head"><h3>Iniciar sesión</h3></div>
+        <div class="block-body stack">
+          {% if let Some(msg) = error %}<div class="error-summary" data-st="error" role="alert"><b>{{ msg }}</b>Revise los datos e intente otra vez.</div>{% endif %}
+          <div class="form">
+            <label for="li-user" class="req">Usuario</label>
+            <div class="field-wrap"><input class="field" id="li-user" name="username" autocomplete="username" value="{{ username }}" required{% if username.is_empty() %} autofocus{% endif %}></div>
+            <label for="li-pass" class="req">Contraseña</label>
+            <div class="field-wrap"><input class="field" id="li-pass" name="password" type="password" autocomplete="current-password" required{% if !username.is_empty() %} autofocus{% endif %}></div>
+          </div>
+          <div class="row ma-login-foot">
+            <span class="field-hint">La sesión cierra tras 10 minutos sin uso.</span>
+            <span class="spacer"></span>
+            <button class="btn btn-primary" type="submit">Entrar</button>
+          </div>
+        </div>
+      </form>
+      <p class="ma-login-note">Demostración con datos ficticios. Si olvidó su contraseña, pida una nueva a un administrador.</p>
+    </main>
+    <footer class="footer"><span><b>MBA</b> · demostración · datos ficticios</span><span class="spacer"></span><span>v0.1 · I1</span></footer>
+  </div>
+</body>
+</html>

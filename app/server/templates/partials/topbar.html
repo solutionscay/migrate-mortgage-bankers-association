@@ -1,0 +1,23 @@
+<header class="topbar">
+  <a class="brand" href="/">MBA <small>Convención y Escuela</small></a>
+  <nav class="modules" aria-label="Módulos">
+    <a href="/people" data-module="convencion"{{ shell.module_current("convencion")|safe }}>Convención</a>
+    <a href="/students" data-module="escuela"{{ shell.module_current("escuela")|safe }}>Escuela</a>
+    <a href="/mail/batches" data-module="correos"{{ shell.module_current("correos")|safe }}>Correos</a>
+    {% if shell.is_admin %}<a href="/admin/users" data-module="admin" class="admin-only"{{ shell.module_current("admin")|safe }}>Admin</a>{% endif %}
+  </nav>
+  <label class="search" role="search">
+    <span class="sr-only">Buscar</span>
+    <svg class="i"><use href="#i-search"/></svg>
+    <input type="search" placeholder="Buscar convencionista, registro, estudiante…" autocomplete="off">
+  </label>
+  <button class="usermenu" type="button" data-menu="menu-user" aria-haspopup="menu" aria-expanded="false">
+    <svg class="i"><use href="#i-user"/></svg><b>{{ shell.username }}</b><svg class="i i-sm"><use href="#i-chevron-down"/></svg>
+  </button>
+  <div class="menu" id="menu-user" popover role="menu">
+    <div class="menu-note">{{ shell.display_name }} · {{ shell.role_label }}</div>
+    <a href="/account/password" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+    <hr>
+    <form method="post" action="/logout"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button type="submit" role="menuitem">Salir</button></form>
+  </div>
+</header>

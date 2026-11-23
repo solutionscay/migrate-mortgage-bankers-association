@@ -1,0 +1,42 @@
+[package]
+name = "mba-server"
+description = "MBA demo web server: axum + askama + rusqlite, server-rendered HTML, one SQLite file."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+# The web server (UI-01 onward).
+name = "mba-server"
+path = "src/main.rs"
+
+[[bin]]
+# OP-SYS-03: deterministic synthetic data into a new database. Server CLI only (AP-14).
+name = "mba-seed"
+path = "src/bin/mba_seed.rs"
+
+[dependencies]
+argon2 = "0.5"
+askama = { version = "0.14", features = ["blocks"] }
+axum = { version = "0.8", features = ["multipart"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+rand = "0.9"
+rand_chacha = "0.9"
+rusqlite = { version = "0.37", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "signal"] }
+tower-layer = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+uuid = { version = "1", features = ["v4"] }
+# Pre-added for phase 2: OP-SYS-02 document templates are sanitized HTML (allow-list).
+ammonia = "4"
+# Pre-added for phase 2: OP-SYS-04 stores the MIME type of each upload (BR-SYS-04).
+mime_guess = "2"
+
+[dev-dependencies]
+http-body-util = "0.1"
+tempfile = "3"
+tower = { version = "0.5", features = ["util"] }

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a></div>
+      <h1 class="title"><b>Inicio</b> <span class="sub">· {{ today }}</span></h1>
+      <div class="actions">
+        <a class="btn" href="/mail/batches"><svg class="i"><use href="#i-mail"/></svg>Envíos</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="grid ma-tiles">
+          <a class="tile" href="/events"><div class="k">Convención</div><div class="v">{{ c.active_events }}</div><div class="d">evento{% if c.active_events != 1 %}s{% endif %} activo{% if c.active_events != 1 %}s{% endif %} · {{ c.registrations_active_events }} registros</div></a>
+          <a class="tile" href="/students"><div class="k">Escuela</div><div class="v">{{ c.active_students }}</div><div class="d">estudiantes activos · {{ c.open_courses }} cursos abiertos</div></a>
+          <a class="tile" href="/mail/batches"><div class="k">Correos</div><div class="v">{{ c.draft_batches }}</div><div class="d">envíos en borrador · {{ c.batches_with_errors }} con errores</div></a>
+          {% if shell.is_admin %}<a class="tile admin-only ma-tile-admin" href="/admin/users"><div class="k">Admin</div><div class="v">{{ c.active_users }}</div><div class="d">usuarios activos · {{ c.locked_users }} bloqueado{% if c.locked_users != 1 %}s{% endif %}</div></a>{% endif %}
+        </div>
+        <div class="grid cols-main-aside" style="margin-top:24px">
+          <div class="block">
+            <div class="block-head"><h3>Actividad reciente</h3><span class="count">últimos cambios</span></div>
+            <table class="t">
+              <colgroup><col style="width:110px"><col style="width:120px"><col></colgroup>
+              <thead><tr><th class="num">Hora</th><th>Módulo</th><th>Cambio</th></tr></thead>
+              <tbody>
+              {% for a in activity %}
+                <tr><td class="num">{{ a.time }}</td><td>{{ a.module }}</td><td>{{ a.text }}</td></tr>
+              {% else %}
+                <tr><td colspan="3" class="muted">Sin cambios registrados.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="block">
+            <div class="block-head"><h3>Accesos</h3></div>
+            <div class="block-body ma-links">
+              <a href="/registrations"><svg class="i"><use href="#i-file"/></svg>Registros de la convención</a>
+              <a href="/enrollments/course"><svg class="i"><use href="#i-list"/></svg>Matrículas</a>
+              <a href="/mail/outbox"><svg class="i"><use href="#i-inbox"/></svg>Bandeja de salida</a>
+              <a href="/account/password"><svg class="i"><use href="#i-lock"/></svg>Cambiar contraseña</a>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}

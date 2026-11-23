@@ -11,3 +11,10 @@
 
 # Promo material (input pack, recordings, video): kept in the private promo kit, vault and share
 /promo/
+
+# Rust build output and local databases
+target/
+/app/data/
+*.db
+*.db-wal
+*.db-shm

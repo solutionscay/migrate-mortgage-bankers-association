@@ -1,0 +1,31 @@
+<nav class="nav" aria-label="Secciones">
+  <div class="nav-group" data-group="inicio">
+    <a href="/" data-nav="inicio"{{ shell.nav_current("inicio")|safe }}>Inicio</a>
+    <a href="/account/password" data-nav="cambiar-contrasena"{{ shell.nav_current("cambiar-contrasena")|safe }}>Cambiar contraseña</a>
+  </div>
+  <div class="nav-group" data-group="convencion">
+    <a href="/people" data-nav="convencionistas"{{ shell.nav_current("convencionistas")|safe }}>Convencionistas</a>
+    <a href="/registrations" data-nav="registros"{{ shell.nav_current("registros")|safe }}>Registros</a>
+    <a href="/events" data-nav="convenciones"{{ shell.nav_current("convenciones")|safe }}>Convenciones</a>
+    <a href="/plans" data-nav="planes"{{ shell.nav_current("planes")|safe }}>Planes</a>
+  </div>
+  <div class="nav-group" data-group="escuela">
+    <a href="/students" data-nav="estudiantes"{{ shell.nav_current("estudiantes")|safe }}>Estudiantes</a>
+    <a href="/affiliates" data-nav="afiliados"{{ shell.nav_current("afiliados")|safe }}>Afiliados</a>
+    <a href="/offerings/course" data-nav="ofrecimientos"{{ shell.nav_current("ofrecimientos")|safe }}>Ofrecimientos</a>
+    <a href="/enrollments/course" data-nav="matriculas"{{ shell.nav_current("matriculas")|safe }}>Matrículas</a>
+    <a href="/grades/import" data-nav="importar-notas"{{ shell.nav_current("importar-notas")|safe }}>Importar notas</a>
+    <a href="/reports" data-nav="reportes"{{ shell.nav_current("reportes")|safe }}>Reportes</a>
+    <a href="/dashboard/enrollments" data-nav="panel-matriculas"{{ shell.nav_current("panel-matriculas")|safe }}>Panel</a>
+  </div>
+  <div class="nav-group" data-group="correos">
+    <a href="/mail/batches" data-nav="envios"{{ shell.nav_current("envios")|safe }}>Envíos</a>
+    <a href="/mail/outbox" data-nav="bandeja-salida"{{ shell.nav_current("bandeja-salida")|safe }}>Bandeja de salida</a>
+  </div>
+  {% if shell.is_admin %}<div class="nav-group admin-only" data-group="admin">
+    <a href="/admin/users" data-nav="admin-usuarios"{{ shell.nav_current("admin-usuarios")|safe }}>Usuarios</a>
+    <a href="/admin/settings" data-nav="admin-configuracion"{{ shell.nav_current("admin-configuracion")|safe }}>Configuración</a>
+    <a href="/admin/mail/templates" data-nav="admin-correo"{{ shell.nav_current("admin-correo")|safe }}>Plantillas y remitentes</a>
+    <a href="/admin/certifications" data-nav="admin-certificaciones"{{ shell.nav_current("admin-certificaciones")|safe }}>Certificaciones y profesores</a>
+  </div>{% endif %}
+</nav>

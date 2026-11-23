@@ -1,0 +1,4 @@
+# Rust stable, pinned (03 Foundation gates). Local builds and the tests use the same compiler.
+[toolchain]
+channel = "1.96.0"
+components = ["clippy", "rustfmt"]

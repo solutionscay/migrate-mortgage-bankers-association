@@ -1,0 +1,8 @@
+<footer class="footer">
+  <span><b>MBA</b> · demostración · datos ficticios</span>
+  {#- Pages without editable fields show an empty slot (no mark); record pages render the mark with data-save="saved". -#}
+  <span class="save-state" data-save="idle" role="status" aria-live="polite">{% if shell.autosave %}<i class="save-mark" aria-hidden="true"></i>{% endif %}<span class="save-text"></span></span>
+  <span class="spacer"></span>
+  <span>{{ shell.display_name }} · {{ shell.role_label }}</span>
+  <span>v0.1 · I1</span>
+</footer>

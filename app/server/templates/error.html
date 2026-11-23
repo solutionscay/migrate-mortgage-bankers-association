@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a></div>
+      <h1 class="title"><b>{{ title }}</b></h1>
+      <div class="actions"></div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="msgpage ma-403"><div class="code">{{ code }}</div><h4>{{ title }}</h4><p>{{ text }}</p><a class="btn btn-sm" href="/">Volver al inicio</a></div>
+      </div>
+{% endblock %}

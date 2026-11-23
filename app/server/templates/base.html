@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head>
+  {% include "partials/head.html" %}
+  <title>{% block title %}MBA{% endblock %} · MBA</title>
+</head>
+<body data-app="server" data-module="{{ shell.module }}" data-nav="{{ shell.nav }}" data-role="{{ shell.role }}"{% block body_state %}{% endblock %} hx-headers='{"X-CSRF-Token": "{{ shell.csrf }}"}'>
+  {% include "partials/icons.html" %}
+  <div class="app">
+    {% include "partials/topbar.html" %}
+    {% include "partials/nav.html" %}
+    {% block pagebar %}{% endblock %}
+    <main class="content" id="main">
+      {% block content %}{% endblock %}
+    </main>
+    {% include "partials/footer.html" %}
+  </div>
+  <dialog class="dlg" id="dialog"></dialog>
+</body>
+</html>
