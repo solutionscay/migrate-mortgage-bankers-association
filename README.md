@@ -2,7 +2,7 @@
 
 A demo of migrating a three-file FileMaker back office for a mortgage bankers association to one web app. The files are MBA (conventions and events), MBS (a school) and MBS_SendMail (bulk e-mail). All data in the demo is synthetic.
 
-The repo holds the full migration plan and the clickable design pages for the new app. The app is not built yet.
+The repo holds the full migration plan, the clickable design pages and the app as it is built. I1 (foundation) is in progress: the server runs, users sign in, and the seed tool fills a database.
 
 ![Registro page (UI-06)](design/screenshots/registro.png)
 
@@ -10,7 +10,8 @@ The repo holds the full migration plan and the clickable design pages for the ne
 
 - The migration plan is done and audited.
 - The M1 design is done. The operator approved it on 2026-11-23 and the epic ([#1](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/1)) is closed.
-- The build is gated (G-BUILD) on the operator's approval of the promo video. Nothing is built before that.
+- The operator approved the promo video (M2) on 2026-11-23. That opened the build gate G-BUILD.
+- I1 Foundation is in progress: server, sign-in, roles, seed tool and the home page are in `app/`.
 
 ## How it was made
 
@@ -83,14 +84,37 @@ The plan cites object files and explorer catalogs. They come from the client's D
 | Id | Epic | State | What it delivers |
 |---|---|---|---|
 | M1 | [#1 Design milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/1) | closed | Static HTML design pages: a component gallery and a page for every kept screen (UI-01 to UI-35), on synthetic data. |
-| M2 | [#2 Promo video milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/2) | open | A promo video made from the plan and the M1 design. It is not part of this repo. |
+| M2 | [#2 Promo video milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/2) | closed | A promo video made from the plan and the M1 design. It is not part of this repo. |
 | I1 | [#3 Foundation](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/3) | open | The server runs, a user signs in, the seed tool fills a database. |
 | I2 | [#4 Convention](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/4) | open | People, events, plans, registrations, payments, sponsors, billing, door check-in. |
 | I3 | [#5 School](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/5) | open | Students, affiliates, courses, enrollments, grades, certifications. |
 | I4 | [#6 Bulk e-mail](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/6) | open | Batches to enrolled students, templates, outbox, Resend adapter. |
 | I5 | [#7 Print, reports and exports](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/7) | open | Every print document, the admin reports and the CSV exports. |
 
-G-BUILD sits between M2 and I1: build work starts only after the operator approves the M2 video. I2 and I3 both depend on I1. I4 depends on I3. I5 depends on I2 and I3.
+G-BUILD sits between M2 and I1. It opened on 2026-11-23, when the operator approved the M2 video. I2 and I3 both depend on I1. I4 depends on I3. I5 depends on I2 and I3.
+
+## Run it
+
+The app is one Rust binary (axum, askama, rusqlite) and one SQLite file. You need the Rust toolchain; `app/rust-toolchain.toml` pins the version.
+
+```sh
+cd app
+cargo build --release
+./target/release/mba-seed --db data/mba.db      # synthetic data; --seed N, --force to replace the file
+MBA_DB=data/mba.db ./target/release/mba-server  # listens on http://127.0.0.1:8080
+```
+
+Open http://127.0.0.1:8080 and sign in. All demo accounts use the password `demo-demo-demo`. The data is synthetic.
+
+| Username | Role | Name |
+|---|---|---|
+| `mvega` | ROLE-ADMIN | Marisol Vega Ortiz |
+| `inieves` | ROLE-ADMIN | Ivelisse Nieves Arroyo |
+| `equintana` | ROLE-STAFF | Edwin Quintana Roldán |
+| `admin.demo` | ROLE-ADMIN | Administración Demo |
+| `staff.demo` | ROLE-STAFF | Personal Demo |
+
+Settings come from the environment: `MBA_BIND` (default `127.0.0.1:8080`), `MBA_DB` (default `data/mba.db`), `MBA_SECURE_COOKIE=1` behind HTTPS. Without `RESEND_API_KEY`, mail stays in the outbox (from I4). The same `--seed` always gives the same database. `cargo test` runs the I1 checks.
 
 ## Design
 
