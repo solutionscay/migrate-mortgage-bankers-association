@@ -3,8 +3,8 @@
 //!
 //! * `sessions` past `expires_at` (12 hours after sign-in) or idle longer than `session.idle_minutes` (10).
 //!   `auth::session::lookup` already refuses such a session; this pass removes the rows left behind.
-//! * Grade-import preview tokens older than 30 minutes: 04 has no table for them yet (OP-ENR-07 arrives in I3 and may
-//!   keep previews in memory or add a table with migration 0002). Until then this step is a no-op.
+//! * Grade-import preview tokens older than 30 minutes (OP-ENR-07): kept in memory by `school::grades`
+//!   (no table in 04), dropped here.
 //! * `stored_files` rows that no record references and that are older than [`ORPHAN_FILE_HOURS`] (24 hours): an
 //!   upload (OP-SYS-04) gets its row first and is attached by the next PATCH or form post, so a fresh row without a
 //!   reference is normal; after a day it is a left-over (replaced logo, removed PDF, abandoned upload). The bytes
@@ -107,9 +107,8 @@ pub fn housekeeping(conn: &Connection, data_dir: &Path, now: NaiveDateTime) -> r
         "DELETE FROM sessions WHERE expires_at <= ?1 OR last_seen_at < ?2",
         params![clock::fmt(now), clock::fmt(now - Duration::minutes(idle))],
     )?;
-    // No grade-import preview table in 04 (see the module note). When I3 adds one, delete rows with
-    // created_at < now - PREVIEW_TOKEN_MINUTES here.
-    let preview_tokens = 0;
+    // Grade-import previews live in memory (no table in 04; `school::grades`): drop those older than 30 minutes.
+    let preview_tokens = crate::school::grades::purge_previews(now);
     let (files, blobs) = purge_orphan_files(conn, data_dir, now)?;
     Ok(Housekeeping { sessions, preview_tokens, files, blobs })
 }

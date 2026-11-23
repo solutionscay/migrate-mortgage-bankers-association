@@ -35,6 +35,9 @@ uuid = { version = "1", features = ["v4"] }
 ammonia = "4"
 # Pre-added for phase 2: OP-SYS-04 stores the MIME type of each upload (BR-SYS-04).
 mime_guess = "2"
+# I3 grades round trip (OP-ENR-06/07, D-23): calamine reads the uploaded XLSX, rust_xlsxwriter writes the export.
+calamine = "0.38.0"
+rust_xlsxwriter = "0.104.0"
 
 [dev-dependencies]
 http-body-util = "0.1"

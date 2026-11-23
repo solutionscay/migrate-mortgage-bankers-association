@@ -150,6 +150,8 @@ pub enum Stamp {
     Full,
     /// `modified_at` only (`users`).
     AtOnly,
+    /// No stamp columns (`calendar_short_course_dates`, `student_certification_interests`).
+    None,
 }
 
 /// The allow list of one resource: its table, key column and fields.
@@ -341,6 +343,7 @@ where
                     rusqlite::params![crate::clock::now_text(), key],
                 )?;
             }
+            Stamp::None => {}
         }
     }
     if changed {

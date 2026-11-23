@@ -17,6 +17,7 @@ pub mod convention;
 pub mod db;
 pub mod error;
 pub mod home;
+pub mod school;
 pub mod seed;
 pub mod sys;
 pub mod web;
@@ -59,6 +60,7 @@ pub fn router(state: AppState) -> Router {
         .merge(autosave::routes())
         .merge(sys::routes())
         .merge(convention::routes::routes())
+        .merge(school::routes::routes())
         .nest("/admin", admin)
         .fallback(error::not_found)
         .layer(from_fn_with_state(state.clone(), auth::csrf_guard))

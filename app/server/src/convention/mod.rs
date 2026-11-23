@@ -75,6 +75,20 @@ pub enum DomainError {
     NoEventItems,
     /// BR-REG-09: the payment is voided already.
     AlreadyVoided,
+    /// I3 BR-STU-07 / AP-04: the student or offering has enrollments (count).
+    HasEnrollments(i64),
+    /// I3 AP-04: the offering has calendar rows (count).
+    HasCalendar(i64),
+    /// I3 AP-07 / BR-CRS-05: calendar rows are never deleted; status Cancelado instead. HTTP 405.
+    NoDelete,
+    /// I3 BR-CRS-01: the calendar row is not active (Pendiente or Confirmado).
+    CalendarNotActive,
+    /// I3 OP-CRS-05: the calendar row has no enrollments.
+    NoEnrollments,
+    /// I3 BR-STU-05: at most 6 certifications of interest.
+    LimitReached(i64),
+    /// I3 BR-ENR-08: the enrollment has a payment; cancel it (BAJA or Canceló) instead.
+    EnrollmentPaid,
     Db(String),
 }
 
@@ -94,6 +108,7 @@ impl DomainError {
             DomainError::NotFound => StatusCode::NOT_FOUND,
             DomainError::Validation(..) => StatusCode::UNPROCESSABLE_ENTITY,
             DomainError::ConfirmRequired => StatusCode::OK,
+            DomainError::NoDelete => StatusCode::METHOD_NOT_ALLOWED,
             DomainError::Db(_) => StatusCode::INTERNAL_SERVER_ERROR,
             _ => StatusCode::CONFLICT,
         }
@@ -123,6 +138,17 @@ impl DomainError {
                 "El Evento seleccionado no tiene detalles. Añada actividades en la convención.".into()
             }
             DomainError::AlreadyVoided => "El pago ya está anulado.".into(),
+            DomainError::HasEnrollments(n) => {
+                format!("Tiene {n} matrícula{}. No se borra.", if *n == 1 { "" } else { "s" })
+            }
+            DomainError::HasCalendar(n) => {
+                format!("Tiene {n} fecha{} en el calendario. No se borra.", if *n == 1 { "" } else { "s" })
+            }
+            DomainError::NoDelete => "Una fecha no se borra: cámbiela a Cancelado.".into(),
+            DomainError::CalendarNotActive => "Esa fecha no está activa (Pendiente o Confirmado).".into(),
+            DomainError::NoEnrollments => "Esta fecha no tiene matrículas.".into(),
+            DomainError::LimitReached(n) => format!("Hasta {n} elementos; no se añade otro."),
+            DomainError::EnrollmentPaid => "La matrícula tiene un pago. No se borra: cámbiela a BAJA o Canceló.".into(),
             DomainError::Db(_) => "Ocurrió un error. Intente otra vez.".into(),
         }
     }
