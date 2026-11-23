@@ -613,6 +613,7 @@ CREATE TABLE registration_items (
   event_item_uuid TEXT NOT NULL REFERENCES event_items(uuid), -- #12 r11; copied from the package item when empty
   price INTEGER NOT NULL DEFAULT 0, -- money: integer cents (#15 package item price, else event item price; stored on creation, BR-REG-05)
   ticket_qty INTEGER NOT NULL DEFAULT 1, -- #13 guests + 1 (BR-REG-03)
+  qty_manual INTEGER NOT NULL DEFAULT 0 CHECK (qty_manual IN (0, 1)), -- new (D-88): 1 = qty set by hand (PATCH of qty); guest changes skip the row (BR-REG-03)
   hotel_reservation_num TEXT, -- #19 hotel items only (BR-REG-06)
   adicional TEXT, -- #18 extra nights, hotel items only
   mesa TEXT, -- #23 table number, seating items only (BR-REG-06)

@@ -100,10 +100,10 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | POST | `/registrations/{id}/items` | action | OP-REG-04 | UI-06 | AP-06 | Add one event item of the same event. Returns items portal + totals (OOB). |
 | DELETE | `/registrations/{id}/items/{item_id}` | action | OP-REG-04 | UI-06 | AP-06 | Two-step confirm. |
 | GET | `/registrations/{id}/items/{item_id}/attributes` | partial | OP-REG-05 | UI-06 | AP-03 | Dialog by item type: hotel (reservation, extra nights) or seating (table) (BR-REG-06). |
-| PATCH | `/registrations/{id}/items/{item_id}` | action | OP-REG-05 | UI-06 | AP-03 | Line fields: price, qty, no charge, attributes (hotel reservation and nights, table). Returns the row and the totals block out of band (`hx-swap-oob`, `id="totales"`). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
-| POST | `/registrations/{id}/guests` | action | OP-REG-06 | UI-06 | AP-06 | Add guest; recompute `ticket_qty` of all items (BR-REG-03) in the same transaction. |
-| PATCH | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-03 | Badge edit, `hx-trigger="change"` (replaces OnObjectExit, layout 29 key 56). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
-| DELETE | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-06 | Recompute `ticket_qty`. |
+| PATCH | `/registrations/{id}/items/{item_id}` | action | OP-REG-05 | UI-06 | AP-03 | Line fields: price, qty, no charge, attributes (hotel reservation and nights, table). A qty patch also sets `qty_manual` = 1 (BR-REG-03, D-88). Returns the row and the totals block out of band (`hx-swap-oob`, `id="totales"`). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
+| POST | `/registrations/{id}/guests` | action | OP-REG-06 | UI-06 | AP-06 | Add guest; recompute `ticket_qty` of items with `qty_manual` = 0 (BR-REG-03, D-88) in the same transaction. |
+| PATCH | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-03 | Badge edit, `hx-trigger="change"` (replaces OnObjectExit, layout 29 key 56); recompute `ticket_qty` of items with `qty_manual` = 0 (D-88). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
+| DELETE | `/registrations/{id}/guests/{guest_id}` | action | OP-REG-06 | UI-06 | AP-06 | Recompute `ticket_qty` of items with `qty_manual` = 0 (D-88). |
 | POST | `/registrations/{id}/payments` | action | OP-REG-07 | UI-06 | AP-03 | Amount > 0. |
 | POST | `/payments/{id}/void` | action | OP-REG-08 | UI-06 | AP-05 | ROLE-ADMIN; reason required (BR-REG-09). |
 | POST | `/registrations/{id}/cancel` | action | OP-REG-09 | UI-06 | AP-05 | Status Canceló. |
@@ -236,7 +236,7 @@ One row per operation of `07`. The route column names the route that calls it; t
 | REG: select plan | OP-REG-03 | `POST /registrations/{id}/plan` | plan id, `confirm` | items portal + totals (OOB) | `objects/MBA.fmp12/scripts/45-registrations.selectPackage-select.txt` | one transaction: delete this registration's items, insert active plan items, update registration | AP-03, AP-09 | ConfirmRequired, PlanNotOfEvent |
 | REG: add/remove item | OP-REG-04 | `POST /registrations/{id}/items`, `DELETE .../items/{item_id}` | event item id | items portal + totals | `objects/MBA.fmp12/layouts/29-Registro.txt` | single insert/delete | AP-06 | ItemNotOfEvent, ConfirmRequired |
 | REG: item attributes | OP-REG-05 | `POST .../items/{item_id}/attributes` | reservation, nights or table | item row | `objects/MBA.fmp12/scripts/37-registration_items_edit_attributes.txt` | single update | AP-03 | Validation |
-| REG: guests | OP-REG-06 | `/registrations/{id}/guests...` | name badge | guests + items portals | `objects/MBA.fmp12/scripts/38-registration_update_guests.txt`, `objects/MBA.fmp12/scripts/39-registration_delete_guest.txt` | one transaction: guest change + `ticket_qty` of all items | AP-03, AP-06 | Validation |
+| REG: guests | OP-REG-06 | `/registrations/{id}/guests...` | name badge | guests + items portals | `objects/MBA.fmp12/scripts/38-registration_update_guests.txt`, `objects/MBA.fmp12/scripts/39-registration_delete_guest.txt` | one transaction: guest change + `ticket_qty` of items with `qty_manual` = 0 (D-88) | AP-03, AP-06 | Validation |
 | REG: record payment | OP-REG-07 | `POST /registrations/{id}/payments` | amount, type, number | payments portal + totals | `objects/MBA.fmp12/scripts/35-registration_add_payment.txt` | single insert | AP-03 | Validation (amount > 0) |
 | REG: void payment | OP-REG-08 | `POST /payments/{id}/void` | reason | payments portal + totals | product decision (D-09) | update + `audit_log` in one transaction | AP-05 | Forbidden, ReasonRequired |
 | REG: cancel/delete registration | OP-REG-09 | `POST /registrations/{id}/cancel`, `DELETE /registrations/{id}` | `confirm` | redirect | `objects/MBA.fmp12/relationships/4-registration_payments.txt` | update, or delete with cascade of items and guests | AP-05, AP-06 | HasPayments |
@@ -330,7 +330,7 @@ Every query selects only the columns its template shows. No route returns a whol
 | Command | Preconditions | Allowed fields | Persistent invariant owner | Atomic writes | Audit | Forbidden cases/tests |
 |---|---|---|---|---|---|---|
 | OP-REG-03 select plan | registration has an event; plan belongs to that event; `confirm=1` when a plan is set | `package_uuid` | BR-REG-02 | delete items of this registration only, insert active plan items, update registration | `registration.plan_changed` | other registrations untouched (T-07-01); no confirm -> confirm dialog, nothing written (T-05-03) |
-| OP-REG-06 guests | registration exists | guest `name` | BR-REG-03 | guest write + `ticket_qty` of all items | none | T-07-02 |
+| OP-REG-06 guests | registration exists | guest `name` | BR-REG-03 | guest write + `ticket_qty` of items with `qty_manual` = 0 (D-88) | none | T-07-02, T-05-10 |
 | OP-REG-07 payment | amount > 0 | `payment`, `payment_type`, `payment_number` | BR-REG-08 | single insert | none | amount 0 refused |
 | OP-REG-08 void payment | ROLE-ADMIN; reason not empty; not voided yet | `void_reason` | BR-REG-09 | update + `audit_log` | `payment.void` | staff -> 403 (T-07-04) |
 | OP-REG-09 delete registration | no payments | none | BR-REG-09 | delete with cascade | `registration.delete` | has payment -> refused (T-05-04) |
@@ -474,6 +474,7 @@ Each operation row above names its object files. Tests (the semantic fixtures T-
 | T-05-07 | `DELETE /calendar/{kind}/{id}` | no route -> 405 |
 | T-05-08 | `POST /mail/emails/{id}/send` without `RESEND_API_KEY` | `mail_outbox` row with provider `mock`; e-mail Sent; no network call |
 | T-05-09 | EXT-01 with a local HTTP mock of the Resend API | request body, bearer header and `Idempotency-Key`; provider 422 -> `error` = 1, message on top of `error_log` |
+| T-05-10 | `PATCH /registrations/{id}/items/{item_id}` (qty), then `POST /registrations/{id}/guests` | qty patch sets `qty_manual` = 1; the guest add changes only items with `qty_manual` = 0; the hand-set qty stays (D-88) |
 | T-05-10 | `POST /mail/batches/{id}/send-all` twice | second call -> 409 while JOB-01 runs; sent e-mails skipped |
 | T-05-11 | `GET /calendar-options/{kind}` | inactive rows absent; affiliate student sees the member price |
 | T-05-12 | `POST /grades/import/{token}/apply` with another user's token | 404 |

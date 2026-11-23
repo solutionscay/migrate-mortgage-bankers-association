@@ -27,7 +27,7 @@ The screens with the most logic: several portals, a write that changes other row
 
 | Screen | Why it is meaty | Before screen (mockup) | Design page (M1) |
 |---|---|---|---|
-| UI-06 Registro | 3 portals (items, guests, payments), event and plan pickers, plan change deletes and rebuilds items after a confirm (BR-REG-02), guest change recomputes every item quantity (BR-REG-03), live total and balance (BR-REG-04, BR-REG-08), payment void (BR-REG-09) | `mockups/registro.png`, `mockups/registro.html` | `design/registro.html` |
+| UI-06 Registro | 3 portals (items, guests, payments), event and plan pickers, plan change deletes and rebuilds items after a confirm (BR-REG-02), guest change recomputes every item quantity not set by hand (BR-REG-03, D-88), live total and balance (BR-REG-04, BR-REG-08), payment void (BR-REG-09) | `mockups/registro.png`, `mockups/registro.html` | `design/registro.html` |
 | UI-09 Convención | event header with live totals (BR-EVT-04), 3 tabs (Actividades, Auspiciadores, Facturación), print launchers for invoices and sponsor letters | `mockups/convencion.png`, `mockups/convencion.html` (Actividades); `mockups/convencion-auspiciadores.png` (Auspiciadores); `mockups/convencion-facturacion.png` (Facturación) | `design/convencion.html` |
 | UI-13 Planes | event pick builds plan items (BR-EVT-06, was an OnObjectSave trigger), active toggle with conditional style, live plan price (BR-EVT-05) | `mockups/planes.png`, `mockups/planes.html` | `design/planes.html` |
 | UI-34 Lista de Facturación (print) | billing list per registration: items, plan, costs, totals (BR-REG-04, BR-REG-05); the model for every print page | `mockups/lista-facturacion.png`, `mockups/lista-facturacion.html` | `design/lista-facturacion.html` |
@@ -184,7 +184,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 | Collection | Relationship/query | Columns/actions | Sort/filter/page | Create/delete rule | Empty/error behavior | Source evidence |
 |---|---|---|---|---|---|---|
 | Actividades | `registration_items` of this registration, `v_registration_item_lines` | type, name, start, end, price, qty, total, attributes (hotel reservation / nights / table), "Editar atributos", delete | event-item date | add: event items of the same event (OP-REG-04); delete with confirm (AP-06) | empty hint | key 2, key 11, value list `registrationSelectEventItems` |
-| Acompañantes | `registration_guests` | name badge, delete | entry order | add/delete recompute qty (BR-REG-03) | "Sin acompañantes" | keys 54, 56 |
+| Acompañantes | `registration_guests` | name badge, delete | entry order | add/delete recompute qty, except qty set by hand (BR-REG-03, D-88) | "Sin acompañantes" | keys 54, 56 |
 | Pagos | `payments` | date, amount, type, number, voided marker, "Anular" (admin) | created desc | add OP-REG-07; never deleted (AP-05) | "Sin pagos" | key 17, key 31 |
 
 #### Conditional presentation
