@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Certificaciones y profesores{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/admin/users">Admin</a><span class="sep">/</span><span>Certificaciones y profesores</span></div>
+      <h1 class="title"><b>Certificaciones y profesores</b><span class="sub"> · <span class="tag draft">borrador</span></span></h1>
+      <div class="actions">
+
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+          <div class="stack">
+          <div class="banner warn"><svg class="i"><use href="#i-alert"/></svg><div><b>Pantalla de inventario.</b> La fuente no llama a estas pantallas (D-19). Los cambios se guardan, pero ningún proceso de la escuela los pide todavía.</div></div>
+          {%- if let Some(n) = notice %}
+          <div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div>{{ n }}</div></div>
+          {%- endif %}
+          <div class="grid ma-crt">
+            <div class="block">
+              <div class="block-head"><h3>Certificaciones</h3><span class="count">{{ certs.len() }}</span><div class="row"><button class="btn btn-sm" type="button" data-open="dlg-nueva-crt"><svg class="i i-sm"><use href="#i-plus"/></svg>Nueva</button></div></div>
+              {%- if certs.is_empty() %}
+              <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin certificaciones</h4><p>Cree la primera con «Nueva».</p></div>
+              {%- else %}
+              <table class="t"><colgroup><col><col style="width:100px"></colgroup><thead><tr><th>Nombre</th><th class="num">Requisitos</th></tr></thead><tbody>
+              {%- for c in certs %}
+              <tr{% if let Some(r) = record %}{% if r.uuid == c.uuid %} aria-selected="true"{% endif %}{% endif %}><td><a href="/admin/certifications/{{ c.uuid }}" hx-get="/admin/certifications/{{ c.uuid }}" hx-target="#main" hx-push-url="true" id="crt-name-{{ c.uuid }}">{{ c.name }}</a></td><td class="num">{{ c.requirements }}</td></tr>
+              {%- endfor %}
+              </tbody></table>
+              {%- endif %}
+            </div>
+            {%- if let Some(r) = record %}
+            <div class="block" id="crt-record">
+              <div class="block-head"><h3 id="crt-title">{{ r.name }}</h3><span class="tag draft">borrador</span><div class="row"><button class="btn btn-sm btn-danger" type="button" data-open="dlg-borrar-crt"><svg class="i i-sm"><use href="#i-trash"/></svg>Borrar</button></div></div>
+              <div class="block-body stack">
+                <div class="form">
+                  <label for="ct-n" class="req">Nombre</label>{{ r.description.html()|safe }}
+                  <label for="ct-code" class="req">Código</label>{{ r.code.html()|safe }}
+                  <label for="ct-elec">Electivas requeridas</label>{{ r.electives.html()|safe }}
+                </div>
+                <div class="table-wrap"><table class="t"><colgroup><col><col style="width:130px"><col style="width:36px"></colgroup>
+                  <thead><tr><th>Curso</th><th>Tipo</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+                  <tbody>
+                  {%- for q in r.requirements %}
+                  <tr><td>{{ q.course }}</td><td><span class="tag {{ q.tag() }}">{{ q.kind }}</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-req-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+                  {%- endfor %}
+                  {%- if r.requirements.is_empty() %}
+                  <tr><td colspan="3" class="muted">Sin cursos todavía. Añada el primero en la fila de abajo.</td></tr>
+                  {%- endif %}
+                  <tr class="add-row"><td><select class="field" name="course_uuid" form="req-add" aria-label="Curso" required><option value="">Escoja un curso…</option>{% for (v, l) in r.courses %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></td><td><select class="field" name="type" form="req-add" aria-label="Tipo"><option>Requisito</option><option>Electiva</option></select></td><td class="col-act"><button class="btn btn-sm btn-icon" type="submit" form="req-add" aria-label="Añadir curso"><svg class="i i-sm"><use href="#i-plus"/></svg></button></td></tr>
+                  </tbody></table></div>
+                <form id="req-add" method="post" action="/admin/certifications/{{ r.uuid }}/requirements" hx-post="/admin/certifications/{{ r.uuid }}/requirements" hx-target="#main"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"></form>
+              </div>
+            </div>
+            {%- else %}
+            <div class="block"><div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Escoja una certificación</h4><p>O cree una con «Nueva».</p></div></div>
+            {%- endif %}
+            <div class="block">
+              <div class="block-head"><h3>Profesores</h3><span class="count">{{ profs.len() }}</span><div class="row"><button class="btn btn-sm" type="button" data-open="dlg-nuevo-prof"><svg class="i i-sm"><use href="#i-plus"/></svg>Nuevo</button></div></div>
+              <table class="t"><colgroup><col><col style="width:36px"></colgroup><thead><tr><th>Nombre</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead><tbody>
+              {%- for p in profs %}
+              <tr id="prof-{{ p.uuid }}"><td>{{ p.name }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-prof-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+              {%- endfor %}
+              {%- if profs.is_empty() %}
+              <tr><td colspan="2" class="muted">Sin profesores.</td></tr>
+              {%- endif %}
+              </tbody></table>
+            </div>
+          </div>
+          </div>
+      </div>
+      {%- if let Some(r) = record %}
+      {%- for q in r.requirements %}
+      <div class="menu" id="menu-req-{{ loop.index }}" popover role="menu">
+        <button type="button" role="menuitem" hx-patch="/admin/certifications/{{ r.uuid }}/requirements/{{ q.uuid }}" hx-vals='{"type": "{{ q.other_kind() }}"}' hx-target="#main"><svg class="i"><use href="#i-edit"/></svg>Cambiar a {{ q.other_kind() }}</button>
+        <hr>
+        <button type="button" role="menuitem" class="danger act-remove" hx-delete="/admin/certifications/{{ r.uuid }}/requirements/{{ q.uuid }}" hx-target="#main"><svg class="i"><use href="#i-trash"/></svg>Quitar curso</button>
+      </div>
+      {%- endfor %}
+      <dialog class="dlg" id="dlg-borrar-crt" aria-labelledby="dlg-borrar-crt-t">
+        <form method="post" action="/admin/certifications/{{ r.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+        <div class="dlg-head danger"><h2 id="dlg-borrar-crt-t">¿Borrar la certificación?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="dlg-body"><p>Se borra <b>{{ r.name }}</b> con sus {{ r.requirements.len() }} cursos. Si un estudiante tiene progreso o graduación en ella, no se borra.</p></div>
+        <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+        </form>
+      </dialog>
+      {%- endif %}
+      {%- for p in profs %}
+      <div class="menu" id="menu-prof-{{ loop.index }}" popover role="menu">
+        <button type="button" role="menuitem" hx-get="/admin/professors/{{ p.uuid }}/edit" hx-target="#prof-{{ p.uuid }}" hx-swap="outerHTML"><svg class="i"><use href="#i-edit"/></svg>Editar</button>
+        <hr>
+        <form method="post" action="/admin/professors/{{ p.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE"><button type="submit" role="menuitem" class="danger act-delete"><svg class="i"><use href="#i-trash"/></svg>Borrar profesor</button></form>
+      </div>
+      {%- endfor %}
+      <dialog class="dlg" id="dlg-nueva-crt" aria-labelledby="dlg-nueva-crt-t">
+        <form method="post" action="/admin/certifications"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+        <div class="dlg-head"><h2 id="dlg-nueva-crt-t">Nueva certificación</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="dlg-body"><div class="form">
+          <label for="nc-n">Nombre</label><div class="field-wrap"><input class="field" id="nc-n" name="description" value="{{ new_crt.description }}"{% if let Some(m) = self.new_crt_error("description") %} aria-invalid="true" aria-describedby="nc-n-err"><div class="field-error" id="nc-n-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% else %}>{% endif %}</div>
+          <label for="nc-c" class="req">Código</label><div class="field-wrap"><input class="field" id="nc-c" name="certification" value="{{ new_crt.code }}" required{% if let Some(m) = self.new_crt_error("certification") %} aria-invalid="true" aria-describedby="nc-c-err"><div class="field-error" id="nc-c-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% else %}><div class="field-hint">Sigla corta, por ejemplo COH.</div>{% endif %}</div>
+        </div><p class="field-hint">Cada estudiante recibe una fila de progreso para la certificación nueva.</p></div>
+        <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+        </form>
+      </dialog>
+      <dialog class="dlg" id="dlg-nuevo-prof" aria-labelledby="dlg-nuevo-prof-t">
+        <form method="post" action="/admin/professors"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+        <div class="dlg-head"><h2 id="dlg-nuevo-prof-t">Nuevo profesor</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="dlg-body"><div class="form">
+          <label for="np-n" class="req">Nombre</label><div class="field-wrap"><input class="field" id="np-n" name="name" value="{{ new_prof.name }}" required{% if let Some(m) = new_prof.error %} aria-invalid="true" aria-describedby="np-n-err"><div class="field-error" id="np-n-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% else %}>{% endif %}</div>
+        </div></div>
+        <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+        </form>
+      </dialog>
+      {%- if let Some(m) = refusal %}
+      <dialog class="dlg" id="dlg-refusal" aria-labelledby="dlg-refusal-t">
+        <div class="dlg-head danger"><h2 id="dlg-refusal-t">No se pudo hacer</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="dlg-body"><p>{{ m }}</p></div>
+        <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
+      </dialog>
+      {%- endif %}
+{% endblock %}

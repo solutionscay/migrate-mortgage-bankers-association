@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Importar notas{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><span>Importar notas</span></div>
+      <h1 class="title" id="grd-title"><b>Importar notas</b> <span class="sub">· paso {{ step }} de 3</span></h1>
+      <div class="actions">
+
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <ol class="sch-steps" aria-label="Pasos">
+          <li{{ self.step_class(1)|safe }}{{ self.step_current(1)|safe }}><b>1</b> Subir archivo</li>
+          <li{{ self.step_class(2)|safe }}{{ self.step_current(2)|safe }}><b>2</b> Revisar cambios</li>
+          <li{{ self.step_class(3)|safe }}{{ self.step_current(3)|safe }}><b>3</b> Aplicar</li>
+        </ol>
+{%- if applied.is_some() %}
+
+        <div class="block">
+          <div class="block-head"><h3>3 · Aplicar</h3></div>
+          <div class="block-body stack">
+            <div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div><b>{{ self.applied_text().0 }}</b> {{ self.applied_text().1 }} La puntuación tomó el promedio final; letra y aprobado se recalcularon.</div></div>
+            <div class="row"><span class="spacer"></span><a class="btn" href="/grades/import">Importar otro archivo</a><a class="btn btn-primary" href="/enrollments/course">Ver matrículas</a></div>
+          </div>
+        </div>
+{%- else if let Some(p) = preview %}
+
+        <div class="block">
+          <div class="block-head"><h3>1 · Archivo</h3><span class="count">exportado desde Matrículas (XLSX)</span></div>
+          <div class="block-body row">
+            <span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>{{ p.file_name }}<button class="x" type="button" hx-get="/grades/import" hx-target="#main" aria-label="Quitar archivo"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <span class="field-hint">{{ p.rows_read }} fila{{ self.plural(p.rows_read, "", "s") }} leída{{ self.plural(p.rows_read, "", "s") }}{% if !p.scope.is_empty() %} · {{ p.scope }}{% endif %}</span>
+            <span class="spacer"></span>
+            <label class="btn btn-sm"><svg class="i i-sm"><use href="#i-upload"/></svg>Escoger otro archivo<input type="file" name="file" accept=".xlsx" hidden hx-post="/grades/import" hx-encoding="multipart/form-data" hx-trigger="change" hx-target="#main" aria-label="Escoger otro archivo XLSX"></label>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:minmax(0,1fr) 300px;margin-top:16px;align-items:start">
+          <div class="block">
+            <div class="block-head"><h3>2 · Vista previa</h3><span class="count">{{ p.changes }} cambio{{ self.plural(p.changes, "", "s") }} · {{ p.unchanged }} sin cambio</span></div>
+            {%- if p.rows.is_empty() %}
+            <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Ninguna fila tiene pareja</h4><p>Ningún serial del archivo es de una matrícula. Revise que el archivo sea el que exportó Matrículas.</p></div>
+            {%- else %}
+            <table class="t">
+              <colgroup><col style="width:80px"><col><col style="width:150px"><col style="width:150px"><col style="width:70px"><col style="width:130px"></colgroup>
+              <thead><tr><th class="num">Serial</th><th>Estudiante</th><th>Examen</th><th>Promedio final</th><th class="c">Letra</th><th>Resultado</th></tr></thead>
+              <tbody>
+              {%- for r in p.rows %}
+              <tr><td class="num">{{ r.serial }}</td><td>{{ r.student }}{% if r.others > 0 %} <span class="muted">{{ r.other_text() }}</span>{% endif %}</td>
+                <td>{% if let Some((o, n)) = r.examen %}<span class="diff-old">{% if o.is_empty() %}—{% else %}{{ o }}{% endif %}</span> → <span class="diff-new">{{ n }}</span>{% else %}<span class="muted">sin cambio</span>{% endif %}</td>
+                <td>{% if let Some((o, n)) = r.final_avg %}<span class="diff-old">{% if o.is_empty() %}—{% else %}{{ o }}{% endif %}</span> → <span class="diff-new">{{ n }}</span>{% else %}<span class="muted">sin cambio</span>{% endif %}</td>
+                <td class="c">{{ r.letter }}</td>
+                <td>{% match r.passed %}{% when Some(true) %}<span class="tag ok">Aprobado</span>{% when Some(false) %}<span class="tag err">No aprobado</span>{% when None %}<span class="tag">Sin notas</span>{% endmatch %}</td></tr>
+              {%- endfor %}
+              </tbody>
+            </table>
+            {%- endif %}
+            <div class="block-body"><span class="field-hint">La puntuación toma el promedio final; letra y aprobado se recalculan (BR-ENR-03 a BR-ENR-05). Una celda vacía deja la nota guardada.</span></div>
+          </div>
+          <div class="block">
+            <div class="block-head"><h3>Sin pareja</h3><span class="count">{{ p.unmatched.len() }} fila{{ self.plural(p.unmatched.len(), "", "s") }}</span></div>
+            {%- if p.unmatched.is_empty() %}
+            <div class="block-body"><span class="field-hint">Todas las filas del archivo tienen pareja.</span></div>
+            {%- else %}
+            <table class="t">
+              <colgroup><col style="width:70px"><col></colgroup>
+              <thead><tr><th>Fila</th><th>Serial en el archivo</th></tr></thead>
+              <tbody>
+              {%- for u in p.unmatched %}
+              <tr><td class="num">{{ u.row }}</td><td>{% if u.serial.is_empty() %}<span class="muted">vacío</span>{% else %}{{ u.serial }}{% endif %} <span class="tag warn">{{ u.tag() }}</span></td></tr>
+              {%- endfor %}
+              </tbody>
+            </table>
+            <div class="block-body"><span class="field-hint">No se crean matrículas. Estas filas no cambian nada.</span></div>
+            {%- endif %}
+          </div>
+        </div>
+
+        <div class="block" style="margin-top:16px">
+          <div class="block-head"><h3>3 · Aplicar</h3></div>
+          <div class="block-body row">
+            <svg class="i"><use href="#i-info"/></svg><span>Nada cambia antes de «Aplicar». Se aplica todo en una sola transacción.</span>
+            <span class="spacer"></span>
+            <a class="btn" href="/enrollments/course">Cancelar</a>
+            {%- if p.changes > 0 %}
+            <button class="btn btn-primary" type="button" data-open="dlg-aplicar">Aplicar {{ p.changes }} cambio{{ self.plural(p.changes, "", "s") }}</button>
+            {%- else %}
+            <button class="btn btn-primary" type="button" disabled>Nada que aplicar</button>
+            {%- endif %}
+          </div>
+        </div>
+        {%- if p.changes > 0 %}
+
+        <dialog class="dlg" id="dlg-aplicar" aria-labelledby="dlg-aplicar-t">
+          <form method="post" action="/grades/import/{{ p.token }}/apply"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          <div class="dlg-head"><h2 id="dlg-aplicar-t">Aplicar notas</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se actualiza{{ self.plural(p.changes, "", "n") }} <b>{{ p.changes }} matrícula{{ self.plural(p.changes, "", "s") }}</b>{% if !p.scope.is_empty() %} de {{ p.scope }}{% endif %}.{% if !p.unmatched.is_empty() %} {% if p.unmatched.len() == 1 %}La fila sin pareja no cambia{% else %}Las {{ p.unmatched.len() }} filas sin pareja no cambian{% endif %} nada.{% endif %}</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Aplicar {{ p.changes }} cambio{{ self.plural(p.changes, "", "s") }}</button></div>
+          </form>
+        </dialog>
+        {%- endif %}
+{%- else %}
+
+        <div class="block">
+          <div class="block-head"><h3>1 · Archivo</h3><span class="count">exportado desde Matrículas (XLSX)</span></div>
+          <div class="block-body stack">
+            {%- if let Some(e) = error %}
+            <div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div>{{ e }}</div></div>
+            {%- endif %}
+            <div class="row">
+              <label class="btn btn-primary"><svg class="i"><use href="#i-upload"/></svg>Escoger archivo<input type="file" name="file" accept=".xlsx" hidden hx-post="/grades/import" hx-encoding="multipart/form-data" hx-trigger="change" hx-target="#main" aria-label="Escoger archivo XLSX"></label>
+              <span class="field-hint">Use el XLSX de «Exportar notas» en Matrículas: columnas Serial, Estudiante y las notas. La pareja se busca por el serial de la matrícula.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" style="margin-top:16px">
+          <div class="block-head"><h3>3 · Aplicar</h3></div>
+          <div class="block-body row">
+            <svg class="i"><use href="#i-info"/></svg><span>Primero verá los cambios. Nada cambia antes de «Aplicar».</span>
+          </div>
+        </div>
+{%- endif %}
+      </div>
+{% endblock %}
