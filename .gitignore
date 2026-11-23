@@ -8,3 +8,6 @@
 /migration/objects/
 /migration/explorers/
 /migration/01_discovery_signals.tsv
+
+# Promo material (input pack, recordings, video): kept in the private promo kit, vault and share
+/promo/

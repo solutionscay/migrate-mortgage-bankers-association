@@ -23,7 +23,7 @@ The real FileMaker screenshots (`filemaker-source/screenshots`) are client mater
 
 ## Meaty screens
 
-The screens with the most logic: several portals, a write that changes other rows, a trigger, a confirm step, or live totals. The design milestone (M1) draws these in full; every other kept screen gets a page shell. The promo video (M2) is made from the design pages; its before/after part uses only the meaty screens with a before screen (operator, `plan.md`).
+The screens with the most logic: several portals, a write that changes other rows, a trigger, a confirm step, or live totals. The design milestone (M1) draws these in full; every other kept screen gets a page shell. The promo video (M2) is made from the design pages, in the private promo kit, vault and share (not in this repository); its before/after part uses only the meaty screens with a before screen (operator, `plan.md`).
 
 | Screen | Why it is meaty | Before screen (mockup) | Design page (M1) |
 |---|---|---|---|
@@ -500,7 +500,7 @@ No SSN field exists (D-06).
 
 ## Design milestone (M1) inputs
 
-The design milestone produces static HTML design pages under `design/` (shape of migrate-karbonfm `design/`): shared partials (head, top bar with module tabs, nav tabs, footer), one CSS file, a component set (`design/components.html`), and a page shell for every kept screen (UI-01 to UI-35; full list in `03_migration_plan.md` "M1 page list"), with the same synthetic data as the mockups. The table below lists the pages drawn in full. The promo video (M2, episode 1) is made from the design pages and compares each before mockup with its design page.
+The design milestone produces static HTML design pages under `design/` (shape of migrate-karbonfm `design/`): shared partials (head, top bar with module tabs, nav tabs, footer), one CSS file, a component set (`design/components.html`), and a page shell for every kept screen (UI-01 to UI-35; full list in `03_migration_plan.md` "M1 page list"), with the same synthetic data as the mockups. The table below lists the pages drawn in full. The promo video (M2, episode 1) is made from the design pages and compares each before mockup with its design page. Its input pack and the video live in the private promo kit, vault and share, not in this repository.
 
 | Design page | Screen | Before screen |
 |---|---|---|

@@ -76,7 +76,7 @@ The plan cites object files as `objects/<file>/<kind>/<id>-<name>.txt` and the e
 ## Milestones
 
 1. **M1 Design.** Static HTML design pages: a component gallery and a page for every kept screen (UI-01 to UI-35), on synthetic data.
-2. **M2 Promo video.** The first promo video, made from the plan and the M1 design.
+2. **M2 Promo video.** The first promo video, made from the plan and the M1 design. The input pack and the video live in the private promo kit, vault and share, not in this repository.
 3. **G-BUILD gate.** No build work starts until the operator approves the M2 video.
 4. **I1 Foundation.** The server runs, a user signs in, the seed tool fills a database.
 5. **I2 Convention.** People, events, plans, registrations, payments, sponsors, billing, door check-in.
