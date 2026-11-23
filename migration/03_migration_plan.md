@@ -37,7 +37,7 @@ Gate log:
 
 | Gate | Opened on | Approved by | Evidence |
 |---|---|---|---|
-| G-BUILD | not open | operator | M2 video link and approval note |
+| G-BUILD | 2026-11-23 | operator | M2 video approved (49 s, 1080p, private share) |
 
 ### Increment table
 
@@ -131,7 +131,7 @@ The input pack and the video live in the private promo kit, vault and share. The
 
 ## Foundation gates
 
-- [ ] G-BUILD is open: M2 done and approved by the operator (see "Build gate").
+- [x] G-BUILD is open: M2 done and approved by the operator (see "Build gate").
 - [ ] Repository/runtime versions are reproducible: `rust-toolchain.toml`, `Cargo.lock` (I1). CI quality gates: out of scope (demo); `cargo test` runs locally.
 - [x] Database schema decisions resolve source keys, TO aliases, compound relationships, validation changes, containers, and timezone policy (`04`: uuid keys, D-11 key links, CHECKs, `stored_files`, Puerto Rico local time D-67).
 - [ ] Identity provisioning and default-deny authorization skeleton exist before user data operations (I1: AP-01, AP-02, `require_role`).
