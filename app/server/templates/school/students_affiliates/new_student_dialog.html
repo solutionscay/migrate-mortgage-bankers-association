@@ -1,0 +1,19 @@
+        <dialog class="dlg" id="dlg-nuevo" aria-labelledby="dlg-nuevo-t">
+          <form method="post" action="/students"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-nuevo-t">Nuevo estudiante</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body">
+              {%- if new_student.has_errors() %}
+              <div class="error-summary" role="alert" style="margin-bottom:12px"><b>Revise {{ new_student.errors.len() }} campo{% if new_student.errors.len() != 1 %}s{% endif %} antes de guardar.</b>
+                <ul>{% for (k, l, m) in new_student.errors %}<li><a href="#nv-{{ k }}">{{ l }}</a>: {{ m|lower }}</li>{% endfor %}</ul></div>
+              {%- endif %}
+              <div class="form">
+                <label for="nv-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="nv-nombre" name="nombre" value="{{ new_student.nombre }}" autofocus{% if let Some(e) = new_student.err("nombre") %} aria-invalid="true" aria-describedby="nv-nombre-e"><div class="field-error" id="nv-nombre-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% else %}>{% endif %}</div>
+                <label for="nv-afiliado">Afiliado</label><div class="field-wrap"><input class="field" id="nv-afiliado" name="afiliado" list="dl-nv-afi" autocomplete="off" value="{{ new_student.afiliado }}"{% if let Some(e) = new_student.err("afiliado") %} aria-invalid="true" aria-describedby="nv-afiliado-e"><div class="field-error" id="nv-afiliado-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% else %}><div class="field-hint">Su nombre se copia en Compañía (BR-STU-02).</div>{% endif %}<datalist id="dl-nv-afi">{% for c in choices %}<option value="{{ c }}"></option>{% endfor %}</datalist></div>
+                <label for="nv-email">E-mail</label><div class="field-wrap"><input class="field" id="nv-email" name="email" value="{{ new_student.email }}"{% if let Some(e) = new_student.err("email") %} aria-invalid="true" aria-describedby="nv-email-e"><div class="field-error" id="nv-email-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% else %}>{% endif %}</div>
+                <label for="nv-telefono">Teléfono</label><div class="field-wrap"><input class="field" id="nv-telefono" name="telefono" value="{{ new_student.telefono }}"></div>
+              </div>
+              <p class="field-hint" style="margin-top:8px">Al guardar se crean sus filas de certificación (BR-STU-01) y se abre la ficha completa.</p>
+            </div>
+            <div class="dlg-foot"><span class="left">Enter guarda · Esc cierra</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+          </form>
+        </dialog>

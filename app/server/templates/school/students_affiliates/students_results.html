@@ -1,0 +1,39 @@
+<div id="stu-results">
+{%- if total_all == 0 %}
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>No hay estudiantes</h4><p>Añada el primero con «Nuevo estudiante».</p></div></div>
+{%- else if total == 0 %}
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-search"/></svg><h4>Sin resultados</h4><p>Ningún estudiante coincide con la búsqueda.</p><a class="btn btn-sm" href="/students">Borrar la búsqueda</a></div></div>
+{%- else %}
+        <div class="table-wrap">
+          <table class="t">
+            <colgroup><col><col style="width:220px"><col style="width:260px"><col style="width:140px"><col style="width:110px"><col style="width:36px"></colgroup>
+            <thead><tr><th aria-sort="ascending"><button class="sort" type="button">Nombre <svg class="i"><use href="#i-sort"/></svg></button></th><th>Compañía</th><th>E-mail</th><th>Teléfono</th><th>Estatus</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+            <tbody>
+{%- for s in rows %}
+              <tr><td><a href="/students/{{ s.uuid }}">{{ s.nombre }}</a></td><td>{{ s.compania }}</td><td>{{ s.email }}</td><td>{{ s.phone }}</td><td><span class="tag{{ s.tag() }}">{{ s.status }}</span></td><td class="col-act"><button class="row-act" type="button" data-menu="menu-est-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{%- endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="pager"><span>{{ first() }}–{{ last() }} de {{ n(total) }}</span><div class="pages">
+          {%- if page > 1 %}<a class="btn btn-sm btn-icon" href="{{ link(page - 1) }}" aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></a>{% else %}<button class="btn btn-sm btn-icon" type="button" disabled aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></button>{% endif %}
+          {%- for n in page_list() %}<a class="btn btn-sm" href="{{ link(n.clone()) }}"{% if n == page %} aria-current="page"{% endif %}>{{ n }}</a>{% endfor %}
+          {%- if page < pages %}<a class="btn btn-sm btn-icon" href="{{ link(page + 1) }}" aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></a>{% else %}<button class="btn btn-sm btn-icon" type="button" disabled aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></button>{% endif %}
+        </div></div>
+        {%- for s in rows %}
+        <div class="menu" id="menu-est-{{ loop.index }}" popover role="menu">
+          <a role="menuitem" href="/students/{{ s.uuid }}"><svg class="i"><use href="#i-file"/></svg>Abrir estudiante</a>
+          <a role="menuitem" href="/students/{{ s.uuid }}/enrollments/course/new"><svg class="i"><use href="#i-plus"/></svg>Matricular en curso</a>
+          <a role="menuitem" href="/students/{{ s.uuid }}/transcript"><svg class="i"><use href="#i-print"/></svg>Transcripción de créditos</a>
+          {%- if is_admin %}
+          <hr class="admin-only">
+          {%- if s.enrollments > 0 %}
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Refusado: tiene {{ s.enrollments }} matrícula{% if s.enrollments != 1 %}s{% endif %} (AP-04)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar estudiante…<span class="admin-mark">admin</span></button>
+          {%- else %}
+          <a role="menuitem" class="danger act-delete admin-only" href="/students/{{ s.uuid }}?open=dlg-borrar-stu"><svg class="i"><use href="#i-trash"/></svg>Borrar estudiante…<span class="admin-mark">admin</span></a>
+          {%- endif %}
+          {%- endif %}
+        </div>
+        {%- endfor %}
+{%- endif %}
+</div>

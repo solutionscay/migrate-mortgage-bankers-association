@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Afiliados{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><span>Afiliados</span></div>
+      <h1 class="title"><b>Afiliados</b> <span class="sub">· {{ active }} activo{% if active != 1 %}s{% endif %} de {{ total_all }}</span></h1>
+      <div class="actions">
+        <span class="split"><button class="btn" type="button" data-menu="menu-afi-print"><svg class="i"><use href="#i-print"/></svg>Imprimir</button><button class="btn" type="button" data-menu="menu-afi-print" aria-haspopup="menu" aria-expanded="false" aria-label="Más impresos"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button></span>
+        <a class="btn btn-primary" href="/affiliates/new" data-open="dlg-nuevo-afi"><svg class="i"><use href="#i-plus"/></svg>Nuevo afiliado</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        <form class="toolbar" method="get" action="/affiliates" hx-get="/affiliates" hx-trigger="input changed delay:300ms from:find input[type=search], change from:find select" hx-target="#afi-list" hx-select="#afi-list" hx-swap="outerHTML" hx-push-url="true">
+          <label class="search"><span class="sr-only">Buscar afiliados</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ q }}" placeholder="Afiliado, cuenta o pueblo" autocomplete="off"></label>
+          <select class="field" name="tipo" aria-label="Tipo"><option value="">Todos los tipos</option>{% for t in self.types() %}<option{% if tipo == *t %} selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+          <select class="field" name="miembro" aria-label="Membresía"><option value="">Toda membresía</option>{% for (v, l) in self.memberships() %}<option value="{{ v }}"{% if *v == miembro %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+          <span class="spacer"></span>
+          <span class="field-hint">Un estudiante de un afiliado ACTIVO paga precio de socio (BR-AFF-01)</span>
+        </form>
+        <div id="afi-list">
+        {%- if total_all == 0 %}
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>No hay afiliados</h4><p>Añada el primero con «Nuevo afiliado».</p></div></div>
+        {%- else if rows.is_empty() %}
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-search"/></svg><h4>Sin resultados</h4><p>Ningún afiliado coincide con la búsqueda.</p><a class="btn btn-sm" href="/affiliates">Borrar la búsqueda</a></div></div>
+        {%- else %}
+        <div class="table-wrap">
+          <table class="t">
+            <colgroup><col style="width:90px"><col><col style="width:180px"><col style="width:100px"><col style="width:120px"><col style="width:130px"><col style="width:96px"><col style="width:100px"><col style="width:36px"></colgroup>
+            <thead><tr><th># Cuenta</th><th aria-sort="ascending"><button class="sort" type="button">Afiliado <svg class="i"><use href="#i-sort"/></svg></button></th><th>Tipo de negocio</th><th>Membresía</th><th>Pueblo</th><th>Teléfono</th><th class="num">Estudiantes</th><th>Tipo</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+            <tbody>
+            {%- for a in rows %}
+              <tr><td>{{ a.account }}</td><td><a href="/affiliates/{{ a.uuid }}">{{ a.socio }}</a></td><td>{{ a.negocio }}</td><td>{{ a.miembro }}</td><td>{{ a.city }}</td><td>{{ a.phone }}</td><td class="num">{{ a.students }}</td><td>{% if !a.cust_type.is_empty() %}<span class="tag{{ a.tag() }}">{{ a.cust_type }}</span>{% endif %}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-afi-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+            {%- endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="pager"><span>1–{{ rows.len() }} de {{ rows.len() }}</span></div>
+        {%- for a in rows %}
+        <div class="menu" id="menu-afi-{{ loop.index }}" popover role="menu">
+          <a role="menuitem" href="/affiliates/{{ a.uuid }}"><svg class="i"><use href="#i-file"/></svg>Abrir afiliado</a>
+          <a role="menuitem" href="/students?affiliate={{ a.uuid }}"><svg class="i"><use href="#i-user"/></svg>Ver estudiantes</a>
+          {%- if shell.is_admin %}
+          <hr class="admin-only">
+          <a role="menuitem" class="danger act-delete admin-only" href="/affiliates/{{ a.uuid }}?open=dlg-borrar-afi"><svg class="i"><use href="#i-trash"/></svg>Borrar afiliado…<span class="admin-mark">admin</span></a>
+          {%- endif %}
+        </div>
+        {%- endfor %}
+        {%- endif %}
+        </div>
+        <div class="menu" id="menu-afi-print" popover role="menu">
+          <div class="menu-note">Impresos de Escuela (Reportes)</div>
+          <a role="menuitem" href="/reports">Lista de afiliados</a>
+          <a role="menuitem" href="/reports">Directorio de afiliados</a>
+          <a role="menuitem" href="/reports">Etiquetas para afiliados</a>
+        </div>
+        <dialog class="dlg" id="dlg-nuevo-afi" aria-labelledby="dlg-nuevo-afi-t">
+          <form method="post" action="/affiliates"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-nuevo-afi-t">Nuevo afiliado</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body">
+              {% if let Some(e) = new_affiliate.error %}<div class="error-summary" role="alert" style="margin-bottom:8px"><b>No se creó el afiliado.</b><ul><li><a href="#na-socio">Afiliado</a>: {{ e|lower }}</li></ul></div>{% endif %}
+              <div class="form">
+                <label for="na-socio" class="req">Afiliado</label><div class="field-wrap"><input class="field" id="na-socio" name="socio" value="{{ new_affiliate.socio }}" autofocus{% if new_affiliate.error.is_some() %} aria-invalid="true"{% endif %}></div>
+              </div>
+              <p class="field-hint" style="margin-top:8px">Recibe el próximo número de cuenta y el tipo ACTIVO. Los demás datos se guardan en la ficha, campo por campo.</p>
+            </div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+          </form>
+        </dialog>
+      </div>
+{% endblock %}

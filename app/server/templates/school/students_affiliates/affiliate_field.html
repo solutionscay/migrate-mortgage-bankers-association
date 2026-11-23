@@ -1,0 +1,5 @@
+{#- UI-15 Afiliado (BR-STU-02): autosave text field with a typeahead datalist. The value "Name (A-1001)" is resolved to one affiliate key on the server; empty unlinks. Same contract as autosave/field.html. -#}
+<div class="field-wrap"{% if f.error.is_some() %} data-unsaved{% endif %} hx-get="/affiliates/options" hx-trigger="input delay:250ms" hx-include="find input" hx-target="find datalist" hx-swap="innerHTML"><input class="field" id="{{ f.id }}" name="{{ f.name }}" list="dl-afi" autocomplete="off" value="{{ f.value }}" data-saved="{{ f.saved }}" hx-patch="{{ f.url }}" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"{% if f.error.is_some() %} aria-invalid="true" aria-describedby="{{ f.id }}-err"{% endif %}><datalist id="dl-afi">{% for c in options %}<option value="{{ c }}"></option>{% endfor %}</datalist>
+{%- if let Some(e) = f.error %}<div class="field-error" id="{{ f.id }}-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>
+{%- else if let Some(h) = f.hint %}<div class="field-hint">{{ h }}</div>{% endif -%}
+</div>

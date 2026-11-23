@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ socio }} · Afiliado{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><a href="/affiliates">Afiliados</a><span class="sep">/</span><span id="afi-crumb">{{ socio }}</span></div>
+      <h1 class="title" id="afi-title"><b>{{ socio }}</b> <span class="sub"> · {{ account }}{% if !negocio.is_empty() %} · {{ negocio }}{% endif %}</span></h1>
+      <div class="actions">
+        <span id="afi-tag" style="display:contents">{% if !cust_type.is_empty() %}<span class="tag lg{{ self.tag() }}">{{ cust_type }}</span>{% endif %}</span>
+        {%- if shell.is_admin %}
+        <button class="btn btn-danger admin-only" type="button" data-open="dlg-borrar-afi"><svg class="i"><use href="#i-trash"/></svg>Borrar afiliado</button>
+        {%- endif %}
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="grid cols-2">
+          <div class="form">
+            <label for="af-cta"># de Cuenta</label><div class="field-wrap"><input class="field" id="af-cta" value="{{ account }}" readonly><div class="field-hint">Se asigna al crear el afiliado.</div></div>
+            <label for="af-socio" class="req">Afiliado</label>{{ self.f("socio")|safe }}
+            <label for="af-otro">Otro nombre</label>{{ self.f("other_name")|safe }}
+            <label for="af-neg">Tipo de negocio</label>{{ self.f("tipo_de_negocio")|safe }}
+            <label for="af-mem">Membresía</label>{{ self.f("miembro")|safe }}
+            <label for="af-tipo">Tipo</label>{{ self.f("cust_type")|safe }}
+            <span class="gap"></span>
+            <label for="af-mail">Email</label>{{ self.f("e_mail")|safe }}
+            <label for="af-mailf">Email de facturación</label>{{ self.f("customer_e_mail")|safe }}
+            <label for="af-t1">Teléfono 1</label>{{ self.f("telephone")|safe }}
+            <label for="af-t2">Teléfono 2</label>{{ self.f("telephone_1")|safe }}
+            <label for="af-fax">Fax</label>{{ self.f("fax")|safe }}
+          </div>
+          <div class="form">
+            <label for="af-dir">Dirección</label>{{ self.f("address")|safe }}
+            <label for="af-pue">Pueblo-Ciudad</label>{{ self.f("city")|safe }}
+            <label>Estado / Código Postal</label><div class="inline-fields" style="grid-template-columns:72px 1fr">{{ self.f("state_zip")|safe }}{{ self.f("zip")|safe }}</div>
+            <span class="label"></span><div class="field-wrap" id="afi-map">{{ map|safe }}</div>
+            <span class="gap"></span>
+            <label for="af-fac">Facturar a</label>{{ self.f("address1")|safe }}
+          </div>
+        </div>
+
+        <div class="block" style="margin-top:24px">
+          <div class="block-head"><h3>Estudiantes</h3><span class="count">{% if student_count > students.len() as i64 %}{{ students.len() }} de {{ student_count }}{% else %}{{ student_count }}{% endif %}</span>
+            {%- if student_count > 0 %}<div class="row"><a class="btn btn-sm btn-quiet" href="/students?affiliate={{ uuid }}">Ver {% if student_count == 1 %}el estudiante{% else %}los {{ student_count }}{% endif %}</a></div>{% endif %}</div>
+          {%- if students.is_empty() %}
+          <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin estudiantes</h4><p>Ningún estudiante tiene este afiliado. Se asigna en la ficha del estudiante (Datos personales).</p></div>
+          {%- else %}
+          <table class="t">
+            <colgroup><col><col style="width:280px"><col style="width:150px"><col style="width:110px"></colgroup>
+            <thead><tr><th>Nombre</th><th>E-mail</th><th>Teléfono</th><th>Estatus</th></tr></thead>
+            <tbody>{% for s in students %}<tr><td><a href="/students/{{ s.uuid }}">{{ s.nombre }}</a></td><td>{{ s.email }}</td><td>{{ s.phone }}</td><td><span class="tag{{ s.tag() }}">{{ s.status }}</span></td></tr>{% endfor %}</tbody>
+          </table>
+          {%- endif %}
+        </div>
+        {%- if shell.is_admin %}
+        <dialog class="dlg" id="dlg-borrar-afi" aria-labelledby="dlg-borrar-afi-t">
+          <form method="post" action="/affiliates/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+            <div class="dlg-head danger"><h2 id="dlg-borrar-afi-t">¿Borrar el afiliado?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body"><p style="margin-bottom:8px">Se borra <b>{{ socio }}</b>.{% if student_count > 0 %} Sus <b>{{ student_count }} estudiante{% if student_count != 1 %}s{% endif %}</b> quedan sin afiliado y pasan a precio individual en las matrículas nuevas.{% endif %}</p><p class="field-hint">El nombre de compañía escrito en cada estudiante no cambia (BR-AFF-02). Las matrículas existentes guardan su precio.</p></div>
+            <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar afiliado</button></div>
+          </form>
+        </dialog>
+        {%- endif %}
+      </div>
+{% endblock %}

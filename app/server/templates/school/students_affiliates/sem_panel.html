@@ -1,0 +1,16 @@
+        <div class="tabpanel" role="tabpanel" id="tp-{% if kind == "seminar" %}sem{% else %}cc{% endif %}" aria-labelledby="tab-{% if kind == "seminar" %}sem{% else %}cc{% endif %}">
+          <div class="block-head" style="border-top:0"><h3>{% if kind == "seminar" %}Seminarios{% else %}Cursos cortos{% endif %}</h3><span class="count">{{ lines.len() }} matrícula{% if lines.len() != 1 %}s{% endif %}</span>
+            <div class="row"><a class="btn btn-sm" href="{{ self.enroll_link(kind) }}"><svg class="i i-sm"><use href="#i-plus"/></svg>Matricular en {{ label|lower }}</a></div></div>
+          <table class="t">
+            <colgroup><col><col style="width:110px"><col style="width:70px"><col style="width:130px"><col style="width:100px"><col style="width:100px"><col style="width:36px"></colgroup>
+            <thead><tr><th>{{ label }}</th><th>Fecha</th><th class="num">Horas</th><th>Estatus</th><th class="money">Cargo</th><th class="money">Balance</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+            <tbody>
+            {%- if lines.is_empty() %}
+            <tr class="empty"><td colspan="7"><div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin matrículas</h4><p>{{ self.first_name() }} no tiene {{ plural }}. Matricule desde una fecha activa (Pendiente o Confirmado).</p><a class="btn btn-sm" href="{{ self.enroll_link(kind) }}"><svg class="i i-sm"><use href="#i-plus"/></svg>Matricular en {{ label|lower }}</a></div></td></tr>
+            {%- endif %}
+            {%- for l in lines %}
+            <tr class="row-money"><td><a href="/enrollments/{{ kind }}/{{ l.uuid }}">{{ l.name }}</a></td><td>{{ l.date }}</td><td class="num">{{ l.hours }}</td><td>{% if !l.status.is_empty() %}<span class="tag{{ l.tag() }}">{{ l.status }}</span>{% endif %}</td><td class="money">{{ self.usd(l.cargo) }}</td><td class="money">{{ self.usd(l.balance) }}</td><td class="col-act"><a class="row-act" href="/enrollments/{{ kind }}/{{ l.uuid }}" aria-label="Abrir matrícula"><svg class="i"><use href="#i-file"/></svg></a></td></tr>
+            {%- endfor %}
+            </tbody>
+          </table>
+        </div>
