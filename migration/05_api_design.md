@@ -56,6 +56,7 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/admin/users/{id}` | partial | query `user_list` | UI-29 | AP-08 | Edit row. |
 | PATCH | `/admin/users/{id}` | action | OP-AUTH-04 | UI-29 | AP-08, AP-11 | Role, active, display name. Disable or role change deletes the user's sessions; last active admin is protected (AP-11). Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | POST | `/admin/users/{id}/password` | action | OP-AUTH-04 | UI-29 | AP-08 | Set a new password. |
+| POST | `/admin/users/{id}/unlock` | action | OP-AUTH-04 | UI-29 | AP-08, AP-11 | Clear a sign-in lock (`locked_until`, `failed_login_count`); menu item "Desbloquear" on locked users only. |
 | GET | `/admin/settings` | page | query `settings_get` | UI-30 | AP-08 | `app_settings` keys; the logo upload. |
 | PATCH | `/admin/settings` | action | OP-SYS-01 | UI-30 | AP-08 | BR-SYS-03. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/admin/templates/{code}` | page | query `document_template_get` | UI-30 | AP-08 | Letter, certificate and policy texts (D-18). |
@@ -223,7 +224,7 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | GET | `/mail/outbox` | page | OP-MAIL-08 | UI-28 | AP-13 | Mock and real sends; provider column. |
 | GET | `/mail/outbox/{id}` | page | OP-MAIL-08 | UI-28 | AP-13 | One message: headers, HTML in a sandboxed iframe, attachment link. |
 
-Route count: 150 (9 AUTH/SYS, 28 admin, 27 PPL/REG, 26 EVT/SPN, 16 STU/AFF/CRT, 24 CRS/ENR, 7 RPT, 13 MAIL). By kind: 47 full pages, 9 HTMX-only partials, 87 actions, 4 file downloads, 2 print families, 1 static. Every page route also answers an HTMX request with its fragment. The two `/print/...` routes serve 72 print pages; each is listed in `05_api_design_appendix.md` §1.
+Route count: 151 (9 AUTH/SYS, 29 admin, 27 PPL/REG, 26 EVT/SPN, 16 STU/AFF/CRT, 24 CRS/ENR, 7 RPT, 13 MAIL). By kind: 47 full pages, 9 HTMX-only partials, 88 actions, 4 file downloads, 2 print families, 1 static. Every page route also answers an HTMX request with its fragment. The two `/print/...` routes serve 72 print pages; each is listed in `05_api_design_appendix.md` §1.
 
 ## Use-case operation catalog
 

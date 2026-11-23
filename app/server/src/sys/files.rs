@@ -48,6 +48,8 @@ const FILE_CSP: &str =
 
 /// The `accept` attribute that matches [`ALLOWED`].
 pub const ACCEPT: &str = ".pdf,.png,.jpg,.jpeg,.gif,.webp,.xlsx,.xls,.docx,.doc,.csv,.txt";
+/// The `accept` attribute for images only (the logo).
+pub const IMAGE_ACCEPT: &str = ".png,.jpg,.jpeg,.gif,.webp";
 
 pub fn routes() -> Router<AppState> {
     Router::new()
@@ -233,11 +235,51 @@ pub struct FileField {
     pub remove_url: Option<String>,
     pub error: Option<&'static str>,
     pub accept: &'static str,
+    /// Autosave target (05 per-field PATCH): a fresh upload sends `name=<uuid>` there on load, and the `x` sends
+    /// `name=` (empty). The PATCH answers with this widget. Without it, a form around the widget submits the uuid.
+    pub save_url: Option<String>,
+    /// Just uploaded and not saved yet: the hidden input fires the autosave PATCH when htmx swaps it in.
+    pub fresh: bool,
 }
 
 impl FileField {
     pub fn new(name: impl Into<String>, label: impl Into<String>, file: Option<StoredFile>) -> Self {
-        Self { name: name.into(), label: label.into(), file, remove_url: None, error: None, accept: ACCEPT }
+        Self {
+            name: name.into(),
+            label: label.into(),
+            file,
+            remove_url: None,
+            error: None,
+            accept: ACCEPT,
+            save_url: None,
+            fresh: false,
+        }
+    }
+
+    /// Autosave the uuid to `url` (for example `/admin/settings` for `logo_file_uuid`).
+    pub fn with_save_url(mut self, url: impl Into<String>) -> Self {
+        self.save_url = Some(url.into());
+        self
+    }
+
+    /// Narrows the `accept` attribute (the server still checks the type).
+    pub fn with_accept(mut self, accept: &'static str) -> Self {
+        self.accept = accept;
+        self
+    }
+
+    /// The hint next to the button, by the accepted types.
+    pub fn hint(&self) -> &'static str {
+        if self.accept == IMAGE_ACCEPT {
+            "PNG, JPEG, GIF o WebP; hasta 20 MB"
+        } else {
+            "PDF, imagen, Excel, Word, CSV o texto; hasta 20 MB"
+        }
+    }
+
+    /// `hx-vals` of the `x` when the widget autosaves: the field set to empty.
+    pub fn clear_vals(&self) -> String {
+        serde_json::json!({ self.name.clone(): "" }).to_string()
     }
 
     pub fn with_remove_url(mut self, url: impl Into<String>) -> Self {
@@ -247,7 +289,11 @@ impl FileField {
 
     /// `hx-vals` for the upload input: carries name and label to `POST /files`, so the chip comes back the same.
     pub fn hx_vals(&self) -> String {
-        serde_json::json!({ "name": self.name, "label": self.label }).to_string()
+        let mut v = serde_json::json!({ "name": self.name, "label": self.label });
+        if let Some(url) = &self.save_url {
+            v["save"] = serde_json::Value::from(url.clone());
+        }
+        v.to_string()
     }
 
     /// The query string of `GET /files/field` for this widget.
@@ -270,6 +316,15 @@ fn clean_ident(s: &str, fallback: &str, allow_space: bool) -> String {
     }
 }
 
+/// A save URL from the client: a local path of safe characters only, or nothing. It goes into an attribute.
+fn clean_local_path(s: &str) -> Option<String> {
+    let ok = s.starts_with('/')
+        && !s.starts_with("//")
+        && s.len() <= 100
+        && s.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '/' | '_' | '-' | '.'));
+    ok.then(|| s.to_owned())
+}
+
 #[derive(serde::Deserialize)]
 pub struct FieldQuery {
     #[serde(default)]
@@ -289,6 +344,7 @@ async fn empty_field(_: RequireStaff, Query(q): Query<FieldQuery>) -> Result<Htm
 async fn upload(staff: RequireStaff, State(state): State<AppState>, mut mp: Multipart) -> Response {
     let mut name = String::new();
     let mut label = String::new();
+    let mut save = String::new();
     let mut picked: Option<(String, Result<Vec<u8>, FileError>)> = None;
     loop {
         let mut field = match mp.next_field().await {
@@ -321,10 +377,12 @@ async fn upload(staff: RequireStaff, State(state): State<AppState>, mut mp: Mult
             }
             "name" => name = field.text().await.unwrap_or_default(),
             "label" => label = field.text().await.unwrap_or_default(),
+            "save" => save = field.text().await.unwrap_or_default(),
             _ => {}
         }
     }
     let mut widget = FileField::new(clean_ident(&name, "file_uuid", false), clean_ident(&label, "archivo", true), None);
+    widget.save_url = clean_local_path(&save);
     let result = match picked {
         Some((filename, _)) if filename.is_empty() => Err(FileError::NoFile),
         Some((filename, Ok(bytes))) => {
@@ -343,6 +401,7 @@ async fn upload(staff: RequireStaff, State(state): State<AppState>, mut mp: Mult
     let status = match result {
         Ok(f) => {
             widget.file = Some(f);
+            widget.fresh = true;
             StatusCode::OK
         }
         Err(e) => {

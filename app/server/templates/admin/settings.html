@@ -14,7 +14,7 @@
           <div class="tabpanel" role="tabpanel" id="panel-org" aria-labelledby="tab-org"><div class="block-body ma-panel"><div class="form ma-form-wide">
             <label for="cf-org" class="req">Nombre</label>{{ field("org.name")|safe }}
             <label>Zona horaria</label><div class="field-wrap"><div class="value">{{ timezone }}</div><div class="field-hint">Fija: todas las horas son de Puerto Rico (D-67).</div></div>
-            <label>Logo</label><div class="field-wrap">{% if let Some(l) = logo %}<div class="row"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>{{ l }}</span></div>{% else %}<div class="value"><span class="muted">Sin logo</span></div>{% endif %}<div class="field-hint">El logo sale en las páginas de imprimir.</div></div>
+            <label>Logo</label><div class="field-wrap">{{ logo|safe }}<div class="field-hint">El logo sale en las páginas de imprimir.</div></div>
             <div class="gap"></div>
             <label for="cf-f1">Firmante Escuela</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("school.signer_name")|safe }}{{ field("school.signer_title")|safe }}</div></div>
             <label for="cf-f2">Firmante Convención</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("convention.signer_name")|safe }}{{ field("convention.signer_title")|safe }}</div><div class="field-hint">Nombre y título. Los firmantes salen en cartas y certificados (BR-SYS-03).</div></div>

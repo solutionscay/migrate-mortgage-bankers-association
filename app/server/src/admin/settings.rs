@@ -36,8 +36,8 @@ pub fn routes() -> Router<AppState> {
 // OP-SYS-01 settings
 // ---------------------------------------------------------------------------------------------------------------
 
-/// The settings ROLE-ADMIN edits (BR-SYS-03). The field name is the key. `org.timezone` is fixed (D-67) and
-/// `logo_file_uuid` is set by the file upload (OP-SYS-04), so neither is here.
+/// The settings ROLE-ADMIN edits (BR-SYS-03). The field name is the key. `org.timezone` is fixed (D-67), so it is
+/// not here. `logo_file_uuid` takes the uuid of an image uploaded through OP-SYS-04 (`sys::files::FileField`).
 pub static SETTINGS: Registry = Registry {
     table: "app_settings",
     key_col: "key",
@@ -64,6 +64,7 @@ pub static SETTINGS: Registry = Registry {
             autosave::optional_text(s, 64)
         }),
         FieldDef::new("session.idle_minutes", "value", "Minutos sin uso", parse_idle),
+        FieldDef::new("logo_file_uuid", "value", "Logo", |s| autosave::optional_text(s, 64)),
     ],
 };
 
@@ -180,7 +181,7 @@ pub struct SettingsPage {
     pub shell: Shell,
     pub f: std::collections::HashMap<&'static str, FieldView>,
     pub timezone: String,
-    pub logo: Option<String>,
+    pub logo: String,
     pub provider: &'static str,
     pub docs: Vec<DocRow>,
     pub lists: Vec<ListRow>,
@@ -242,12 +243,7 @@ async fn settings_page(
             f.insert(def.name, setting_field(&conn, def, &saved)?);
         }
         let timezone = crate::db::setting(&conn, "org.timezone")?.unwrap_or_default();
-        let logo = match crate::db::setting(&conn, "logo_file_uuid")? {
-            Some(uuid) => {
-                conn.query_row("SELECT filename FROM stored_files WHERE uuid = ?1", [&uuid], |r| r.get(0)).optional()?
-            }
-            None => None,
-        };
+        let logo = logo_field(&conn)?.render()?;
         let docs = conn
             .prepare(
                 "SELECT code, title, module, modified_at FROM document_templates ORDER BY modified_at DESC, title",
@@ -288,6 +284,25 @@ async fn settings_page(
     render_page(&headers, &page)
 }
 
+/// The logo widget with the saved file (OP-SYS-04 chip); it autosaves the uuid to `PATCH /admin/settings`.
+fn logo_field(conn: &Connection) -> rusqlite::Result<crate::sys::files::FileField> {
+    let file = match crate::db::setting(conn, "logo_file_uuid")? {
+        Some(uuid) => crate::sys::files::get_file(conn, &uuid)?,
+        None => None,
+    };
+    Ok(crate::sys::files::FileField::new("logo_file_uuid", "logo", file)
+        .with_save_url("/admin/settings")
+        .with_accept(crate::sys::files::IMAGE_ACCEPT))
+}
+
+/// The empty widget with a refusal message (the stored logo stays as it was).
+fn widget_error(mut w: crate::sys::files::FileField, msg: String) -> crate::sys::files::FileField {
+    w.file = None;
+    w.error =
+        Some(if msg.contains("imagen") { "Use una imagen PNG, JPEG, GIF o WebP." } else { "No se guardó el logo." });
+    w
+}
+
 /// "11/2/2026" (design date format).
 fn us_date(stored: &str) -> String {
     use chrono::Datelike;
@@ -309,6 +324,16 @@ async fn patch_setting(
     let ctx = Ctx { actor: &actor, request_id: rid.as_ref().map(|r| r.0 .0.as_str()), record: "Configuración" };
     let key = Value::Text(def.name.to_owned());
     let outcome = autosave::save(&mut conn, &SETTINGS, &key, def, &field.value, &ctx, |tx, _old, new| {
+        if def.name == "logo_file_uuid" {
+            if let Value::Text(uuid) = new {
+                let mime: Option<String> = tx
+                    .query_row("SELECT mime_type FROM stored_files WHERE uuid = ?1", [uuid], |r| r.get(0))
+                    .optional()?;
+                if !mime.is_some_and(|m| m.starts_with("image/")) {
+                    return Err(Refusal::Invalid("Use una imagen PNG, JPEG, GIF o WebP.".into()));
+                }
+            }
+        }
         if def.name == "mail.default_template_uuid" {
             if let Value::Text(uuid) = new {
                 let known = tx
@@ -322,6 +347,17 @@ async fn patch_setting(
         }
         Ok(())
     })?;
+    if def.name == "logo_file_uuid" {
+        let mut widget = logo_field(&conn)?;
+        let status = match outcome {
+            Outcome::Saved { .. } => axum::http::StatusCode::OK,
+            Outcome::Invalid(msg) => {
+                widget = widget_error(widget, msg);
+                axum::http::StatusCode::UNPROCESSABLE_ENTITY
+            }
+        };
+        return Ok((status, Html(widget.render()?)).into_response());
+    }
     let saved = saved_text(&conn, def)?;
     let view = setting_field(&conn, def, &saved)?;
     let view = match outcome {

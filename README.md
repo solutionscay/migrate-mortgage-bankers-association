@@ -114,7 +114,15 @@ Open http://127.0.0.1:8080 and sign in. All demo accounts use the password `demo
 | `admin.demo` | ROLE-ADMIN | Administración Demo |
 | `staff.demo` | ROLE-STAFF | Personal Demo |
 
-Settings come from the environment: `MBA_BIND` (default `127.0.0.1:8080`), `MBA_DB` (default `data/mba.db`), `MBA_SECURE_COOKIE=1` behind HTTPS. Without `RESEND_API_KEY`, mail stays in the outbox (from I4). The same `--seed` always gives the same database. `cargo test` runs the I1 checks.
+Settings come from the environment:
+
+- `MBA_BIND`: the listen address. Default `127.0.0.1:8080`.
+- `MBA_DB`: the database file. Default `data/mba.db`.
+- `MBA_DATA_DIR`: where uploads go (under `files/`). Default: the folder of the database.
+- `MBA_SECURE_COOKIE=1`: adds `Secure` to the session cookie. Set it behind HTTPS. It is off by default because the demo runs on plain `http://127.0.0.1`.
+- `RESEND_API_KEY`: unset means mail stays in the outbox (from I4).
+
+The same `--seed` always gives the same database. `cargo test` runs the I1 checks.
 
 ## Design
 

@@ -1,5 +1,5 @@
-//! Route tests of the SYS area: T-05-20 (files: AP-03, upload, download), T-05-21 (upload limits).
-//! T-05-22 (JOB-02 with a fixed clock) is the unit test in `src/sys/jobs.rs`.
+//! Route tests of the SYS area: T-05-20 (files: AP-03, upload, download), T-05-21 (upload limits), and the UI-30 logo
+//! (OP-SYS-04 file + OP-SYS-01 autosave of `logo_file_uuid`). T-05-22 (JOB-02 with a fixed clock) is in `src/sys/jobs.rs`.
 
 use axum::body::Body;
 use axum::http::{header, Request, Response, StatusCode};
@@ -206,4 +206,54 @@ async fn upload_limits() {
     let ok = vec![b'a'; 20 * 1024 * 1024];
     assert_eq!(app.upload(Some(&cookie), Some(&csrf), "limite.txt", &ok).await.status(), StatusCode::OK);
     assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), 1);
+}
+
+/// UI-30 logo: an uploaded image's uuid autosaves to `logo_file_uuid`; a PDF is refused; the `x` clears it.
+#[tokio::test]
+async fn logo_upload_autosaves_the_uuid() {
+    let app = App::new();
+    let (cookie, csrf) = app.sign_in("mvega").await;
+    let uuid_of = |html: &str| hidden(html, "pdf_file_uuid");
+    let patch = |value: String| {
+        Request::patch("/admin/settings")
+            .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .header(header::COOKIE, &cookie)
+            .header("x-csrf-token", &csrf)
+            .header("hx-request", "true")
+            .body(Body::from(format!("logo_file_uuid={value}")))
+            .unwrap()
+    };
+    let logo = || {
+        app.conn()
+            .query_row("SELECT value FROM app_settings WHERE key = 'logo_file_uuid'", [], |r| {
+                r.get::<_, Option<String>>(0)
+            })
+            .unwrap()
+    };
+
+    let png = uuid_of(&body(app.upload(Some(&cookie), Some(&csrf), "logo.png", b"\x89PNG fake").await).await);
+    let res = app.send(patch(png.clone())).await;
+    assert_eq!(res.status(), StatusCode::OK);
+    let html = body(res).await;
+    assert!(
+        html.contains("logo.png") && html.contains("name=\"logo_file_uuid\"") && !html.contains("hx-trigger=\"load\""),
+        "{html}"
+    );
+    assert_eq!(logo().as_deref(), Some(png.as_str()));
+    assert!(
+        app.count("SELECT COUNT(*) FROM audit_log WHERE action = 'field.change' AND detail LIKE '%logo_file_uuid%'")
+            >= 1
+    );
+    let page = body(app.get("/admin/settings", Some(&cookie)).await).await;
+    assert!(page.contains("logo.png"), "settings page shows the chip");
+
+    let pdf = uuid_of(&body(app.upload(Some(&cookie), Some(&csrf), "carta.pdf", b"%PDF-1.4 fake").await).await);
+    let res = app.send(patch(pdf)).await;
+    assert_eq!(res.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    assert!(body(res).await.contains("Use una imagen"));
+    assert_eq!(logo().as_deref(), Some(png.as_str()), "refused: the logo stays");
+
+    let res = app.send(patch(String::new())).await;
+    assert_eq!(res.status(), StatusCode::OK);
+    assert_eq!(logo(), None);
 }
