@@ -113,7 +113,6 @@ code, kbd { font-family: inherit; font-size: inherit; font-weight: 500; }
   display: flex; align-items: center; gap: var(--s-4);
   height: var(--h-topbar); padding: 0 var(--s-4);
   background: var(--charcoal-2); color: var(--on-charcoal);
-  border-bottom: 1px solid var(--charcoal-3);
   overflow: hidden; white-space: nowrap;
 }
 .brand { display: flex; align-items: baseline; gap: var(--s-2); color: var(--on-charcoal); font-weight: 700; font-size: 14px; letter-spacing: .02em; }
@@ -123,10 +122,13 @@ code, kbd { font-family: inherit; font-size: inherit; font-weight: 500; }
 .modules a {
   display: flex; align-items: center; padding: 0 var(--s-3); height: 100%;
   color: var(--on-charcoal-dim); font-weight: 500;
-  border-bottom: 2px solid transparent; border-top: 2px solid transparent;
 }
-.modules a:hover { color: var(--on-charcoal); text-decoration: none; }
-.modules a[aria-current] { color: var(--on-charcoal); border-bottom-color: var(--teal); }
+.modules a:hover { color: var(--on-charcoal); text-decoration: none; background: #323336; }
+/* Three nav levels, three different marks, no stacked rules:
+   module = a block in the nav bar's colour, so the nav bar reads as its drawer;
+   section = a tab in the page bar's colour that opens into the page;
+   record tab (.tabs) = the teal top rule. */
+.modules a[aria-current], .modules a[aria-current]:hover { color: var(--on-charcoal); background: var(--charcoal); }
 .topbar .search { margin-left: auto; width: 320px; }
 .search { position: relative; display: block; }
 .search .i { position: absolute; left: 8px; top: 50%; margin-top: -8px; color: var(--muted); pointer-events: none; }
@@ -155,10 +157,9 @@ body[data-module="escuela"] .nav-group[data-group="escuela"],
 body[data-module="correos"] .nav-group[data-group="correos"],
 body[data-module="admin"] .nav-group[data-group="admin"] { display: flex; }
 .nav .nav-aux { margin-left: auto; color: var(--on-charcoal-dim); font-size: var(--fs-sm); }
-/* FileMaker marks the current tab with a bar on top; keep it, in teal. Bold
+/* The current section is a tab that opens into the page bar below it. Bold
    would widen the label and shift its neighbours, so the weight stays put. */
-.nav a[aria-current]::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--teal); }
-.nav a[aria-current] { background: var(--charcoal-2); }
+.nav a[aria-current], .nav a[aria-current]:hover { margin-top: 6px; background: var(--stone-50); color: var(--ink); }
 
 .pagebar {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 20px 1fr;
@@ -599,6 +600,9 @@ body:not([data-state]) [data-st]:not([data-st~="base"]), .st-off { display: none
 .spacing div { font-size: var(--fs-xs); color: var(--muted); text-align: center; }
 .spacing i { display: block; background: var(--teal); margin: 0 auto 4px; height: 12px; }
 .state-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4) var(--s-6); }
+.nav-levels { display: grid; gap: var(--s-4); margin-bottom: var(--s-2); }
+.nav-level .role-label { display: block; }
+.pagebar.nav-level-page { height: 32px; grid-template-rows: 1fr; padding: 0 var(--s-4); }
 .state-grid > div > .cap { font-size: var(--fs-xs); color: var(--muted); margin-bottom: 4px; }
 .demo-row { display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap; }
 .demo-row > .cap { width: 120px; font-size: var(--fs-xs); color: var(--muted); }

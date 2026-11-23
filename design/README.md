@@ -78,6 +78,7 @@ Open any page from disk. States are reached with the hooks in "State hooks" belo
 - The FileMaker solid teal buttons (Evento, Plan) become a white block with a teal left rule and teal text (`.pick`).
 - One quiet row action (`.row-act`, "⋯") at the end of a row opens a menu. A child row without money keeps "Quitar" for both roles (`.act-remove`, AP-06). Void and delete of a row with money (`.row-money`) appear only for ROLE-ADMIN (`.act-void`, `.act-delete` with `.admin-only`, AP-05). The column keeps its width in both role views.
 - No FileMaker chrome: no record navigator, layout picker or found-set bar.
+- Three nav levels, one mark each, no stacked rules: the current **module** (top bar) is a filled block in the nav bar colour, with no underline; the current **section** (nav bar) is a stone tab that opens into the page bar; the current **record tab** (`.tabs`) has the teal top rule. Only the record-tab level uses teal. See `components.html#niveles`.
 - No Save button on record pages, as in FileMaker: each field saves when the user leaves it (see "Saving"). Guardar stays only in dialogs that create or settle a record.
 
 ## Fixed shell
@@ -184,6 +185,7 @@ All 1440x900, headless Chromium, made with `tools/shoot.sh` unless noted.
 | `screenshots/components-scrolled.png` | `components.html?at=detalle` |
 | `screenshots/components-dialog.png` | `components.html?at=formulario&open=dlg-plan` |
 | `screenshots/components-roles.png` | `components.html?at=roles` |
+| `screenshots/components-niveles.png` | `components.html?at=niveles` |
 | `screenshots/components-guardado.png` | `components.html?at=autosave` |
 | `screenshots/components-sin-guardar.png` | `components.html?at=autosave&state=sin-guardar` |
 | `screenshots/login.png` | `login.html` |

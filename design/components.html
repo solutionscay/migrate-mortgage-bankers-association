@@ -179,6 +179,22 @@
             <h2>Estructura de página</h2>
             <p class="lead">La barra superior, la navegación, la barra de página y el pie tienen altura fija. Solo el área de contenido se desplaza. El área reserva el espacio de la barra de desplazamiento, y los diálogos, menús y avisos se abren en la capa superior, así que nada fuera del contenido se mueve.</p>
 
+            <h3 class="g-sub" id="niveles">Navegación en tres niveles</h3>
+            <p class="field-hint" style="margin-bottom:8px">Tres niveles, tres marcas, sin reglas apiladas. <b>Módulo</b>: un bloque en el color de la barra de navegación, sin subrayado (barra superior). <b>Sección</b>: una pestaña de piedra que se abre hacia la página (barra de navegación). <b>Pestaña de ficha</b>: la regla teal arriba; solo este nivel usa teal.</p>
+            <div class="nav-levels">
+              <div class="nav-level"><span class="role-label">1 · Módulo</span>
+                <div class="topbar"><span class="brand">MBA <small>Convención y Escuela</small></span><nav class="modules" aria-label="Módulos (ejemplo)"><a href="#" aria-current="page">Convención</a><a href="#">Escuela</a><a href="#">Correos</a><a href="#">Admin</a></nav></div>
+              </div>
+              <div class="nav-level"><span class="role-label">2 · Sección</span>
+                <nav class="nav" aria-label="Secciones (ejemplo)"><a href="#">Convencionistas</a><a href="#" aria-current="page">Registros</a><a href="#">Convenciones</a><a href="#">Planes</a></nav>
+                <div class="pagebar nav-level-page"><div class="crumbs"><span>La pestaña de sección se abre hacia la barra de página</span></div></div>
+              </div>
+              <div class="nav-level"><span class="role-label">3 · Pestaña de ficha</span>
+                <div class="tabs" role="tablist" aria-label="Convención (ejemplo)"><a href="#" role="tab" aria-selected="true" id="lv-act" aria-controls="lv-p">Actividades<span class="tab-count">12</span></a><a href="#" role="tab" aria-selected="false" id="lv-aus">Auspiciadores<span class="tab-count">14</span></a><a href="#" role="tab" aria-selected="false" id="lv-fac">Facturación<span class="tab-count">5</span></a></div>
+                <div class="tabpanel block-body" id="lv-p" role="tabpanel"><span class="field-hint">Solo este nivel usa teal.</span></div>
+              </div>
+            </div>
+
             <h3 class="g-sub">Cabecera de registro: título grande, estatus a la derecha</h3>
             <div class="block">
               <div class="pagebar" style="border-bottom:0">
