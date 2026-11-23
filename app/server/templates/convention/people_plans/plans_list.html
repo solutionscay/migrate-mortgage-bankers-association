@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Planes{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/people">Convención</a><span class="sep">/</span><span>Planes</span></div>
+      <h1 class="title"><b>Planes</b> <span class="sub">· {% if let Some(e) = event_name %}{{ e }}{% else %}Todos los eventos{% endif %}</span></h1>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" data-open="dlg-nuevo-plan"><svg class="i"><use href="#i-plus"/></svg>Nuevo plan</button>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        {% if let Some(e) = error %}<div class="banner err" role="alert" style="margin-bottom:12px"><svg class="i"><use href="#i-alert"/></svg><div><b>No se borró el plan.</b> {{ e }} (AP-04)</div></div>{% endif %}
+        <form class="toolbar" method="get" action="/plans">
+          <label class="search"><span class="sr-only">Buscar</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ q }}" placeholder="Nombre del plan" autocomplete="off" hx-get="/plans" hx-trigger="input changed delay:300ms, search" hx-target="#main" hx-select="#main > *" hx-include="closest form" hx-push-url="true"></label>
+          <select class="field" name="event" aria-label="Evento" hx-get="/plans" hx-trigger="change" hx-target="#main" hx-select="#main > *" hx-include="closest form" hx-push-url="true"><option value=""{% if event.is_empty() %} selected{% endif %}>Todos los eventos</option>{% for (u, n) in events %}<option value="{{ u }}"{% if *u == event %} selected{% endif %}>{{ n }}</option>{% endfor %}</select>
+        </form>
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)">
+        {%- if rows.is_empty() %}
+          <div class="empty"><svg class="i"><use href="#i-inbox"/></svg>{% if total_all == 0 %}<h4>No hay planes</h4><p>Cree el primero con «Nuevo plan».</p>{% else %}<h4>Sin resultados</h4><p>Ningún plan coincide con el filtro.</p><a class="btn btn-sm" href="/plans?event=">Ver todos los planes</a>{% endif %}</div>
+        {%- else %}
+<table class="t">
+<colgroup><col><col><col style="width:110px"><col style="width:120px"><col style="width:140px"><col style="width:36px"></colgroup>
+<thead><tr><th>Evento</th><th>Plan</th><th class="num">Actividades</th><th class="money">Precio</th><th>Origen del precio</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+<tbody>
+{%- for p in rows %}
+<tr><td>{{ p.event }}</td><td><a href="/plans/{{ p.uuid }}">{{ p.name }}</a></td><td class="num">{{ p.included }}</td><td class="money">{{ self.usd(p.price) }}</td><td class="">{% if p.fixed %}<span class="tag plain">Precio fijo</span>{% else %}<span class="muted">Calculado</span>{% endif %}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-plan-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+{%- endfor %}
+</tbody>
+</table>
+        {%- endif %}
+        </div>
+        <div class="pager"><span>{% if rows.is_empty() %}0{% else %}1–{{ rows.len() }}{% endif %} de {{ rows.len() }}{% if rows.len() as i64 != total_all %} · {{ total_all }} en total{% endif %}</span></div>
+        {%- for p in rows %}
+        <div class="menu" id="menu-plan-{{ loop.index }}" popover role="menu">
+          <a href="/plans/{{ p.uuid }}" role="menuitem"><svg class="i"><use href="#i-file"/></svg>Abrir plan</a>
+          {%- if shell.is_admin %}
+          <hr class="admin-only">
+          {%- if p.registrations > 0 %}
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Refusado: {{ p.registrations }} registro{% if p.registrations != 1 %}s usan{% else %} usa{% endif %} este plan (409)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar plan…<span class="admin-mark">admin</span></button>
+          {%- else %}
+          <a href="/plans/{{ p.uuid }}?open=dlg-borrar-plan" role="menuitem" class="danger act-delete admin-only"><svg class="i"><use href="#i-trash"/></svg>Borrar plan…<span class="admin-mark">admin</span></a>
+          {%- endif %}
+          {%- endif %}
+        </div>
+        {%- endfor %}
+        <dialog class="dlg" id="dlg-nuevo-plan" aria-labelledby="dlg-nuevo-plan-t">
+          <form method="post" action="/plans">
+            <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-nuevo-plan-t">Nuevo plan</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body">
+              {% if let Some(e) = new_plan.error %}<div class="error-summary" role="alert" style="margin-bottom:8px"><b>No se creó el plan.</b><ul><li>{{ e }}</li></ul></div>{% endif %}
+              {%- if active.is_empty() %}<div class="banner warn"><svg class="i"><use href="#i-alert"/></svg><div><b>Al momento no hay eventos activos.</b> Un plan necesita un evento activo (BR-EVT-02).</div></div>{% endif %}
+              <div class="form">
+                <label for="npl-ev" class="req">Evento</label><div class="field-wrap"><select class="field" id="npl-ev" name="event_uuid" required>{% for (u, n) in active %}<option value="{{ u }}"{% if *u == new_plan.event_uuid %} selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+                <label for="npl-nombre" class="req">Plan</label><div class="field-wrap"><input class="field" id="npl-nombre" name="name" value="{{ new_plan.name }}" required autofocus{% if new_plan.error.is_some() %} aria-invalid="true"{% endif %}></div>
+              </div>
+              <p class="field-hint" style="margin-top:8px">Al crear el plan se añaden las actividades del evento, sin incluir. Marque «Incluir» en cada una (BR-EVT-06).</p>
+            </div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit"{% if active.is_empty() %} disabled{% endif %}>Guardar</button></div>
+          </form>
+        </dialog>
+      </div>
+{% endblock %}

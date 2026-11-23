@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Plan {{ name }}{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/people">Convención</a><span class="sep">/</span><a href="/plans">Planes</a><span class="sep">/</span><span id="plan-crumb">{{ name }}</span></div>
+      <h1 class="title" id="plan-title"><b>Plan</b>{% if let Some(e) = event_name %} · {{ e }}{% endif %} · {{ name }}</h1>
+      <div class="actions">
+        <a class="btn" href="/plans?event={{ event_uuid }}"><svg class="i"><use href="#i-chevron-left"/></svg>Planes</a>{% if shell.is_admin %}<button class="btn btn-icon" type="button" id="btn-plan-more" data-menu="menu-plan-more" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones"><svg class="i"><use href="#i-more"/></svg></button>{% endif %}
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:16px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        <div class="grid plan-head">
+          <div class="form">
+            <label for="pl-ev">Evento</label>{{ f_event.html()|safe }}
+            <label for="pl-nombre" class="req">Plan</label>{{ f_name.html()|safe }}
+            <label for="pl-fijo">Precio fijo</label>{{ f_fixed.html()|safe }}
+          </div>
+          <dl class="totals plan-price" id="plan-price">
+            {{ price.render().unwrap_or_default()|safe }}
+          </dl>
+        </div>
+        {%- if event_name.is_none() %}
+        <div class="banner warn" style="margin-top:16px"><svg class="i"><use href="#i-alert"/></svg><div><b>Favor de seleccionar el evento.</b> Los detalles del plan salen de las actividades del evento.</div></div>
+        {%- else if event_items == 0 %}
+        <div class="banner warn" style="margin-top:16px"><svg class="i"><use href="#i-alert"/></svg><div><b>El Evento seleccionado no tiene detalles.</b> Añada actividades en la convención y luego pulse «Reconstruir» (BR-EVT-06).</div><div class="row"><a class="btn btn-sm" href="/events/{{ event_uuid }}">Ir a la convención</a></div></div>
+        {%- endif %}
+        <div class="block" style="margin-top:16px">
+          <div class="block-head"><h3>Detalles</h3><span class="count" id="plan-count">{{ count_text }}</span>
+            <div class="row"><button class="btn btn-sm" type="button" data-open="dlg-reconstruir"{% if event_name.is_none() %} disabled{% endif %}><svg class="i i-sm"><use href="#i-refresh"/></svg>Reconstruir</button></div></div>
+          {%- if rows.is_empty() %}
+          <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin detalles</h4><p>El plan no tiene actividades todavía.{% if event_items > 0 %} Pulse «Reconstruir» para añadir las {{ event_items }} del evento.{% endif %}</p></div>
+          {%- else %}
+<table class="t">
+<colgroup><col style="width:64px"><col style="width:96px"><col><col style="width:140px"><col style="width:92px"><col style="width:80px"><col style="width:92px"><col style="width:80px"><col style="width:64px"><col style="width:90px"><col style="width:36px"></colgroup>
+<thead>
+          <tr class="group"><th colspan="4"></th><th colspan="2" class="g">COMIENZA</th><th colspan="2" class="g">TERMINA</th><th colspan="3"></th></tr><tr><th class="c">Incluir</th><th>Tipo</th><th>Nombre</th><th>Lugar</th><th>Fecha</th><th>Hora</th><th>Fecha</th><th>Hora</th><th class="num">Qty.</th><th class="money">Precio</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+{%- for it in rows %}
+{{ self.row_html(it)|safe }}
+{%- endfor %}
+</table>
+          {%- endif %}
+        </div>
+        {%- for it in rows %}
+        <dialog class="dlg" id="dlg-quitar-{{ it.uuid }}" aria-labelledby="dlg-quitar-{{ it.uuid }}-t">
+          <form method="post" action="/plan-items/{{ it.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-quitar-{{ it.uuid }}-t">¿Quitar del plan?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se quita <b>{{ it.name }}</b> de este plan. Los registros que ya lo tienen no cambian. «Reconstruir» lo vuelve a añadir.</p></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar</button></div>
+          </form>
+        </dialog>
+        {%- endfor %}
+        <dialog class="dlg" id="dlg-reconstruir" aria-labelledby="dlg-reconstruir-t">
+          <form method="post" action="/plans/{{ uuid }}/build"><input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+          <div class="dlg-head"><h2 id="dlg-reconstruir-t">Reconstruir detalles</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Se añaden al plan las actividades del evento que faltan. No se borra ninguna ni se cambia «Incluir» (BR-EVT-06).</p><div class="banner info" style="margin-top:12px"><svg class="i"><use href="#i-info"/></svg><div>{% if let Some(e) = event_name %}{{ e }} tiene {{ event_items }} actividad{% if event_items != 1 %}es{% endif %}. {% if missing == 0 %}El plan ya las tiene: no se añade ninguna.{% else %}Faltan {{ missing }}: se añaden sin incluir.{% endif %}{% else %}El plan no tiene evento.{% endif %}</div></div></div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Reconstruir</button></div>
+          </form>
+        </dialog>
+        {%- if shell.is_admin %}
+        <div class="menu" id="menu-plan-more" popover role="menu">
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-open="dlg-borrar-plan"><svg class="i"><use href="#i-trash"/></svg>Borrar plan…<span class="admin-mark">admin</span></button>
+        </div>
+        <dialog class="dlg" id="dlg-borrar-plan" aria-labelledby="dlg-borrar-plan-t">
+          {%- if registrations > 0 %}
+          <div class="dlg-head danger"><h2 id="dlg-borrar-plan-t">No se puede borrar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>{{ registrations }} registro{% if registrations != 1 %}s usan{% else %} usa{% endif %} el plan {{ name }}.</b> Un plan con registros no se borra (AP-04).</div></div></div>
+          <div class="dlg-foot"><span class="left">409 · Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+          {%- else %}
+          <form method="post" action="/plans/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
+          <div class="dlg-head danger"><h2 id="dlg-borrar-plan-t">¿Borrar el plan {{ name }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+          <div class="dlg-body"><p>Ningún registro usa este plan. Se borran el plan y sus {{ rows.len() }} detalle{% if rows.len() != 1 %}s{% endif %}. No se puede deshacer.</p></div>
+          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+          </form>
+          {%- endif %}
+        </dialog>
+        {%- endif %}
+      </div>
+{% endblock %}

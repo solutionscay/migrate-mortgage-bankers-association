@@ -1,0 +1,4 @@
+{#- UI-04 Compañía: the autosave text field with the datalist of value list people.company (same contract as autosave/field.html). -#}
+<div class="field-wrap"{% if f.error.is_some() %} data-unsaved{% endif %}><input class="field" id="{{ f.id }}" name="{{ f.name }}" list="dl-comp" value="{{ f.value }}" data-saved="{{ f.saved }}" hx-patch="{{ f.url }}" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"{% if f.error.is_some() %} aria-invalid="true" aria-describedby="{{ f.id }}-err"{% endif %}><datalist id="dl-comp">{% for c in options %}<option>{{ c }}</option>{% endfor %}</datalist>
+{%- if let Some(e) = f.error %}<div class="field-error" id="{{ f.id }}-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif -%}
+</div>

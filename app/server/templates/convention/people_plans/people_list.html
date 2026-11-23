@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Convencionistas{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/people">Convención</a><span class="sep">/</span><span>Convencionistas</span></div>
+      <h1 class="title"><b>Convencionistas</b> <span class="sub">· {{ results.n(results.total_all) }}</span></h1>
+      <div class="actions">
+        <a class="btn btn-primary" href="/people/new" data-open="dlg-nuevo"><svg class="i"><use href="#i-plus"/></svg>Nuevo convencionista</a>
+      </div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        <form class="toolbar" method="get" action="/people">
+          <input type="hidden" name="view" value="{{ results.view }}">
+          <label class="search"><span class="sr-only">Buscar</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ results.q }}" placeholder="Nombre, compañía o e-mail" autocomplete="off" hx-get="/people" hx-trigger="input changed delay:300ms, search" hx-target="#people-results" hx-swap="outerHTML" hx-include="closest form" hx-push-url="true" hx-indicator="#people-busy"></label>
+          <select class="field" name="company" aria-label="Compañía" hx-get="/people" hx-trigger="change" hx-target="#people-results" hx-swap="outerHTML" hx-include="closest form" hx-push-url="true" hx-indicator="#people-busy"><option value="">Todas las compañías</option>{% for c in companies %}<option{% if *c == results.company %} selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+          <span class="htmx-indicator" id="people-busy">Buscando…</span>
+          <span class="spacer"></span>
+          <span class="seg" role="group" aria-label="Vista"><a class="btn btn-icon" role="button" href="{{ results.link(1, "list") }}" aria-pressed="{% if results.view == "list" %}true{% else %}false{% endif %}" aria-label="Lista"><svg class="i"><use href="#i-list"/></svg></a><a class="btn btn-icon" role="button" href="{{ results.link(1, "table") }}" aria-pressed="{% if results.view == "table" %}true{% else %}false{% endif %}" aria-label="Tabla"><svg class="i"><use href="#i-table"/></svg></a></span>
+        </form>
+        {{ results.render().unwrap_or_default()|safe }}
+        <dialog class="dlg" id="dlg-nuevo" aria-labelledby="dlg-nuevo-t">
+          <form method="post" action="/people">
+            <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-nuevo-t">Nuevo convencionista</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body">
+              {% if let Some(e) = new_person.error %}<div class="error-summary" role="alert" style="margin-bottom:8px"><b>No se creó el convencionista.</b><ul><li>{{ e }}</li></ul></div>{% endif %}
+              <div class="form">
+                <label for="np-nombre">Nombre</label><div class="field-wrap"><input class="field" id="np-nombre" name="name_first" value="{{ new_person.name_first }}" autofocus{% if new_person.error.is_some() %} aria-invalid="true"{% endif %}></div>
+                <label for="np-apellido">Apellido</label><div class="field-wrap"><input class="field" id="np-apellido" name="name_last" value="{{ new_person.name_last }}"{% if new_person.error.is_some() %} aria-invalid="true"{% endif %}></div>
+                <label for="np-comp">Compañía</label><div class="field-wrap"><input class="field" id="np-comp" name="company" list="dl-np-comp" value="{{ new_person.company }}"><datalist id="dl-np-comp">{% for c in companies %}<option>{{ c }}</option>{% endfor %}</datalist></div>
+              </div>
+              <p class="field-hint" style="margin-top:8px">Escriba el nombre o el apellido. Los demás datos se guardan en la ficha, campo por campo.</p>
+            </div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+          </form>
+        </dialog>
+      </div>
+{% endblock %}
