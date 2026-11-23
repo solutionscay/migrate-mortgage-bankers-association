@@ -1,0 +1,5 @@
+{#- Inner HTML of `<dl class="totals" id="totales">` (design/registro.html). Figures from v_registration_totals. -#}
+<dt class="grand">Total</dt><dd class="grand">{{ usd(t.total) }}</dd>
+<dt>Total pago</dt><dd class="minor paid">{{ usd(t.payment_total) }}</dd>
+<dt>Balance</dt><dd class="due">{{ usd(t.balance) }}</dd>
+<span class="note">Calculado en el servidor (BR-REG-04, BR-REG-08)</span>

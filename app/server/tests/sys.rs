@@ -131,8 +131,11 @@ async fn upload_and_download() {
 
     // AP-02: signed in, no CSRF token -> 403.
     let (cookie, csrf) = app.sign_in("equintana").await;
+    // The seed already stores the event PDF and the billing files; count from there.
+    let seeded = app.count("SELECT COUNT(*) FROM stored_files");
+    let seeded_paths = app.count("SELECT COUNT(DISTINCT storage_path) FROM stored_files");
     assert_eq!(app.upload(Some(&cookie), None, "programa.pdf", PDF).await.status(), StatusCode::FORBIDDEN);
-    assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), 0);
+    assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), seeded);
 
     // AP-03: ROLE-STAFF uploads.
     let res = app.upload(Some(&cookie), Some(&csrf), "programa convención 2027.pdf", PDF).await;
@@ -175,8 +178,8 @@ async fn upload_and_download() {
     );
     let html = body(app.upload(Some(&cookie), Some(&csrf), "copia.pdf", PDF).await).await;
     assert_ne!(hidden(&html, "pdf_file_uuid"), uuid);
-    assert_eq!(app.count("SELECT COUNT(DISTINCT storage_path) FROM stored_files"), 2);
-    assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), 3);
+    assert_eq!(app.count("SELECT COUNT(DISTINCT storage_path) FROM stored_files"), seeded_paths + 2);
+    assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), seeded + 3);
 
     // Unknown uuid -> 404 page.
     assert_eq!(app.get("/files/no-such-file", Some(&cookie)).await.status(), StatusCode::NOT_FOUND);
@@ -190,6 +193,7 @@ async fn upload_and_download() {
 async fn upload_limits() {
     let app = App::new();
     let (cookie, csrf) = app.sign_in("equintana").await;
+    let seeded = app.count("SELECT COUNT(*) FROM stored_files");
     let big = vec![b'a'; 20 * 1024 * 1024 + 1];
     for (name, bytes, msg) in [
         ("grande.pdf", &big[..], "20 MB"),
@@ -205,7 +209,7 @@ async fn upload_limits() {
     // Exactly 20 MB is accepted.
     let ok = vec![b'a'; 20 * 1024 * 1024];
     assert_eq!(app.upload(Some(&cookie), Some(&csrf), "limite.txt", &ok).await.status(), StatusCode::OK);
-    assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), 1);
+    assert_eq!(app.count("SELECT COUNT(*) FROM stored_files"), seeded + 1);
 }
 
 /// UI-30 logo: an uploaded image's uuid autosaves to `logo_file_uuid`; a PDF is refused; the `x` clears it.

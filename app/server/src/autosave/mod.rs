@@ -110,11 +110,18 @@ pub struct FieldDef {
     pub also: &'static [(&'static str, i64)],
     /// Never shown in the audit trail (BR-SYS-02).
     pub secret: bool,
+    /// Columns that always take the same new value in the same UPDATE (BR-EVT-01: an event item's `date_end`
+    /// follows `date_start`).
+    pub mirror: &'static [&'static str],
 }
 
 impl FieldDef {
     pub const fn new(name: &'static str, column: &'static str, label: &'static str, parse: Parser) -> Self {
-        Self { name, column, label, parse, show: None, also: &[], secret: false }
+        Self { name, column, label, parse, show: None, also: &[], secret: false, mirror: &[] }
+    }
+    pub const fn mirror(mut self, cols: &'static [&'static str]) -> Self {
+        self.mirror = cols;
+        self
     }
     pub const fn show(mut self, show: Shower) -> Self {
         self.show = Some(show);
@@ -313,6 +320,9 @@ where
     let changed = old != new;
     if changed || !def.also.is_empty() {
         let mut sets = vec![format!("{} = ?1", def.column)];
+        for col in def.mirror {
+            sets.push(format!("{col} = ?1"));
+        }
         let mut args = vec![new.clone()];
         for (col, v) in def.also {
             args.push(Value::Integer(*v));

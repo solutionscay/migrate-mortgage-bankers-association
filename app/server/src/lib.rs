@@ -13,6 +13,7 @@ pub mod auth;
 pub mod autosave;
 pub mod clock;
 pub mod config;
+pub mod convention;
 pub mod db;
 pub mod error;
 pub mod home;
@@ -57,6 +58,7 @@ pub fn router(state: AppState) -> Router {
         .merge(auth::account_routes())
         .merge(autosave::routes())
         .merge(sys::routes())
+        .merge(convention::routes::routes())
         .nest("/admin", admin)
         .fallback(error::not_found)
         .layer(from_fn_with_state(state.clone(), auth::csrf_guard))

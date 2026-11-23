@@ -9,14 +9,38 @@ use crate::audit::{self, Actor};
 use rusqlite::types::Value;
 use rusqlite::Connection;
 
-/// `PATCH /registrations/{id}/items/{item_id}`: the line fields I1 registers. I2 adds price, no charge and the
-/// attributes here.
+/// `PATCH /registrations/{id}/items/{item_id}`: the line fields (OP-REG-05).
 pub static ITEM: Registry = Registry {
     table: "registration_items",
     key_col: "uuid",
     stamp: Stamp::Full,
-    fields: &[FieldDef::new("qty", "ticket_qty", "Qty.", parse_qty).also(&[("qty_manual", 1)])],
+    fields: &[
+        FieldDef::new("qty", "ticket_qty", "Qty.", parse_qty).also(&[("qty_manual", 1)]),
+        // OP-REG-05: price, no charge and the BR-REG-06 attributes. The type check of the attributes (hotel fields on
+        // Hotel items, the table on seating items) runs in `convention::registries::patch`.
+        FieldDef::new("price", "price", "Precio", parse_price).show(show_price),
+        FieldDef::new("no_charge", "no_charge", "Sin cargo", super::flag),
+        FieldDef::new("hotel_reservation_num", "hotel_reservation_num", "Reserva", attr_text),
+        FieldDef::new("adicional", "adicional", "Noches adicionales", attr_text),
+        FieldDef::new("mesa", "mesa", "Mesa", attr_text),
+    ],
 };
+
+/// Line price in cents (BR-REG-05: stored once; a hand edit replaces it).
+fn parse_price(s: &str) -> Result<Value, String> {
+    super::cents(s).map(Value::Integer)
+}
+
+fn show_price(v: &Value) -> String {
+    match v {
+        Value::Integer(c) => super::dollars(*c),
+        _ => String::new(),
+    }
+}
+
+fn attr_text(s: &str) -> Result<Value, String> {
+    super::optional_text(s, 60)
+}
 
 /// Qty of a line: a whole number from 1 to 999 (05 T-05-14: 0 is refused).
 fn parse_qty(s: &str) -> Result<Value, String> {

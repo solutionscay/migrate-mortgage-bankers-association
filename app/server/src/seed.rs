@@ -151,7 +151,7 @@ impl Gen {
     }
 
     fn phone(&mut self) -> String {
-        format!("787-555-{:04}", self.range(100, 9999))
+        format!("787-555-01{:02}", self.range(0, 99))
     }
 }
 
@@ -193,6 +193,12 @@ pub fn usd(cents: i64) -> String {
 
 /// Seeds an empty, migrated database. Refuses a database that already has users.
 pub fn run(conn: &mut Connection, seed: u64) -> Result<Summary, DbError> {
+    run_in(conn, seed, None)
+}
+
+/// [`run`], and with a data folder also writes the seeded files (event PDF, billing PDFs) under `files/`, where
+/// `sys::files` serves them (OP-SYS-04).
+pub fn run_in(conn: &mut Connection, seed: u64, data_dir: Option<&std::path::Path>) -> Result<Summary, DbError> {
     let users: i64 = conn.query_row("SELECT COUNT(*) FROM users", [], |r| r.get(0))?;
     if users > 0 {
         return Err(DbError::Check("the database already has users; seed a new file".into()));
@@ -208,8 +214,19 @@ pub fn run(conn: &mut Connection, seed: u64) -> Result<Summary, DbError> {
     tx.commit()?;
 
     let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-    let convention = seed_convention(&tx, &mut g)?;
+    let mut files = Vec::new();
+    let convention = seed_convention(&tx, &mut g, &mut files)?;
     tx.commit()?;
+    if let Some(dir) = data_dir {
+        for f in &files {
+            let path = dir.join(&f.storage_path);
+            if let Some(parent) = path.parent() {
+                std::fs::create_dir_all(parent)
+                    .map_err(|e| DbError::Check(format!("create {}: {e}", parent.display())))?;
+            }
+            std::fs::write(&path, &f.bytes).map_err(|e| DbError::Check(format!("write {}: {e}", path.display())))?;
+        }
+    }
 
     let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
     let mail = seed_mail(&tx, &mut g, &school.students)?;
@@ -619,13 +636,210 @@ struct Convention {
     plan: (String, String),      // (plan name, event name)
 }
 
-fn seed_convention(tx: &Transaction, g: &mut Gen) -> rusqlite::Result<Convention> {
+/// A seeded file: its `stored_files` row now, its bytes later (written only when the tool has a data folder).
+pub struct SeedFile {
+    pub storage_path: String,
+    pub bytes: Vec<u8>,
+}
+
+/// One-page PDF with a title line: placeholder bytes for the seeded event PDF and billing files.
+pub fn placeholder_pdf(title: &str) -> Vec<u8> {
+    let text: String = title.chars().filter(|c| c.is_ascii() && *c != '(' && *c != ')' && *c != '\\').collect();
+    let stream =
+        format!("BT /F1 18 Tf 72 720 Td ({text}) Tj ET\nBT /F1 11 Tf 72 696 Td (MBA demo - datos ficticios) Tj ET");
+    let objs = [
+        "<< /Type /Catalog /Pages 2 0 R >>".to_string(),
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>".to_string(),
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>"
+            .to_string(),
+        format!("<< /Length {} >>\nstream\n{stream}\nendstream", stream.len()),
+        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>".to_string(),
+    ];
+    let mut out = b"%PDF-1.4\n".to_vec();
+    let mut offsets = Vec::new();
+    for (i, o) in objs.iter().enumerate() {
+        offsets.push(out.len());
+        out.extend_from_slice(format!("{} 0 obj\n{o}\nendobj\n", i + 1).as_bytes());
+    }
+    let xref = out.len();
+    out.extend_from_slice(format!("xref\n0 {}\n0000000000 65535 f \n", objs.len() + 1).as_bytes());
+    for off in offsets {
+        out.extend_from_slice(format!("{off:010} 00000 n \n").as_bytes());
+    }
+    out.extend_from_slice(
+        format!("trailer\n<< /Size {} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n", objs.len() + 1).as_bytes(),
+    );
+    out
+}
+
+fn seed_file(
+    tx: &Transaction,
+    g: &mut Gen,
+    files: &mut Vec<SeedFile>,
+    name: &str,
+    at: &str,
+) -> rusqlite::Result<String> {
+    let bytes = placeholder_pdf(name.trim_end_matches(".pdf"));
+    let sha = crate::db::sha256_hex(&bytes);
+    let storage_path = format!("files/{}/{}", &sha[..2], sha);
+    let uuid = g.uuid();
+    tx.execute(
+        "INSERT INTO stored_files (uuid, filename, mime_type, size_bytes, sha256, storage_path, created_at, created_by)
+         VALUES (?1, ?2, 'application/pdf', ?3, ?4, ?5, ?6, ?7)",
+        params![uuid, name, bytes.len() as i64, sha, storage_path, at, SEED_ACTOR],
+    )?;
+    files.push(SeedFile { storage_path, bytes });
+    Ok(uuid)
+}
+
+/// An event item of the seed: (name, type, date offset from the event start, time start, time end, room, price cents).
+type ItemDef = (&'static str, &'static str, i64, &'static str, &'static str, &'static str, i64);
+
+/// Convención Demo 2027 as design/convencion.html lists it (12 activities, sort order as shown). Hotel nights keep
+/// their check-in date as start and end (BR-EVT-01: an item's end date equals its start date).
+const CONV_2027_ITEMS: &[ItemDef] = &[
+    ("Hotel Demo Plaza", "Hotel", -1, "16:00", "12:00", "", 28900),
+    ("Hotel Demo Plaza", "Hotel", 0, "16:00", "12:00", "", 28900),
+    ("Taller de Cumplimiento Afiliado", "Seminario", 0, "08:30", "17:00", "Salón A", 13500),
+    ("Taller de Cumplimiento No Afiliado", "Seminario", 0, "08:30", "17:00", "Salón A", 17500),
+    ("Coctel de Bienvenida", "Cocktail", 0, "18:00", "20:00", "Terraza Demo", 5500),
+    ("Desayuno de Networking", "Desayuno", 1, "07:00", "09:00", "Salón B", 0),
+    ("Panel de Tendencias del Mercado", "Foro", 1, "09:00", "12:00", "Gran Salón", 0),
+    ("Almuerzo de Reconocimientos", "Almuerzo", 1, "12:30", "15:00", "Gran Salón A, B", 14000),
+    ("Hotel Demo Plaza", "Hotel", 1, "16:00", "12:00", "", 28900),
+    ("Cena de Gala Aniversario", "Cena", 1, "19:00", "23:00", "Gran Salón", 11000),
+    ("Desayuno de Clausura", "Desayuno", 2, "08:00", "10:00", "Terraza Demo", 4500),
+    ("Hotel Demo Plaza (2 noches)", "Hotel", 0, "16:00", "12:00", "", 57800),
+];
+
+const FORO_ITEMS: &[ItemDef] = &[
+    ("Foro de Cumplimiento", "Foro", 0, "09:00", "12:00", "Salón Principal", 0),
+    ("Desayuno del Foro", "Desayuno", 0, "07:30", "09:00", "Salón Principal", 3500),
+    ("Almuerzo del Foro", "Almuerzo", 0, "12:30", "14:00", "Salón Principal", 6000),
+];
+
+const CONV_OLD_ITEMS: &[ItemDef] = &[
+    ("Hotel Demo Plaza", "Hotel", 0, "16:00", "12:00", "", 27500),
+    ("Hotel Demo Plaza", "Hotel", 1, "16:00", "12:00", "", 27500),
+    ("Taller de Cumplimiento", "Seminario", 0, "08:30", "17:00", "Salón A", 13000),
+    ("Coctel de Bienvenida", "Cocktail", 0, "18:00", "20:00", "Terraza Demo", 5000),
+    ("Almuerzo de Reconocimientos", "Almuerzo", 1, "12:30", "15:00", "Gran Salón", 13500),
+    ("Cena de Gala", "Cena", 1, "19:00", "23:00", "Gran Salón", 10500),
+    ("Desayuno de Clausura", "Desayuno", 2, "08:00", "10:00", "Terraza Demo", 4500),
+];
+
+/// The six events of design/convenciones.html: (name, location, start, end, status, items).
+#[allow(clippy::type_complexity)]
+const EVENTS: &[(&str, &str, &str, &str, &str, &[ItemDef])] = &[
+    ("Convención Demo 2027", "Hotel Demo Plaza", "2027-05-06", "2027-05-08", "Activo", CONV_2027_ITEMS),
+    ("Foro de Otoño Demo 2027", "Centro de Convenciones Ejemplo", "2027-10-14", "2027-10-14", "Activo", FORO_ITEMS),
+    ("Foro Demo 2026", "Centro de Convenciones Ejemplo", "2026-10-08", "2026-10-08", "Inactivo", FORO_ITEMS),
+    ("Convención Demo 2026", "Hotel Demo Plaza", "2026-05-14", "2026-05-16", "Inactivo", CONV_OLD_ITEMS),
+    ("Foro Demo 2025", "Centro de Convenciones Ejemplo", "2025-10-09", "2025-10-09", "Inactivo", FORO_ITEMS),
+    ("Convención Demo 2025", "Hotel Ejemplo Resort", "2025-05-15", "2025-05-17", "Inactivo", CONV_OLD_ITEMS),
+];
+
+/// Plans of design/planes-lista.html: (event index, name, price override cents, active item indexes, qty overrides).
+#[allow(clippy::type_complexity)]
+const PLANS: &[(usize, &str, Option<i64>, &[usize], &[(usize, i64)])] = &[
+    (0, "P1 · Completo", Some(164000), &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], &[]),
+    // 8 of 12 included; Cena and Desayuno de Clausura x2: $1,218.00 (design/planes.html).
+    (0, "P2(B) · 15 marzo", None, &[1, 2, 4, 5, 7, 8, 9, 10], &[(9, 2), (10, 2)]),
+    (0, "P3 · Solo seminarios", None, &[2, 3], &[]),
+    (0, "P4 · Hotel y cena", Some(68800), &[1, 8, 9], &[]),
+    (0, "P5 · Afiliado sin hotel", None, &[2, 4, 5, 6, 7, 10], &[]),
+    (1, "F1 · Foro completo", None, &[0, 1, 2], &[]),
+    (2, "F1 · Foro completo", None, &[0, 1, 2], &[]),
+    (3, "P1 · Completo", None, &[0, 1, 2, 3, 4, 5, 6], &[]),
+    (3, "P2 · Sin hotel", None, &[2, 3, 4, 5, 6], &[]),
+    (4, "F1 · Foro completo", None, &[0, 1, 2], &[]),
+    (5, "P1 · Completo", None, &[0, 1, 2, 3, 4, 5, 6], &[]),
+];
+
+/// design/convencion.html Auspiciadores: (name, type, title, contact, phone, requested, received, promised).
+#[allow(clippy::type_complexity)]
+const SPONSORS: &[(&str, &str, &str, &str, &str, i64, i64, i64)] = &[
+    ("Acme Mortgage Demo", "Platino", "Sra.", "Ana Ejemplo", "787-555-0112", 1_000_000, 1_000_000, 0),
+    ("Banco Ejemplo", "Oro", "Sr.", "Juan Pérez Demo", "787-555-0127", 500_000, 500_000, 0),
+    ("Capital Ficticio Lending", "Plata", "Lcda.", "Mengana Prueba", "787-555-0133", 250_000, 250_000, 0),
+    ("Bufete Fulano & Mengano", "Bronce", "Lcdo.", "Fulano de Tal", "787-555-0141", 50_000, 50_000, 0),
+    ("Cooperativa Muestra", "Plata", "Sra.", "María Ejemplo", "787-555-0148", 250_000, 0, 250_000),
+    ("Título Demo Services", "Oro", "Sr.", "Zutano Muestra", "787-555-0156", 500_000, 500_000, 0),
+    ("Tasaciones Ejemplo", "Bronce", "Ing.", "Carla Demo", "787-555-0163", 50_000, 0, 0),
+    ("Crédito Prueba FCU", "Plata", "Sr.", "Tomás Ejemplo", "787-555-0170", 250_000, 0, 250_000),
+    ("Avalúos Demo Partners", "Bronce", "Sra.", "Laura Muestra", "787-555-0178", 50_000, 50_000, 0),
+    ("Hipotecas Ficticias, LLC", "Oro", "Sr.", "Pedro Prueba", "787-555-0185", 500_000, 0, 500_000),
+    ("Seguros Ejemplo", "Plata", "Sra.", "Beatriz Demo", "787-555-0191", 250_000, 0, 0),
+    ("Abogados Demo & Asoc.", "Bronce", "Lcdo.", "Mario Ejemplo", "787-555-0104", 50_000, 50_000, 0),
+    ("Financiera Ficticia", "Plata", "Sr.", "Ricardo Muestra", "787-555-0109", 250_000, 0, 250_000),
+    ("Préstamos Prueba Inc.", "Bronce", "Sra.", "Paola Demo", "787-555-0119", 50_000, 0, 50_000),
+];
+
+/// design/convencionistas.html: (first, last, company, phone, e-mail, city).
+const NAMED_PEOPLE: &[(&str, &str, &str, &str, &str, &str)] = &[
+    ("María", "Ejemplo Demo", "Cooperativa Muestra", "787-555-0148", "maria@ejemplo.com", "Ciudad Ejemplo"),
+    ("Fulano", "de Tal", "Acme Mortgage Demo", "787-555-0141", "fulano@ejemplo.com", "Pueblo Demo"),
+    ("Pedro", "Prueba Demo", "Cooperativa Muestra", "787-555-0185", "pedro@ejemplo.com", "Ciudad Ejemplo"),
+    ("Elena", "Muestra Ficticia", "Banco Ejemplo", "787-555-0101", "elena@ejemplo.com", "Villa Muestra"),
+    ("Luis", "Ejemplo Prueba", "Capital Ficticio Lending", "787-555-0102", "luis@ejemplo.com", "Pueblo Demo"),
+    ("Carmen", "Demo Ficticio", "Hipotecas Ficticias, LLC", "787-555-0103", "carmen@ejemplo.com", "Ciudad Ejemplo"),
+    ("Rafael", "Prueba Muestra", "Avalúos Demo Partners", "787-555-0105", "rafael@ejemplo.com", "Villa Muestra"),
+    ("Sofía", "Ficticia Demo", "Abogados Demo & Asoc.", "787-555-0106", "sofia@ejemplo.com", "Pueblo Demo"),
+];
+
+struct SeedReg<'a> {
+    number: i64,
+    person: usize,
+    event: usize,
+    plan: Option<&'a str>,
+    status: &'a str,
+    costeado: &'a str,
+    /// Guest names (first, last, badge).
+    guests: &'a [(&'a str, &'a str, &'a str)],
+    /// Items without a plan: (event item index, hand-set qty or 0 = guests + 1).
+    items: &'a [(usize, i64)],
+    /// Payments: (date, number, type, cents, void reason).
+    payments: &'a [(&'a str, &'a str, &'a str, i64, Option<&'a str>)],
+    /// "pay the total" instead of listed payments.
+    pay_total: bool,
+    comments: Option<&'a str>,
+}
+
+#[allow(clippy::type_complexity)]
+fn seed_convention(tx: &Transaction, g: &mut Gen, files: &mut Vec<SeedFile>) -> rusqlite::Result<Convention> {
     let a = SEED_ACTOR;
-    // People.
-    let mut people = Vec::new();
-    for i in 0..60i64 {
+    let at = g.at(0);
+
+    // People: the eight of the design, then synthetic ones (787-555-01xx, @ejemplo.com).
+    let mut people: Vec<(String, String)> = Vec::new();
+    for (i, (first, last, company, phone, mail, city)) in NAMED_PEOPLE.iter().enumerate() {
         let uuid = g.uuid();
-        let at = g.stamp();
+        let maria = i == 0;
+        tx.execute(
+            "INSERT INTO people (uuid, company, name_first, name_last, phone1, phone2, fax, address, city, state, zip, email,
+               name_badge, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'PR', '00000', ?10, ?11, ?12, ?13, ?12, ?13)",
+            params![
+                uuid,
+                company,
+                first,
+                last,
+                phone,
+                maria.then_some("787-555-0149"),
+                maria.then_some("787-555-0177"),
+                format!("Calle Ficticia {}", 123 + i * 10),
+                city,
+                mail,
+                format!("{first} {}", last.split(' ').next().unwrap_or_default()),
+                at,
+                a
+            ],
+        )?;
+        people.push((uuid, format!("{first} {last}")));
+    }
+    for i in 0..52i64 {
+        let uuid = g.uuid();
+        let stamp = g.stamp();
         let (first, l1, l2) = g.person();
         let company = *g.pick(COMPANIES);
         let phone = g.phone();
@@ -645,255 +859,427 @@ fn seed_convention(tx: &Transaction, g: &mut Gen) -> rusqlite::Result<Convention
                 format!("00{}", 900 + (i % 80)),
                 email(&first, &l1, 100 + i),
                 format!("{first} {l1}"),
-                at,
+                stamp,
                 a
             ],
         )?;
         people.push((uuid, format!("{first} {l1} {l2}")));
     }
 
-    // Events with items and plans.
-    type Plan = (String, String, Vec<(String, String, i64, i64)>); // (uuid, name, package items)
-    struct Ev {
-        uuid: String,
-        name: &'static str,
-        status: &'static str,
-        items: Vec<(String, &'static str, i64, i64)>, // (uuid, type, price, qty)
-        plans: Vec<Plan>,
-    }
-    let defs: [(&str, &str, &str, &str, &str); 3] = [
-        ("Convención Demo 2027", "2027-03-12", "2027-03-14", "Hotel Ejemplo, San Juan", "Activo"),
-        ("Foro de Cumplimiento 2026", "2026-12-04", "2026-12-04", "Centro de Convenciones Muestra", "Activo"),
-        ("Convención Demo 2026", "2026-03-13", "2026-03-15", "Hotel Ejemplo, San Juan", "Inactivo"),
-    ];
-    let item_defs: &[(&str, &str, i64, i64, i64, &str)] = &[
-        // (name, type, price cents, qty, day offset, start time)
-        ("Habitación de hotel (2 noches)", "Hotel", 37800, 1, 0, "15:00"),
-        ("Seminario general", "Seminario", 15000, 1, 0, "09:00"),
-        ("Foro de cumplimiento", "Foro", 12500, 1, 1, "10:00"),
-        ("Desayuno de bienvenida", "Desayuno", 3500, 1, 1, "07:30"),
-        ("Almuerzo de premiación", "Almuerzo", 6500, 1, 1, "12:30"),
-        ("Cena de gala", "Cena", 9500, 1, 2, "19:00"),
-        ("Cocktail de clausura", "Cocktail", 4500, 1, 2, "17:30"),
-    ];
-    let mut events = Vec::new();
-    for (ei, (name, start, end, place, status)) in defs.iter().enumerate() {
+    // Events with their items (BR-EVT-01: item end date = start date; BR-EVT-03: sort order 1..n).
+    let mut events: Vec<(String, Vec<(String, &'static str, i64)>)> = Vec::new();
+    for (ei, (name, place, start, end, status, items)) in EVENTS.iter().enumerate() {
         let uuid = g.uuid();
-        let at = g.stamp();
+        let pdf = if ei == 0 { Some(seed_file(tx, g, files, "programa-convencion-2027.pdf", &at)?) } else { None };
         tx.execute(
-            "INSERT INTO events (uuid, name, date_start, date_end, location, status, created_at, created_by, modified_at, modified_by)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?7, ?8)",
-            params![uuid, name, start, end, place, status, at, a],
+            "INSERT INTO events (uuid, name, date_start, date_end, location, status, pdf_file_uuid, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?8, ?9)",
+            params![uuid, name, start, end, place, status, pdf, at, a],
         )?;
         let start_date = chrono::NaiveDate::parse_from_str(start, "%Y-%m-%d").expect("date");
-        let chosen: Vec<usize> = if ei == 1 { vec![2, 3, 4] } else { (0..item_defs.len()).collect() };
-        let mut items = Vec::new();
-        for (k, &ix) in chosen.iter().enumerate() {
-            let (iname, kind, price, qty, day, time) = item_defs[ix];
+        let mut its = Vec::new();
+        for (k, (iname, kind, day, t1, t2, room, price)) in items.iter().enumerate() {
             let iu = g.uuid();
-            let d = (start_date + chrono::Duration::days(if ei == 1 { 0 } else { day })).format("%Y-%m-%d").to_string();
+            let d = (start_date + chrono::Duration::days(*day)).format("%Y-%m-%d").to_string();
             tx.execute(
-                "INSERT INTO event_items (uuid, event_uuid, name, date_start, date_end, time_start, location_room, qty, price, type,
-                   sort_order, created_at, created_by, modified_at, modified_by)
-                 VALUES (?1, ?2, ?3, ?4, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?11, ?12)",
-                params![iu, uuid, iname, d, time, format!("Salón {}", k + 1), qty, price, kind, k as i64 + 1, at, a],
+                "INSERT INTO event_items (uuid, event_uuid, name, date_start, date_end, time_start, time_end, location_room, qty,
+                   price, type, sort_order, created_at, created_by, modified_at, modified_by)
+                 VALUES (?1, ?2, ?3, ?4, ?4, ?5, ?6, ?7, 1, ?8, ?9, ?10, ?11, ?12, ?11, ?12)",
+                params![iu, uuid, iname, d, t1, t2, (!room.is_empty()).then_some(*room), price, kind, k as i64 + 1, at, a],
             )?;
-            items.push((iu, kind, price, qty));
+            its.push((iu, *kind, *price));
         }
-        let plan_defs: Vec<(&str, Vec<&str>, Option<i64>)> = if ei == 1 {
-            vec![("Foro completo", vec!["Foro", "Desayuno", "Almuerzo"], Some(19900))]
-        } else {
-            vec![
-                (
-                    "P1(A) · completo con hotel",
-                    vec!["Hotel", "Seminario", "Foro", "Desayuno", "Almuerzo", "Cena", "Cocktail"],
-                    None,
-                ),
-                ("P2(B) · sin hotel", vec!["Seminario", "Foro", "Almuerzo", "Cena"], None),
-            ]
-        };
-        let mut plans = Vec::new();
-        for (pname, kinds, over) in plan_defs {
-            let pu = g.uuid();
+        events.push((uuid, its));
+    }
+
+    // Plans: every plan item built (OP-EVT-04), the listed ones included.
+    let mut plans: Vec<(usize, &str, String, Vec<(String, String, i64)>)> = Vec::new(); // (event, name, uuid, active items)
+    for (ei, name, over, active, qtys) in PLANS {
+        let pu = g.uuid();
+        tx.execute(
+            "INSERT INTO packages (uuid, event_uuid, name, price_override, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?5, ?6)",
+            params![pu, events[*ei].0, name, over, at, a],
+        )?;
+        let mut act = Vec::new();
+        for (k, (iu, _, price)) in events[*ei].1.iter().enumerate() {
+            let on = active.contains(&k);
+            let q = qtys.iter().find(|(i, _)| *i == k).map(|(_, q)| *q).unwrap_or(1);
+            let piu = g.uuid();
             tx.execute(
-                "INSERT INTO packages (uuid, event_uuid, name, price_override, created_at, created_by, modified_at, modified_by)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?5, ?6)",
-                params![pu, uuid, pname, over, at, a],
+                "INSERT INTO package_items (uuid, package_uuid, event_item_uuid, active, price, ticket_qty, created_at, created_by, modified_at, modified_by)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?7, ?8)",
+                params![piu, pu, iu, on as i64, price, q, at, a],
             )?;
-            let mut pitems = Vec::new();
-            for (iu, kind, price, qty) in &items {
-                let active = kinds.contains(kind);
-                let piu = g.uuid();
-                tx.execute(
-                    "INSERT INTO package_items (uuid, package_uuid, event_item_uuid, active, price, ticket_qty, created_at, created_by, modified_at, modified_by)
-                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?7, ?8)",
-                    params![piu, pu, iu, active as i64, price, qty, at, a],
-                )?;
-                if active {
-                    pitems.push((piu, iu.clone(), *price, *qty));
-                }
+            if on {
+                act.push((piu, iu.clone(), *price));
             }
-            plans.push((pu, pname.to_owned(), pitems));
         }
-        events.push(Ev { uuid, name, status, items, plans });
+        plans.push((*ei, name, pu, act));
     }
 
-    // Sponsors.
-    for (ei, n) in [(0usize, 4), (2, 2)] {
-        for k in 0..n {
-            let su = g.uuid();
-            let at = g.stamp();
-            let kind = ["Platino", "Oro", "Plata", "Bronce"][k % 4];
-            let promised = [500000, 250000, 100000, 50000][k % 4];
-            let (first, l1, _) = g.person();
-            let phone = g.phone();
-            tx.execute(
-                "INSERT INTO sponsor (uuid, sponsor_name, requested_amount, amount_received, promised, phone, greeting, title,
-                   contact_name, type, city, state, event_uuid, created_at, created_by, modified_at, modified_by)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'Gerente', ?8, ?9, ?10, 'PR', ?11, ?12, ?13, ?12, ?13)",
-                params![
-                    su,
-                    COMPANIES[(k * 3 + ei) % COMPANIES.len()],
-                    promised,
-                    if ei == 2 { promised } else { promised / 2 },
-                    promised,
-                    phone,
-                    format!("Estimado(a) {first}:"),
-                    format!("{first} {l1}"),
-                    kind,
-                    *g.pick(CITIES),
-                    events[ei].uuid,
-                    at,
-                    a
-                ],
-            )?;
-        }
+    // Sponsors of Convención Demo 2027 (design), and a few for 2026.
+    for (k, (name, kind, title, contact, phone, req, rec, prom)) in SPONSORS.iter().enumerate() {
+        let su = g.uuid();
+        let last = contact.split(' ').next_back().unwrap_or_default();
+        let greet = match *title {
+            "Sra." | "Lcda." => format!("Estimada señora {last}:"),
+            _ => format!("Estimado señor {last}:"),
+        };
+        let (address, city) =
+            if k == 0 { ("Avenida Demo 400, Suite 2", "Pueblo Demo") } else { ("Calle Ejemplo 1", "Ciudad Ejemplo") };
+        tx.execute(
+            "INSERT INTO sponsor (uuid, sponsor_name, requested_amount, amount_received, promised, address, phone, greeting, title,
+               contact_name, type, city, zip, state, event_uuid, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, '00000', 'PR', ?13, ?14, ?15, ?14, ?15)",
+            params![
+                su,
+                name,
+                req,
+                (*rec > 0).then_some(*rec),
+                (*prom > 0).then_some(*prom),
+                address,
+                phone,
+                greet,
+                title,
+                contact,
+                kind,
+                city,
+                events[0].0,
+                at,
+                a
+            ],
+        )?;
+    }
+    for (name, kind, amount) in [("Banco Ejemplo", "Oro", 500_000i64), ("Acme Mortgage Demo", "Platino", 1_000_000)] {
+        let su = g.uuid();
+        tx.execute(
+            "INSERT INTO sponsor (uuid, sponsor_name, requested_amount, amount_received, type, event_uuid, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?3, ?4, ?5, ?6, ?7, ?6, ?7)",
+            params![su, name, amount, kind, events[3].0, at, a],
+        )?;
     }
 
-    // Registrations with guests, items and payments.
-    let mut number = 1200i64;
-    let mut invoice = 30000i64;
+    // Billing files of Convención Demo 2027 (design Facturación tab, D-16).
+    for (date, time) in [
+        ("2027-05-04", "16:42:18"),
+        ("2027-05-03", "09:15:02"),
+        ("2027-04-26", "11:07:45"),
+        ("2027-04-19", "15:28:51"),
+        ("2027-04-12", "10:02:33"),
+    ] {
+        let ts = format!("{date} {time}");
+        let fu = seed_file(tx, g, files, &format!("Lista_Facturacion_{date}.pdf"), &ts)?;
+        let bu = g.uuid();
+        tx.execute(
+            "INSERT INTO billing (uuid, event_uuid, timestamp, file_uuid, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?3, ?5, ?3, ?5)",
+            params![bu, events[0].0, ts, fu, a],
+        )?;
+    }
+
+    // Registrations #1283..#1290 of the design (registros.html, registro.html, registro-puerta.html).
+    let named: &[SeedReg] = &[
+        SeedReg {
+            number: 1283,
+            person: 0,
+            event: 0,
+            plan: Some("P2(B) · 15 marzo"),
+            status: "Nuevo",
+            costeado: "Afiliado",
+            guests: &[("Pedro", "Prueba Demo", "Pedro Prueba")],
+            items: &[],
+            payments: &[
+                ("2027-04-02 10:00:00", "DEMO-01", "Cheque", 50_000, None),
+                ("2027-04-10 15:30:00", "DEMO-02", "VISA", 25_000, Some("Cargo duplicado en la tarjeta")),
+            ],
+            pay_total: false,
+            comments: Some("Texto de ejemplo para la demostración. Datos ficticios."),
+        },
+        SeedReg {
+            number: 1284,
+            person: 2,
+            event: 0,
+            plan: None,
+            status: "Registrado",
+            costeado: "Individuo",
+            guests: &[],
+            items: &[(9, 2)], // Cena de Gala x2, qty set by hand (D-88): $220.00
+            payments: &[],
+            pay_total: true,
+            comments: None,
+        },
+        SeedReg {
+            number: 1285,
+            person: 3,
+            event: 0,
+            plan: None,
+            status: "Registrado",
+            costeado: "Afiliado",
+            guests: &[("Ana", "Muestra", "Ana Muestra"), ("Jorge", "Ficticio", "Jorge Ficticio")],
+            items: &[(1, 1), (9, 0)],
+            payments: &[],
+            pay_total: true,
+            comments: None,
+        },
+        SeedReg {
+            number: 1286,
+            person: 7,
+            event: 0,
+            plan: None,
+            status: "No Canceló",
+            costeado: "Individuo",
+            guests: &[],
+            items: &[(11, 0), (3, 0), (4, 0), (5, 0)],
+            payments: &[],
+            pay_total: false,
+            comments: None,
+        },
+        SeedReg {
+            number: 1287,
+            person: 6,
+            event: 0,
+            plan: None,
+            status: "Canceló",
+            costeado: "Individuo",
+            guests: &[],
+            items: &[(2, 0), (7, 0)],
+            payments: &[],
+            pay_total: false,
+            comments: Some("Canceló por teléfono."),
+        },
+        SeedReg {
+            number: 1288,
+            person: 5,
+            event: 0,
+            plan: Some("P1 · Completo"),
+            status: "Asistió",
+            costeado: "Afiliado",
+            guests: &[("Ramón", "Demo", "Ramón Demo")],
+            items: &[],
+            payments: &[],
+            pay_total: true,
+            comments: None,
+        },
+        SeedReg {
+            number: 1289,
+            person: 4,
+            event: 0,
+            plan: Some("P3 · Solo seminarios"),
+            status: "Registrado",
+            costeado: "Afiliado",
+            guests: &[],
+            items: &[],
+            payments: &[],
+            pay_total: true,
+            comments: None,
+        },
+        SeedReg {
+            number: 1290,
+            person: 1,
+            event: 0,
+            plan: Some("P5 · Afiliado sin hotel"),
+            status: "Nuevo",
+            costeado: "Afiliado",
+            guests: &[],
+            items: &[],
+            payments: &[],
+            pay_total: false,
+            comments: None,
+        },
+    ];
+    let mut invoice = 30_000i64;
     let mut payment = (0, String::new(), 0);
-    for _ in 0..72 {
-        let ei = *g.pick(&[0usize, 0, 0, 0, 1, 1, 2, 2]);
-        let ev = &events[ei];
-        let (pu_person, pname) = g.pick(&people).clone();
-        number += 1;
-        let ru = g.uuid();
-        let at = g.stamp();
-        let plan = if g.chance(0.6) { Some(g.pick(&ev.plans).clone()) } else { None };
-        let status = if ev.status == "Inactivo" {
-            *g.pick(&["Asistió", "Asistió", "No Canceló"])
+    for r in named {
+        let paid = insert_registration(tx, g, &people, &events, &plans, r, &mut invoice, &at)?;
+        if r.number == 1283 {
+            payment = (r.number, people[r.person].1.clone(), paid);
+        }
+    }
+
+    // Synthetic registrations: #1201..#1282 for 2027 and the Foro de Otoño, older numbers for past events.
+    let mut number = 1200i64;
+    let mut old_number = 1000i64;
+    for _ in 0..110 {
+        let ei = *g.pick(&[0usize, 0, 0, 0, 0, 1, 2, 3, 3, 4, 5]);
+        let n = if ei <= 1 && number < 1282 {
+            number += 1;
+            number
+        } else {
+            old_number += 1;
+            old_number
+        };
+        let person = g.range(8, people.len() as i64 - 1) as usize;
+        let event_plans: Vec<&str> = plans.iter().filter(|p| p.0 == ei).map(|p| p.1).collect();
+        let plan = if g.chance(0.6) && !event_plans.is_empty() { Some(*g.pick(&event_plans)) } else { None };
+        let status = if EVENTS[ei].4 == "Inactivo" {
+            *g.pick(&["Asistió", "Asistió", "Asistió", "No Canceló", "Canceló"])
         } else {
             *g.pick(&["Registrado", "Registrado", "Registrado", "Nuevo", "Canceló"])
         };
-        tx.execute(
-            "INSERT INTO registration (uuid, person_uuid, event_uuid, package_uuid, registration_number, status, costeado_por,
-               created_at, created_by, modified_at, modified_by)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?8, ?9)",
-            params![ru, pu_person, ev.uuid, plan.as_ref().map(|p| p.0.clone()), number, status, *g.pick(&["Afiliado", "Individuo"]), at, a],
-        )?;
-        let guests = *g.pick(&[0i64, 0, 0, 1, 1, 2]);
-        for _ in 0..guests {
-            let gu = g.uuid();
-            let (first, l1, _) = g.person();
-            tx.execute(
-                "INSERT INTO registration_guests (uuid, registration_uuid, name_first, name_last, name_badge, created_at, created_by, modified_at, modified_by)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?6, ?7)",
-                params![gu, ru, first, l1, format!("{first} {l1}"), at, a],
-            )?;
-        }
-        let qty = guests + 1;
-        let mut lines: Vec<(Option<String>, String, &str, i64)> = Vec::new();
-        if let Some((_, _, pitems)) = &plan {
-            for (piu, iu, price, _) in pitems {
-                let kind = ev.items.iter().find(|i| &i.0 == iu).map(|i| i.1).unwrap_or("Foro");
-                lines.push((Some(piu.clone()), iu.clone(), kind, *price));
-            }
-        } else {
-            let n = g.range(2, ev.items.len().min(4) as i64) as usize;
-            let mut idx: Vec<usize> = Vec::new();
-            while idx.len() < n {
-                let k = g.range(0, ev.items.len() as i64 - 1) as usize;
-                if !idx.contains(&k) {
-                    idx.push(k);
+        let nguests = *g.pick(&[0usize, 0, 0, 1, 1, 2]);
+        let guest_names: Vec<(String, String, String)> = (0..nguests)
+            .map(|_| {
+                let (f, l, _) = g.person();
+                let badge = format!("{f} {l}");
+                (f, l, badge)
+            })
+            .collect();
+        let guests: Vec<(&str, &str, &str)> =
+            guest_names.iter().map(|(f, l, b)| (f.as_str(), l.as_str(), b.as_str())).collect();
+        let nitems = events[ei].1.len();
+        let mut idx: Vec<(usize, i64)> = Vec::new();
+        if plan.is_none() {
+            let want = g.range(1, nitems.min(4) as i64) as usize;
+            while idx.len() < want {
+                let k = g.range(0, nitems as i64 - 1) as usize;
+                if !idx.iter().any(|(i, _)| *i == k) {
+                    idx.push((k, 0));
                 }
             }
-            for k in idx {
-                let (iu, kind, price, _) = &ev.items[k];
-                lines.push((None, iu.clone(), kind, *price));
-            }
         }
-        for (piu, iu, kind, price) in lines {
-            invoice += 1;
-            let lu = g.uuid();
-            let hotel = kind == "Hotel";
-            let seating = matches!(kind, "Cena" | "Almuerzo" | "Seminario" | "Desayuno");
-            let mesa = if seating { Some(g.range(1, 30).to_string()) } else { None };
-            tx.execute(
-                "INSERT INTO registration_items (uuid, registration_uuid, package_item_uuid, event_item_uuid, price, ticket_qty,
-                   hotel_reservation_num, mesa, invoice_number, created_at, created_by, modified_at, modified_by)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?10, ?11)",
-                params![
-                    lu,
-                    ru,
-                    piu,
-                    iu,
-                    price,
-                    qty,
-                    if hotel { Some(format!("H-{}", 40000 + invoice)) } else { None },
-                    mesa,
-                    invoice,
-                    at,
-                    a
-                ],
-            )?;
-        }
-        if status == "Canceló" || status == "Nuevo" {
-            continue;
-        }
-        let total: i64 =
-            tx.query_row("SELECT total FROM v_registration_totals WHERE registration_uuid = ?1", [&ru], |r| r.get(0))?;
-        let amount = match g.range(0, 4) {
-            0 => 0,
-            1 => (total / 2 / 100) * 100,
-            _ => total,
+        let pay_total = status != "Canceló" && status != "Nuevo" && g.chance(0.75);
+        let r = SeedReg {
+            number: n,
+            person,
+            event: ei,
+            plan,
+            status,
+            costeado: g.pick(&["Afiliado", "Individuo"]),
+            guests: &guests,
+            items: &idx,
+            payments: &[],
+            pay_total,
+            comments: None,
         };
-        if amount > 0 {
+        insert_registration(tx, g, &people, &events, &plans, &r, &mut invoice, &at)?;
+    }
+
+    Ok(Convention { payment, plan: ("P2(B) · 15 marzo".into(), "Convención Demo 2027".into()) })
+}
+
+/// One registration with its guests, items (plan items or hand-picked ones) and payments. Returns the cents paid
+/// (voided payments excluded).
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
+fn insert_registration(
+    tx: &Transaction,
+    g: &mut Gen,
+    people: &[(String, String)],
+    events: &[(String, Vec<(String, &'static str, i64)>)],
+    plans: &[(usize, &str, String, Vec<(String, String, i64)>)],
+    r: &SeedReg,
+    invoice: &mut i64,
+    at: &str,
+) -> rusqlite::Result<i64> {
+    let a = SEED_ACTOR;
+    let ru = g.uuid();
+    let stamp = if r.number >= 1283 { at.to_owned() } else { g.stamp() };
+    let plan = r.plan.and_then(|name| plans.iter().find(|p| p.0 == r.event && p.1 == name));
+    tx.execute(
+        "INSERT INTO registration (uuid, person_uuid, event_uuid, package_uuid, registration_number, status, costeado_por,
+           comments, created_at, created_by, modified_at, modified_by)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?9, ?10)",
+        params![
+            ru,
+            people[r.person].0,
+            events[r.event].0,
+            plan.map(|p| p.2.clone()),
+            r.number,
+            r.status,
+            r.costeado,
+            r.comments,
+            stamp,
+            a
+        ],
+    )?;
+    for (f, l, b) in r.guests {
+        let gu = g.uuid();
+        tx.execute(
+            "INSERT INTO registration_guests (uuid, registration_uuid, name_first, name_last, name_badge, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?6, ?7)",
+            params![gu, ru, f, l, b, stamp, a],
+        )?;
+    }
+    let qty = r.guests.len() as i64 + 1;
+    // (package item, event item, price, qty, qty_manual)
+    let mut lines: Vec<(Option<String>, String, i64, i64, i64)> = Vec::new();
+    if let Some(p) = plan {
+        for (piu, iu, price) in &p.3 {
+            lines.push((Some(piu.clone()), iu.clone(), *price, qty, 0));
+        }
+    } else {
+        for (k, hand) in r.items {
+            let (iu, _, price) = &events[r.event].1[*k];
+            lines.push((None, iu.clone(), *price, if *hand > 0 { *hand } else { qty }, (*hand > 0) as i64));
+        }
+    }
+    let mut table = 3;
+    for (piu, iu, price, q, manual) in lines {
+        *invoice += 1;
+        let kind = events[r.event].1.iter().find(|(u, _, _)| *u == iu).map(|(_, k, _)| *k).unwrap_or("Foro");
+        let (reserva, mesa) = match kind {
+            "Hotel" => (Some(format!("DEMO-{:02}", r.number % 100)), None),
+            k if crate::convention::events::is_seating(k) && price > 0 => {
+                table += 3;
+                (None, Some(table.to_string()))
+            }
+            _ => (None, None),
+        };
+        let lu = g.uuid();
+        tx.execute(
+            "INSERT INTO registration_items (uuid, registration_uuid, package_item_uuid, event_item_uuid, price, ticket_qty,
+               qty_manual, hotel_reservation_num, mesa, invoice_number, created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?11, ?12)",
+            params![lu, ru, piu, iu, price, q, manual, reserva, mesa, *invoice, stamp, a],
+        )?;
+    }
+    let mut paid = 0;
+    for (date, num, kind, cents, void) in r.payments {
+        let pu = g.uuid();
+        tx.execute(
+            "INSERT INTO payments (uuid, registration_uuid, payment, payment_type, payment_number, voided_at, voided_by, void_reason,
+               created_at, created_by, modified_at, modified_by)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?9, ?10)",
+            params![
+                pu,
+                ru,
+                cents,
+                kind,
+                num,
+                void.map(|_| *date),
+                void.map(|_| "mvega"),
+                void,
+                date,
+                a
+            ],
+        )?;
+        if void.is_none() {
+            paid += cents;
+        }
+    }
+    if r.pay_total {
+        let total: i64 =
+            tx.query_row("SELECT total FROM v_registration_totals WHERE registration_uuid = ?1", [&ru], |row| {
+                row.get(0)
+            })?;
+        if total > 0 {
             let pu = g.uuid();
             let kind = *g.pick(&["VISA", "MC", "AMEX", "Efectivo", "Cheque"]);
             let num = match kind {
-                "Cheque" => Some(format!("{}", g.range(1000, 9999))),
                 "Efectivo" => None,
+                "Cheque" => Some(format!("{}", g.range(1000, 9999))),
                 _ => Some(format!("AUT-{}", g.range(100000, 999999))),
             };
-            let pat = g.stamp();
             tx.execute(
                 "INSERT INTO payments (uuid, registration_uuid, payment, payment_type, payment_number, created_at, created_by, modified_at, modified_by)
                  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?6, ?7)",
-                params![pu, ru, amount, kind, num, pat, a],
+                params![pu, ru, total, kind, num, stamp, a],
             )?;
-            if ei == 0 && payment.0 == 0 {
-                payment = (number, pname.clone(), amount);
-            }
+            paid += total;
         }
     }
-    // One voided payment (D-09, BR-REG-09), so the void state has a row.
-    let (vreg, vat): (String, String) = tx.query_row(
-        "SELECT registration_uuid, created_at FROM payments ORDER BY created_at, uuid LIMIT 1",
-        [],
-        |r| Ok((r.get(0)?, r.get(1)?)),
-    )?;
-    let vu = g.uuid();
-    tx.execute(
-        "INSERT INTO payments (uuid, registration_uuid, payment, payment_type, payment_number, voided_at, voided_by, void_reason,
-           created_at, created_by, modified_at, modified_by)
-         VALUES (?1, ?2, 5000, 'Cheque', '1001', ?3, 'mvega', 'Cheque devuelto por el banco', ?3, ?4, ?3, 'mvega')",
-        params![vu, vreg, vat, a],
-    )?;
-
-    let p = &events[0].plans[1];
-    Ok(Convention { payment, plan: (p.1.clone(), events[0].name.to_owned()) })
+    Ok(paid)
 }
 
 struct Mail {

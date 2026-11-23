@@ -44,7 +44,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     let mut conn = db::open(&path)?;
-    let summary = seed::run(&mut conn, seed_no)?;
+    // Seeded files (event PDF, billing PDFs) go where the server looks: MBA_DATA_DIR, else the database's folder.
+    let data_dir = std::env::var("MBA_DATA_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| path.parent().map(PathBuf::from).unwrap_or_else(|| PathBuf::from(".")));
+    let summary = seed::run_in(&mut conn, seed_no, Some(&data_dir))?;
     conn.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);")?;
 
     println!("Seeded {} (seed {seed_no}). integrity_check: ok. foreign_key_check: ok.", path.display());
