@@ -427,3 +427,18 @@ async fn htmx_gets_the_fragment() {
     assert!(full.contains("<html") && full.contains("class=\"topbar\"") && full.contains("ma-tiles"));
     assert!(!frag.contains("<html") && !frag.contains("class=\"topbar\"") && frag.contains("ma-tiles"));
 }
+
+/// App icon (option A): /favicon.ico and the icon files need no session; the login page carries the icon tags.
+#[tokio::test]
+async fn favicon_is_public_and_in_the_head() {
+    let app = App::new();
+    let res = app.get("/favicon.ico", None).await;
+    assert_eq!(res.status(), StatusCode::OK);
+    assert_eq!(res.headers()[header::CONTENT_TYPE], "image/x-icon");
+    for path in ["/assets/icons/favicon.svg", "/assets/icons/icon-180.png", "/assets/icons/site.webmanifest"] {
+        assert_eq!(app.get(path, None).await.status(), StatusCode::OK, "{path}");
+    }
+    let html = body(app.get("/login", None).await).await;
+    assert!(html.contains(r#"<link rel="icon" href="/favicon.ico" sizes="48x48">"#));
+    assert!(html.contains(r#"<link rel="manifest" href="/assets/icons/site.webmanifest">"#));
+}

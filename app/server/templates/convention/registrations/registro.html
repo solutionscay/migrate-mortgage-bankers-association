@@ -116,7 +116,7 @@
       <div class="menu" id="menu-reg" popover role="menu">
         <button type="button" role="menuitem" data-open="dlg-cancelar"><svg class="i"><use href="#i-ban"/></svg>Cancelar registro…</button>
         {% if shell.is_admin %}<hr>
-        {% if payments_count > 0 %}<div class="menu-note">Tiene pagos: no se borra (AP-05)</div>{% endif %}
+        {% if live_payments > 0 %}<div class="menu-note">Tiene pagos: no se borra (AP-05)</div>{% endif %}
         <button type="button" role="menuitem" class="danger act-delete" data-open="dlg-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar registro…<span class="admin-mark">admin</span></button>{% endif %}
       </div>
       {% for l in lines %}
@@ -193,8 +193,8 @@
         <form method="post" action="/registrations/{{ h.uuid }}">
           <input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
           <div class="dlg-head danger"><h2 id="dlg-borrar-t">¿Borrar el registro #{{ h.number }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
-          <div class="dlg-body">{% if payments_count > 0 %}<p>Este registro tiene {{ payments_count }} pago{% if payments_count != 1 %}s{% endif %}. No se borra: cancélelo (estatus Canceló, AP-05).</p>{% else %}<p>Se borran el registro, sus actividades y sus acompañantes. No se puede deshacer.</p>{% endif %}</div>
-          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button>{% if payments_count > 0 %}<button class="btn btn-danger-solid" type="button" data-open="dlg-cancelar">Cancelar el registro…</button>{% else %}<button class="btn btn-danger-solid" type="submit">Borrar</button>{% endif %}</div>
+          <div class="dlg-body">{% if live_payments > 0 %}<p>Este registro tiene {{ live_payments }} pago{% if live_payments != 1 %}s{% endif %} sin anular. No se borra: cancélelo (estatus Canceló, AP-05).</p>{% else %}<p>Se borran el registro, sus actividades y sus acompañantes{% if payments_count > 0 %}, y sus {{ payments_count }} pago{% if payments_count != 1 %}s{% endif %} anulado{% if payments_count != 1 %}s{% endif %} (quedan en la bitácora){% endif %}. No se puede deshacer.</p>{% endif %}</div>
+          <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button>{% if live_payments > 0 %}<button class="btn btn-danger-solid" type="button" data-open="dlg-cancelar">Cancelar el registro…</button>{% else %}<button class="btn btn-danger-solid" type="submit">Borrar</button>{% endif %}</div>
         </form>
       </dialog>{% endif %}
 {% endblock %}

@@ -51,10 +51,11 @@ async fn ui03_people_list_search_and_states() {
     assert!(html.contains("María Ejemplo Demo") && html.contains("1–1 de 1"));
     let html = body(app.get("/people?q=zzz", Some(&staff)).await).await;
     assert!(html.contains("Sin resultados"));
-    let html = body(app.get("/people?company=Cooperativa+Muestra&view=list", Some(&staff)).await).await;
+    let html = body(app.get("/people?company=Cooperativa+Muestra", Some(&staff)).await).await;
     assert!(
-        html.contains("Pedro Prueba Demo") && !html.contains("Fulano de Tal") && !html.contains("<th>Teléfono</th>")
+        html.contains("Pedro Prueba Demo") && !html.contains("Fulano de Tal") && html.contains("<th>Teléfono</th>")
     );
+    assert!(!html.contains("aria-label=\"Vista\""), "no list/table toggle");
 
     let frag = body(hx_get(&app, "/people?q=Pedro", &staff, "people-results").await).await;
     assert!(frag.starts_with("<div id=\"people-results\">") && !frag.contains("<html"));

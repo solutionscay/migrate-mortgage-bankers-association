@@ -26,9 +26,7 @@ pub const LOCK_MINUTES: i64 = 15;
 
 /// Routes that work without a session.
 pub fn public_routes() -> Router<AppState> {
-    Router::new()
-        .route("/login", get(login_page).post(login))
-        .route("/favicon.ico", get(|| async { StatusCode::NO_CONTENT }))
+    Router::new().route("/login", get(login_page).post(login))
 }
 
 /// Routes for any signed-in user (AP-01).

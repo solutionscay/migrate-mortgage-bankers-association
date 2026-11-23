@@ -11,7 +11,10 @@ use std::path::Path;
 
 /// (version, name, SQL). Each file may carry its own `BEGIN;`/`COMMIT;` so it also runs alone in `sqlite3`; the runner
 /// strips those lines and runs the file and its history row in one transaction.
-pub const MIGRATIONS: &[(i64, &str, &str)] = &[(1, "0001_schema", include_str!("../migrations/0001_schema.sql"))];
+pub const MIGRATIONS: &[(i64, &str, &str)] = &[
+    (1, "0001_schema", include_str!("../migrations/0001_schema.sql")),
+    (2, "0002_door_no_asistio", include_str!("../migrations/0002_door_no_asistio.sql")),
+];
 
 #[derive(Debug)]
 pub enum DbError {
@@ -97,20 +100,29 @@ pub fn migrate(conn: &mut Connection) -> Result<Vec<String>, DbError> {
             Some(_) => return Err(DbError::Divergent(*version, (*name).to_owned())),
             None => {}
         }
-        let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-        tx.execute_batch(&strip_transaction(sql))?;
-        tx.execute(
-            "INSERT INTO schema_migrations (version, name, sha256, applied_at) VALUES (?1, ?2, ?3, ?4)",
-            params![version, name, sum, crate::clock::now_text()],
-        )?;
-        tx.commit()?;
+        // Foreign keys off while a migration runs, so a table rebuild (DROP + RENAME) neither cascades nor fails;
+        // foreign_key_check must then pass before the commit (ALTER TABLE "other changes" procedure).
+        conn.execute_batch("PRAGMA foreign_keys = OFF;")?;
+        let res = (|| -> Result<(), DbError> {
+            let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+            tx.execute_batch(&strip_transaction(sql))?;
+            foreign_key_check(&tx)?;
+            tx.execute(
+                "INSERT INTO schema_migrations (version, name, sha256, applied_at) VALUES (?1, ?2, ?3, ?4)",
+                params![version, name, sum, crate::clock::now_text()],
+            )?;
+            tx.commit()?;
+            Ok(())
+        })();
+        conn.execute_batch("PRAGMA foreign_keys = ON;")?;
+        res?;
         applied.push((*name).to_owned());
     }
     Ok(applied)
 }
 
-/// Drops the `PRAGMA foreign_keys = ON;`, `BEGIN;` and `COMMIT;` lines (the connection already has foreign keys on,
-/// and the runner owns the transaction). Panics unless the file has at most one BEGIN and as many COMMITs: a changed
+/// Drops the `PRAGMA foreign_keys = ON|OFF;`, `PRAGMA foreign_key_check;`, `BEGIN;` and `COMMIT;` lines (the runner
+/// sets the pragma, checks the keys and owns the transaction). Panics unless the file has at most one BEGIN and as many COMMITs: a changed
 /// file must be looked at, not run half outside a transaction.
 pub fn strip_transaction(sql: &str) -> String {
     let (mut begins, mut commits) = (0, 0);
@@ -125,7 +137,7 @@ pub fn strip_transaction(sql: &str) -> String {
                 commits += 1;
                 false
             }
-            "PRAGMA foreign_keys = ON;" => false,
+            "PRAGMA foreign_keys = ON;" | "PRAGMA foreign_keys = OFF;" | "PRAGMA foreign_key_check;" => false,
             _ => true,
         })
         .collect();
@@ -185,6 +197,48 @@ mod tests {
         let lists: i64 = conn.query_row("SELECT COUNT(DISTINCT list) FROM value_list_items", [], |r| r.get(0)).unwrap();
         assert!(lists >= 15, "value lists seeded: {lists}");
         assert_eq!(setting(&conn, "session.idle_minutes").unwrap().as_deref(), Some("10"));
+        integrity_check(&conn).unwrap();
+        foreign_key_check(&conn).unwrap();
+    }
+
+    /// 0002 rebuilds registration and mail_outbox: rows, children (no cascade on DROP) and keys survive;
+    /// "No Asistió" and 'mocked' pass the new CHECKs.
+    #[test]
+    fn migration_0002_keeps_data_and_children() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        set_pragmas(&conn, false).unwrap();
+        conn.execute_batch("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, sha256 TEXT NOT NULL, applied_at TEXT NOT NULL);").unwrap();
+        conn.execute_batch(&strip_transaction(MIGRATIONS[0].2)).unwrap();
+        conn.execute(
+            "INSERT INTO schema_migrations VALUES (1, '0001_schema', ?1, 'x')",
+            [sha256_hex(MIGRATIONS[0].2.as_bytes())],
+        )
+        .unwrap();
+        conn.execute_batch(
+            "INSERT INTO people (uuid) VALUES ('p');
+             INSERT INTO events (uuid, name) VALUES ('e', 'E');
+             INSERT INTO event_items (uuid, event_uuid, name, type) VALUES ('i', 'e', 'I', 'Foro');
+             INSERT INTO registration (uuid, person_uuid, event_uuid, registration_number, status)
+               VALUES ('r', 'p', 'e', 1000, 'No Canceló');
+             INSERT INTO registration_items (uuid, registration_uuid, event_item_uuid) VALUES ('ri', 'r', 'i');
+             INSERT INTO payments (uuid, registration_uuid, payment) VALUES ('pay', 'r', 100);",
+        )
+        .unwrap();
+        assert_eq!(migrate(&mut conn).unwrap(), ["0002_door_no_asistio"]);
+        let n = |sql: &str| conn.query_row(sql, [], |r| r.get::<_, i64>(0)).unwrap();
+        assert_eq!(n("SELECT COUNT(*) FROM registration_items WHERE registration_uuid = 'r'"), 1);
+        assert_eq!(n("SELECT COUNT(*) FROM payments WHERE registration_uuid = 'r'"), 1);
+        assert_eq!(n("SELECT COUNT(*) FROM v_registration_totals"), 1);
+        assert_eq!(n("PRAGMA foreign_keys"), 1);
+        conn.execute("UPDATE registration SET status = 'No Asistió' WHERE uuid = 'r'", []).unwrap();
+        assert!(conn.execute("UPDATE registration SET status = 'x' WHERE uuid = 'r'", []).is_err());
+        assert!(conn.execute("DELETE FROM registration WHERE uuid = 'r'", []).is_err(), "payments FK still holds");
+        conn.execute(
+            "INSERT INTO mail_outbox (provider, from_addr, to_addrs, subject, html, status)
+             VALUES ('mock', 'a@ejemplo.com', 'b@ejemplo.com', 's', 'h', 'mocked')",
+            [],
+        )
+        .unwrap();
         integrity_check(&conn).unwrap();
         foreign_key_check(&conn).unwrap();
     }

@@ -433,7 +433,7 @@ async fn payments_dialog() {
     assert_eq!(app.num("SELECT balance FROM v_registration_totals WHERE registration_uuid = ?1", &reg), 0);
 }
 
-/// OP-REG-10: door buttons. No Asistió is stored as No Canceló and shown pressed again; htmx gets the row and the
+/// OP-REG-10: door buttons. No Asistió is stored as itself (D-91, migration 0002) and shown pressed again; htmx gets the row and the
 /// attended count out of band; a bad value is 422; the search filters the rows.
 #[tokio::test]
 async fn door_check_in() {
@@ -445,7 +445,9 @@ async fn door_check_in() {
     let res = app.form(&url, &staff, &[("status", "No Asistió")]).await;
     assert_eq!(res.status(), StatusCode::SEE_OTHER);
     assert_eq!(location(&res), format!("/events/{event}/door"));
-    assert_eq!(app.one("SELECT status FROM registration WHERE uuid = ?1", &reg), "No Canceló");
+    assert_eq!(app.one("SELECT status FROM registration WHERE uuid = ?1", &reg), "No Asistió");
+    let html = body(app.get(&format!("/events/{event}/door"), Some(&staff)).await).await;
+    assert!(html.contains("value=\"No Asistió\" aria-pressed=\"true\""), "No Asistió pressed again");
 
     let req = axum::http::Request::post(&url)
         .header("content-type", "application/x-www-form-urlencoded")

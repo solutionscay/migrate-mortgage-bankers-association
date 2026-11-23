@@ -25,7 +25,7 @@ Full list of print pages (one route per print layout): `05_api_design_appendix.m
 - **Responses to writes.** A write from a full page answers `303 See Other` to the page. A write from HTMX answers the changed fragment, plus out-of-band swaps (`hx-swap-oob`) for figures that depend on it (for example registration totals after an item change). A create answers `HX-Redirect` to the new record.
 - **Input.** axum `Form` into a typed struct (serde, `deny_unknown_fields`). Money arrives as dollar text and is parsed to integer cents (04 convention). Dates arrive as ISO `YYYY-MM-DD`. A bad value re-renders the form with a field error (422).
 - **Offering kind.** School routes take `{kind}` = `course` | `seminar` | `short-course`. The handler maps the kind to the three table families of `04` (`courses`/`calendar_course`/`enrollments_course`, `seminars`/`calendar_seminar`/`enrollments_seminars`, `short_courses`/`calendar_short_course`/`enrollments_short_course`). An unknown kind is 404.
-- **Lists.** `?q=` search text, `?page=` (50 rows per page), `?view=list|table` (the FileMaker list and table layouts become one list page with two views; 06).
+- **Lists.** `?q=` search text, `?page=` (50 rows per page). The FileMaker list and table layouts become one list page with one table view (06).
 - **Static files.** `GET /assets/{path}` serves the CSS, the vendored `htmx.min.js` and `app.js`, embedded in the binary.
 - **Print.** Print pages are HTML with a print stylesheet. The browser prints or saves as PDF (product decision, `decisions.md`). No server PDF engine.
 
@@ -84,14 +84,14 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 
 | Method | Path | Kind | Operation | Screen | Policy | Notes |
 |---|---|---|---|---|---|---|
-| GET | `/people` | page | query `people_search` | UI-03 | AP-03 | `?q=`, `?view=list|table`. |
+| GET | `/people` | page | query `people_search` | UI-03 | AP-03 | `?q=`, `?company=`, `?page=`. |
 | GET | `/people/new` | page | none | UI-04 | AP-03 | |
 | POST | `/people` | action | OP-PPL-01 | UI-04 | AP-03 | |
 | GET | `/people/{id}` | page | query `person_get` | UI-04 | AP-03 | Person with registrations portal. |
 | PATCH | `/people/{id}` | action | OP-PPL-01 | UI-04 | AP-03 | Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | DELETE | `/people/{id}` | action | OP-PPL-02 | UI-04 | AP-04 | Refused when the person has registrations (BR-PPL-02). |
 | POST | `/people/{id}/registrations` | action | OP-REG-01 | UI-04 | AP-03 | "Añadir Registro": creates the registration, `HX-Redirect` to UI-06. |
-| GET | `/registrations` | page | query `registration_list` | UI-05 | AP-03 | `?event=`, `?status=`, `?q=`, `?view=`. |
+| GET | `/registrations` | page | query `registration_list` | UI-05 | AP-03 | `?event=`, `?status=`, `?tipo=`, `?q=`, `?page=`. |
 | GET | `/registrations/{id}` | page | query `registration_get` | UI-06 | AP-03 | Header, items, guests, payments, totals from `v_registration_totals`. |
 | PATCH | `/registrations/{id}` | action | OP-REG-01 | UI-06 | AP-03 | Header fields: status, `costeado_por`, comments, guest badge text. Per-field autosave: one field per request, returns the field fragment (supersedes the whole-record `POST`). |
 | GET | `/registrations/{id}/event-picker` | partial | OP-REG-02 | UI-06 | AP-03 | Dialog of events with status Activo (was layout `Eventos Activos`). Not offered when the registration already has an event. Empty: "Al momento no hay eventos activos." (BR-REG-01, audit fix). |
@@ -110,7 +110,7 @@ Kind: `page` (full page, or fragment with `HX-Request`), `partial` (HTMX fragmen
 | POST | `/registrations/{id}/cancel` | action | OP-REG-09 | UI-06 | AP-05 | Status Canceló. |
 | DELETE | `/registrations/{id}` | action | OP-REG-09 | UI-04, UI-06 | AP-05, AP-06 | Refused when payments exist; offers cancel. |
 | GET | `/events/{id}/door` | page | query `door_list` | UI-07 | AP-03 | Door check-in list of one event. |
-| POST | `/registrations/{id}/attendance` | action | OP-REG-10 | UI-07 | AP-03 | Asistió / No Asistió / Canceló; returns the row. |
+| POST | `/registrations/{id}/attendance` | action | OP-REG-10 | UI-07 | AP-03 | Asistió / No Asistió / Canceló, stored as written (D-91); returns the row. |
 
 ### EVT and SPN (convention)
 

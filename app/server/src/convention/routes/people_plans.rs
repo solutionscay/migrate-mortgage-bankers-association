@@ -1,6 +1,6 @@
 //! Phase-2 pane "people_plans": UI-03 Convencionistas, UI-04 Convencionista, UI-12 Planes, UI-13 Plan.
 //!
-//! * `GET /people` (`?q=`, `?company=`, `?view=list|table`, `?page=`); with `HX-Target: people-results` only the
+//! * `GET /people` (`?q=`, `?company=`, `?page=`); with `HX-Target: people-results` only the
 //!   results block. `GET /people/new` opens the create dialog; `POST /people` creates (OP-PPL-01).
 //! * `GET /people/{id}`, `PATCH /people/{id}` (one field), `DELETE /people/{id}` (OP-PPL-02, AP-04: staff 403,
 //!   registrations 409), `POST /people/{id}/registrations` ("Añadir registro", OP-REG-01, redirect to UI-06).
@@ -95,7 +95,7 @@ pub fn status_class(status: &str) -> &'static str {
         "Registrado" => " info",
         "Asistió" => " ok",
         "Canceló" => " err",
-        "No Canceló" => " warn",
+        "No Canceló" | "No Asistió" => " warn",
         _ => "",
     }
 }
@@ -132,7 +132,6 @@ pub struct PeopleResults {
     pub total: i64,
     pub page: i64,
     pub pages: i64,
-    pub view: String,
     pub q: String,
     pub company: String,
     pub is_admin: bool,
@@ -153,9 +152,9 @@ impl PeopleResults {
     pub fn n(&self, v: &i64) -> String {
         grouped(*v)
     }
-    /// The query string of another page or view, keeping the filters.
-    pub fn link(&self, page: i64, view: &str) -> String {
-        let mut s = format!("/people?view={view}&page={page}");
+    /// The query string of another page, keeping the filters.
+    pub fn link(&self, page: i64) -> String {
+        let mut s = format!("/people?page={page}");
         if !self.q.is_empty() {
             s.push_str(&format!("&q={}", urlencode(&self.q)));
         }
@@ -192,7 +191,6 @@ impl Page for PeoplePage {
 pub struct PeopleQuery {
     q: Option<String>,
     company: Option<String>,
-    view: Option<String>,
     page: Option<i64>,
     hecho: Option<String>,
 }
@@ -201,7 +199,6 @@ pub struct PeopleQuery {
 fn people_search(conn: &Connection, q: &PeopleQuery, user: &CurrentUser) -> Result<PeopleResults, AppError> {
     let term = q.q.clone().unwrap_or_default().trim().to_owned();
     let company = q.company.clone().unwrap_or_default().trim().to_owned();
-    let view = if q.view.as_deref() == Some("list") { "list" } else { "table" }.to_owned();
     let filter = "(?1 = '' OR (COALESCE(name_first,'') || ' ' || COALESCE(name_last,'')) LIKE '%' || ?1 || '%'
                    OR company LIKE '%' || ?1 || '%' OR email LIKE '%' || ?1 || '%')
                   AND (?2 = '' OR company = ?2)";
@@ -239,7 +236,6 @@ fn people_search(conn: &Connection, q: &PeopleQuery, user: &CurrentUser) -> Resu
         total,
         page,
         pages,
-        view,
         q: term,
         company,
         is_admin: user.role == crate::auth::Role::Admin,

@@ -137,7 +137,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 ### UI-03 Convencionistas (people list)
 
 - Readiness: behavior-ready. Route: `GET /people`. Source: `objects/MBA.fmp12/layouts/26-Lista_de_Convencionistas.txt`, `objects/MBA.fmp12/layouts/28-Tabla_de_Convencionistas.txt`.
-- List view and table view (`?view=`), search box (`hx-get` with `hx-trigger="input changed delay:300ms"`), "Nuevo" button. Row click opens UI-04.
+- One table view (name, company, phone, e-mail, city, registrations); the FileMaker list and table layouts merge into it, with no view toggle. Search box (`hx-get` with `hx-trigger="input changed delay:300ms"`), "Nuevo" button. Row click opens UI-04.
 - States: empty ("No hay convencionistas"), populated, no results.
 
 ### UI-04 Convencionista (person)
@@ -170,7 +170,7 @@ A trigger becomes an HTMX request to a server operation. Client visibility and r
 
 | Label | Data field | Control | Stored/display values | Required/validation owner | Read/write rule | Source evidence |
 |---|---|---|---|---|---|---|
-| Estatus | `registration.status` | select | value list `registration_status` (Nuevo, Registrado, Asistió, Canceló, No Canceló) | CHECK (BR-REG-10) | AP-03 | layout 29; `objects/MBA.fmp12/value-lists/2-registration_status.txt` |
+| Estatus | `registration.status` | select | value list `registration_status` (Nuevo, Registrado, Asistió, Canceló, No Canceló, No Asistió; D-91) | CHECK (BR-REG-10) | AP-03 | layout 29; `objects/MBA.fmp12/value-lists/2-registration_status.txt` |
 | Costeado por | `registration.costeado_por` | radio | Afiliado / Individuo (value list `costeado_por`) | CHECK | AP-03 | layout 29 |
 | Nombres badge (acompañantes) | `registration.guest_name_badges` | text | text | none | AP-03 | layout 29 |
 | Comentarios | `registration.comments` | textarea | text | none | AP-03 | layout 29 |

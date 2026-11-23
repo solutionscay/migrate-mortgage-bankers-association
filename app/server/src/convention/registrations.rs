@@ -10,7 +10,7 @@ use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde_json::json;
 
 /// `registration.status` values (BR-REG-10; 04 CHECK). New registrations start Nuevo.
-pub const STATUSES: &[&str] = &["Nuevo", "Registrado", "Asistió", "Canceló", "No Canceló"];
+pub const STATUSES: &[&str] = &["Nuevo", "Registrado", "Asistió", "Canceló", "No Canceló", "No Asistió"];
 /// Door check-in buttons (BR-REG-10, value list `registro_puerta_status`).
 pub const DOOR_STATUSES: &[&str] = &["Asistió", "No Asistió", "Canceló"];
 /// `payments.payment_type` values (value list `tipo_de_pago`, D-28).
@@ -405,19 +405,46 @@ pub fn cancel_registration(tx: &Transaction, who: &Who, registration_uuid: &str)
     Ok(())
 }
 
-/// OP-REG-09 delete: refused when the registration has any payment row (409 with the cancel offer, T-05-04,
-/// T-08-09); else ROLE-ADMIN only (AP-05). Items and guests cascade (04).
+/// OP-REG-09 delete: refused when the registration has a payment that is not voided (409 with the cancel offer,
+/// T-05-04, T-08-09; D-93); else ROLE-ADMIN only (AP-05). Items and guests cascade (04). `payments` has no cascade
+/// (D-09), so the voided rows are deleted here first; the audit row keeps them (uuid, amount, type, number, reason).
 pub fn delete_registration(tx: &Transaction, who: &Who, registration_uuid: &str) -> DResult<()> {
     get(tx, registration_uuid)?;
-    let payments = count(tx, "SELECT COUNT(*) FROM payments WHERE registration_uuid = ?1", registration_uuid)?;
-    policy::ap05_registration_delete(who, payments)?;
+    let live = count(
+        tx,
+        "SELECT COUNT(*) FROM payments WHERE registration_uuid = ?1 AND voided_at IS NULL",
+        registration_uuid,
+    )?;
+    policy::ap05_registration_delete(who, live)?;
+    let voided: Vec<serde_json::Value> = tx
+        .prepare(
+            "SELECT uuid, payment, payment_type, payment_number, voided_at, voided_by, void_reason FROM payments
+              WHERE registration_uuid = ?1 ORDER BY created_at, rowid",
+        )?
+        .query_map([registration_uuid], |r| {
+            Ok(json!({
+                "uuid": r.get::<_, String>(0)?, "payment": r.get::<_, i64>(1)?,
+                "payment_type": r.get::<_, Option<String>>(2)?, "payment_number": r.get::<_, Option<String>>(3)?,
+                "voided_at": r.get::<_, Option<String>>(4)?, "voided_by": r.get::<_, Option<String>>(5)?,
+                "void_reason": r.get::<_, Option<String>>(6)?,
+            }))
+        })?
+        .collect::<Result<_, _>>()?;
+    tx.execute("DELETE FROM payments WHERE registration_uuid = ?1", [registration_uuid])?;
     tx.execute("DELETE FROM registration WHERE uuid = ?1", [registration_uuid])?;
-    audit::log(tx, who.actor.user_id, "registration.delete", Some("registration"), Some(registration_uuid), None)?;
+    let detail = (!voided.is_empty()).then(|| json!({ "voided_payments": voided }));
+    audit::log(
+        tx,
+        who.actor.user_id,
+        "registration.delete",
+        Some("registration"),
+        Some(registration_uuid),
+        detail.as_ref(),
+    )?;
     Ok(())
 }
 
-/// OP-REG-10 door check-in (UI-07): Asistió / No Asistió / Canceló. `registration.status` has no "No Asistió"
-/// (04 CHECK), so it is stored as "No Canceló" (did not cancel, did not come); see the open point in the I2 result.
+/// OP-REG-10 door check-in (UI-07): Asistió / No Asistió / Canceló, stored as written (D-91, migration 0002).
 /// Returns the stored status.
 pub fn set_attendance(
     tx: &Transaction,
@@ -429,7 +456,7 @@ pub fn set_attendance(
     get(tx, registration_uuid)?;
     let stored = match door_status {
         "Asistió" => "Asistió",
-        "No Asistió" => "No Canceló",
+        "No Asistió" => "No Asistió",
         "Canceló" => "Canceló",
         _ => return Err(DomainError::Validation("status", "Escoja Asistió, No Asistió o Canceló.".into())),
     };
@@ -442,7 +469,7 @@ pub fn set_attendance(
 pub fn door_status_of(status: &str) -> Option<&'static str> {
     match status {
         "Asistió" => Some("Asistió"),
-        "No Canceló" => Some("No Asistió"),
+        "No Asistió" => Some("No Asistió"),
         "Canceló" => Some("Canceló"),
         _ => None,
     }

@@ -30,10 +30,10 @@ pub fn ap04_parent_delete(who: &Who, dependents: i64) -> DResult<()> {
     Ok(())
 }
 
-/// AP-05: delete a registration only when it has no payment row; else cancel (status Canceló). ROLE-ADMIN only.
-pub fn ap05_registration_delete(who: &Who, payments: i64) -> DResult<()> {
-    if payments > 0 {
-        return Err(DomainError::HasPayments(payments));
+/// AP-05: delete a registration only when it has no payment that is not voided (D-93); else cancel (status Canceló). ROLE-ADMIN only.
+pub fn ap05_registration_delete(who: &Who, live_payments: i64) -> DResult<()> {
+    if live_payments > 0 {
+        return Err(DomainError::HasPayments(live_payments));
     }
     if who.role != Role::Admin {
         return Err(DomainError::Forbidden);

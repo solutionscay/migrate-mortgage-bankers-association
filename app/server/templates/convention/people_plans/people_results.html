@@ -2,28 +2,23 @@
 {%- if total_all == 0 %}
         <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>No hay convencionistas</h4><p>Añada el primero con «Nuevo convencionista».</p></div></div>
 {%- else if total == 0 %}
-        <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-search"/></svg><h4>Sin resultados</h4><p>Ningún convencionista coincide con la búsqueda.</p><a class="btn btn-sm" href="/people?view={{ view }}">Borrar la búsqueda</a></div></div>
+        <div class="table-wrap" style="border-top:1px solid var(--stone-300)"><div class="empty"><svg class="i"><use href="#i-search"/></svg><h4>Sin resultados</h4><p>Ningún convencionista coincide con la búsqueda.</p><a class="btn btn-sm" href="/people">Borrar la búsqueda</a></div></div>
 {%- else %}
         <div class="table-wrap" style="border-top:1px solid var(--stone-300)">
 <table class="t">
-{%- if view == "list" %}
-<colgroup><col><col><col style="width:90px"><col style="width:36px"></colgroup>
-<thead><tr><th aria-sort="ascending"><button class="sort" type="button">Nombre <svg class="i"><use href="#i-sort"/></svg></button></th><th>Compañía</th><th class="num">Registros</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
-{%- else %}
 <colgroup><col><col><col style="width:120px"><col style="width:190px"><col style="width:140px"><col style="width:90px"><col style="width:36px"></colgroup>
 <thead><tr><th aria-sort="ascending"><button class="sort" type="button">Nombre <svg class="i"><use href="#i-sort"/></svg></button></th><th>Compañía</th><th>Teléfono</th><th>E-mail</th><th>Ciudad</th><th class="num">Registros</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
-{%- endif %}
 <tbody>
 {%- for p in rows %}
-<tr><td><a href="/people/{{ p.uuid }}">{% if p.name.is_empty() %}(sin nombre){% else %}{{ p.name }}{% endif %}</a></td><td>{{ p.company }}</td>{% if view != "list" %}<td>{{ p.phone }}</td><td>{{ p.email }}</td><td>{{ p.city }}</td>{% endif %}<td class="num">{{ p.registrations }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-p-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
+<tr><td><a href="/people/{{ p.uuid }}">{% if p.name.is_empty() %}(sin nombre){% else %}{{ p.name }}{% endif %}</a></td><td>{{ p.company }}</td><td>{{ p.phone }}</td><td>{{ p.email }}</td><td>{{ p.city }}</td><td class="num">{{ p.registrations }}</td><td class="col-act"><button class="row-act" type="button" data-menu="menu-p-{{ loop.index }}" aria-label="Acciones de la fila" aria-haspopup="menu" aria-expanded="false"><svg class="i"><use href="#i-more"/></svg></button></td></tr>
 {%- endfor %}
 </tbody>
 </table>
         </div>
         <div class="pager"><span>{{ first() }}–{{ last() }} de {{ n(total) }}</span><div class="pages">
-          {%- if page > 1 %}<a class="btn btn-sm btn-icon" href="{{ link(page - 1, view) }}" aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></a>{% else %}<button class="btn btn-sm btn-icon" type="button" disabled aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></button>{% endif %}
-          {%- for n in page_list() %}<a class="btn btn-sm" href="{{ link(n.clone(), view) }}"{% if n == page %} aria-current="page"{% endif %}>{{ n }}</a>{% endfor %}
-          {%- if page < pages %}<a class="btn btn-sm btn-icon" href="{{ link(page + 1, view) }}" aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></a>{% else %}<button class="btn btn-sm btn-icon" type="button" disabled aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></button>{% endif %}
+          {%- if page > 1 %}<a class="btn btn-sm btn-icon" href="{{ link(page - 1) }}" aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></a>{% else %}<button class="btn btn-sm btn-icon" type="button" disabled aria-label="Anterior"><svg class="i i-sm"><use href="#i-chevron-left"/></svg></button>{% endif %}
+          {%- for n in page_list() %}<a class="btn btn-sm" href="{{ link(n.clone()) }}"{% if n == page %} aria-current="page"{% endif %}>{{ n }}</a>{% endfor %}
+          {%- if page < pages %}<a class="btn btn-sm btn-icon" href="{{ link(page + 1) }}" aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></a>{% else %}<button class="btn btn-sm btn-icon" type="button" disabled aria-label="Siguiente"><svg class="i i-sm"><use href="#i-chevron-right"/></svg></button>{% endif %}
         </div></div>
         {%- for p in rows %}
         <div class="menu" id="menu-p-{{ loop.index }}" popover role="menu">

@@ -86,7 +86,7 @@ pub fn reg_tag(status: &str) -> &'static str {
     match status {
         "Registrado" => "tag info",
         "Asistió" => "tag ok",
-        "No Canceló" => "tag warn",
+        "No Canceló" | "No Asistió" => "tag warn",
         "Canceló" => "tag err",
         _ => "tag",
     }

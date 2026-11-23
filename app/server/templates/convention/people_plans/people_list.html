@@ -14,12 +14,9 @@
       <div class="content-inner">
         {% if let Some(n) = notice %}<div class="banner ok" role="status" style="margin-bottom:12px"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
         <form class="toolbar" method="get" action="/people">
-          <input type="hidden" name="view" value="{{ results.view }}">
           <label class="search"><span class="sr-only">Buscar</span><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{ results.q }}" placeholder="Nombre, compañía o e-mail" autocomplete="off" hx-get="/people" hx-trigger="input changed delay:300ms, search" hx-target="#people-results" hx-swap="outerHTML" hx-include="closest form" hx-push-url="true" hx-indicator="#people-busy"></label>
           <select class="field" name="company" aria-label="Compañía" hx-get="/people" hx-trigger="change" hx-target="#people-results" hx-swap="outerHTML" hx-include="closest form" hx-push-url="true" hx-indicator="#people-busy"><option value="">Todas las compañías</option>{% for c in companies %}<option{% if *c == results.company %} selected{% endif %}>{{ c }}</option>{% endfor %}</select>
           <span class="htmx-indicator" id="people-busy">Buscando…</span>
-          <span class="spacer"></span>
-          <span class="seg" role="group" aria-label="Vista"><a class="btn btn-icon" role="button" href="{{ results.link(1, "list") }}" aria-pressed="{% if results.view == "list" %}true{% else %}false{% endif %}" aria-label="Lista"><svg class="i"><use href="#i-list"/></svg></a><a class="btn btn-icon" role="button" href="{{ results.link(1, "table") }}" aria-pressed="{% if results.view == "table" %}true{% else %}false{% endif %}" aria-label="Tabla"><svg class="i"><use href="#i-table"/></svg></a></span>
         </form>
         {{ results.render().unwrap_or_default()|safe }}
         <dialog class="dlg" id="dlg-nuevo" aria-labelledby="dlg-nuevo-t">

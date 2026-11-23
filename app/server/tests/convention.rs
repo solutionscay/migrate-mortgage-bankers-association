@@ -489,6 +489,23 @@ fn t08_09_registration_with_payment_is_cancelled_not_deleted() {
     regs::delete_registration(&tx, &admin(), &r2).unwrap();
     assert_eq!(one::<i64>(&tx, "SELECT COUNT(*) FROM registration_items WHERE registration_uuid = ?1", &r2), 0);
     assert_eq!(one::<i64>(&tx, "SELECT COUNT(*) FROM registration_guests WHERE registration_uuid = ?1", &r2), 0);
+    tx.commit().unwrap();
+    // D-93: all payments voided -> admin deletes; the voided rows go too and the audit row keeps them.
+    let r3 = registration(&mut conn, &fx, true);
+    let tx = begin(&mut conn).unwrap();
+    regs::add_payment(&tx, &staff(), &r3, "25", "Efectivo", "").unwrap();
+    let pay = one::<String>(&tx, "SELECT uuid FROM payments WHERE registration_uuid = ?1", &r3);
+    regs::void_payment(&tx, &admin(), &pay, "duplicado").unwrap();
+    assert_eq!(regs::delete_registration(&tx, &staff(), &r3), Err(DomainError::Forbidden));
+    regs::delete_registration(&tx, &admin(), &r3).unwrap();
+    assert_eq!(one::<i64>(&tx, "SELECT COUNT(*) FROM registration WHERE uuid = ?1", &r3), 0);
+    assert_eq!(one::<i64>(&tx, "SELECT COUNT(*) FROM payments WHERE registration_uuid = ?1", &r3), 0);
+    let detail = one::<String>(
+        &tx,
+        "SELECT detail FROM audit_log WHERE action = 'registration.delete' AND entity_uuid = ?1",
+        &r3,
+    );
+    assert!(detail.contains(&pay) && detail.contains("duplicado"), "{detail}");
 }
 
 #[test]

@@ -44,10 +44,23 @@ const ASSETS: &[(&str, &str, &[u8])] = &[
         "text/javascript; charset=utf-8",
         include_bytes!("../assets/vendor/htmx-2.0.4.min.js"),
     ),
+    ("icons/favicon.svg", "image/svg+xml", include_bytes!("../../../design/assets/icons/favicon.svg")),
+    ("icons/favicon.ico", "image/x-icon", include_bytes!("../../../design/assets/icons/favicon.ico")),
+    ("icons/icon-180.png", "image/png", include_bytes!("../../../design/assets/icons/icon-180.png")),
+    ("icons/icon-192.png", "image/png", include_bytes!("../../../design/assets/icons/icon-192.png")),
+    ("icons/icon-512.png", "image/png", include_bytes!("../../../design/assets/icons/icon-512.png")),
+    (
+        "icons/site.webmanifest",
+        "application/manifest+json",
+        include_bytes!("../../../design/assets/icons/site.webmanifest"),
+    ),
 ];
 
 pub fn asset_routes() -> Router<AppState> {
-    Router::new().route("/assets/{*path}", get(asset))
+    Router::new()
+        .route("/assets/{*path}", get(asset))
+        // Browsers ask for /favicon.ico without reading the head; public, so the login page has it too.
+        .route("/favicon.ico", get(|| asset(Path("icons/favicon.ico".into()))))
 }
 
 async fn asset(Path(path): Path<String>) -> Response {

@@ -1220,7 +1220,7 @@ One row per source field (1,079), plus one row per dropped table. Separator fiel
 | Object file | Name | Source | Values | Target |
 |---|---|---|---|---|
 | `objects/MBA.fmp12/value-lists/1-event_status.txt` | event_status | custom | 2: Activo, Inactivo | value_list_items seed + CHECK where a rule depends on it |
-| `objects/MBA.fmp12/value-lists/2-registration_status.txt` | registration_status | custom | 4: Registrado, Asistió, Canceló, No Canceló (plus 2 "-" separators) | value_list_items seed + CHECK where a rule depends on it |
+| `objects/MBA.fmp12/value-lists/2-registration_status.txt` | registration_status | custom | 4: Registrado, Asistió, Canceló, No Canceló (plus 2 "-" separators) | value_list_items seed + CHECK where a rule depends on it; migration 0002 adds No Asistió (D-91) |
 | `objects/MBA.fmp12/value-lists/3-package_active_events.txt` | package_active_events | field | package_active_events::event_key#19 | query (select options) |
 | `objects/MBA.fmp12/value-lists/4-package_select_event_items.txt` | package_select_event_items | field | package_select_event_items::uuid#1 | drop |
 | `objects/MBA.fmp12/value-lists/5-1.txt` | 1 | custom | 1: 1 | boolean checkbox |

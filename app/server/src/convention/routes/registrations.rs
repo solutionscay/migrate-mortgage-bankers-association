@@ -110,7 +110,7 @@ fn status_tag(status: &str) -> &'static str {
         "Registrado" => "tag info",
         "Asistió" => "tag ok",
         "Canceló" => "tag err",
-        "No Canceló" => "tag warn",
+        "No Canceló" | "No Asistió" => "tag warn",
         _ => "tag",
     }
 }
@@ -132,7 +132,6 @@ struct ListQuery {
     status: Option<String>,
     tipo: Option<String>,
     q: Option<String>,
-    view: Option<String>,
     page: Option<i64>,
     hecho: Option<String>,
 }
@@ -161,7 +160,6 @@ pub struct ListPage {
     pub q: String,
     pub event_uuid: Option<String>,
     pub event_name: String,
-    pub table_view: bool,
     pub total: i64,
     pub first: i64,
     pub last: i64,
@@ -178,9 +176,9 @@ impl Page for ListPage {
 }
 
 impl ListPage {
-    /// The list URL with the same filters and another page or view.
-    pub fn href(&self, page: impl Borrow<i64>, table: impl Borrow<bool>) -> String {
-        let (page, table) = (page.borrow(), table.borrow());
+    /// The list URL with the same filters and another page.
+    pub fn href(&self, page: impl Borrow<i64>) -> String {
+        let page = page.borrow();
         let mut s = format!("/registrations?event={}", urlencode(self.event_uuid.as_deref().unwrap_or("todos")));
         if let Some((st, _)) = self.statuses.iter().find(|(_, on)| *on) {
             s.push_str(&format!("&status={}", urlencode(st)));
@@ -190,9 +188,6 @@ impl ListPage {
         }
         if !self.q.is_empty() {
             s.push_str(&format!("&q={}", urlencode(&self.q)));
-        }
-        if !*table {
-            s.push_str("&view=list");
         }
         if *page > 1 {
             s.push_str(&format!("&page={page}"));
@@ -295,7 +290,6 @@ async fn list(
         q: search,
         event_uuid,
         event_name,
-        table_view: q.view.as_deref() != Some("list"),
         total,
         first,
         last,
@@ -634,6 +628,8 @@ pub struct RegPage {
     pub costeado: Radios,
     pub payment_types: Vec<&'static str>,
     pub payments_count: usize,
+    /// Payments not voided: any of them blocks the delete (AP-05, D-93).
+    pub live_payments: usize,
     pub x: Extras,
 }
 
@@ -794,6 +790,7 @@ impl RegPage {
             kind: totals.registration_type.clone(),
             guests: guests(conn, uuid)?,
             payments_count: payments.len(),
+            live_payments: payments.iter().filter(|p| !p.voided).count(),
             payments,
             event,
             plan,

@@ -63,7 +63,7 @@ Records are single-file in the source; each rule comes from the file that holds 
 
 | Entity/domain | Role/capability | Create | View/query | Edit | Delete | Bulk/export/admin | Enforcement owner |
 |---|---|---|---|---|---|---|---|
-| REG: `registration` | ROLE-STAFF | allow | allow | allow | conditional: only without payments; else cancel (AP-05) | export/print allow (AP-10) | axum handler + 07 operation |
+| REG: `registration` | ROLE-STAFF | allow | allow | allow | conditional: only without payments that are not voided; else cancel (AP-05, D-93) | export/print allow (AP-10) | axum handler + 07 operation |
 | REG: `registration` | ROLE-ADMIN | allow | allow | allow | conditional: as staff | allow | same |
 | REG: `registration_items`, `registration_guests` | both | allow | allow | allow | allow after confirm (AP-06) | plan rebuild = bulk delete inside OP-REG-03 (AP-09) | same |
 | REG: `payments` | ROLE-STAFF | allow | allow | edit until voided | deny (AP-05) | none | same |
