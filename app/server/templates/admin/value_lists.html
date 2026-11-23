@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Listas de valores{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/admin/users">Admin</a><span class="sep">/</span><a href="/admin/settings?tab=tab-val">Configuración</a><span class="sep">/</span><span>Listas de valores</span></div>
+      <h1 class="title"><b>{{ label }}</b><span class="sub"> · {{ values.len() }} valores</span></h1>
+      <div class="actions"><a class="btn" href="/admin/settings?tab=tab-val"><svg class="i"><use href="#i-chevron-left"/></svg>Listas</a></div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="stack">
+        {% if let Some(n) = notice %}<div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+        {% if let Some(e) = error %}<div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div><b>No se guardó.</b> {{ e }}</div></div>{% endif %}
+        <div class="grid cols-main-aside">
+          <div class="block">
+            <div class="block-head"><h3>Valores</h3><span class="count">{{ list }}</span></div>
+            <table class="t">
+              <colgroup><col style="width:70px"><col><col style="width:140px"><col style="width:90px"></colgroup>
+              <thead><tr><th class="num">Orden</th><th>Valor</th><th></th><th class="c">Mover</th></tr></thead>
+              <tbody>
+              {% for v in values %}<tr>
+                <td class="num">{{ v.sort_order }}</td>
+                {% if v.locked %}<td>{{ v.value }} <svg class="i i-sm" aria-hidden="true"><use href="#i-lock"/></svg><span class="sr-only">(fijo)</span></td><td class="muted">Fijo: lo usa una regla</td>
+                {% else %}<td class="edit"><input class="field" form="vl-r-{{ loop.index }}" name="new_value" value="{{ v.value }}" aria-label="Valor {{ v.value }}"></td><td><button class="btn btn-sm" type="submit" form="vl-r-{{ loop.index }}">Cambiar nombre</button></td>{% endif %}
+                <td class="c"><button class="btn btn-sm btn-icon" type="submit" form="vl-u-{{ loop.index }}" aria-label="Subir {{ v.value }}"{% if loop.first %} disabled{% endif %}><svg class="i i-sm" style="transform:rotate(180deg)"><use href="#i-chevron-down"/></svg></button><button class="btn btn-sm btn-icon" type="submit" form="vl-d-{{ loop.index }}" aria-label="Bajar {{ v.value }}"{% if loop.last %} disabled{% endif %}><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button></td>
+              </tr>{% endfor %}
+                <tr class="add-row"><td></td><td><input class="field" form="vl-add" name="new_value" aria-label="Valor nuevo" placeholder="Valor nuevo" required maxlength="100"></td><td colspan="2"><button class="btn btn-sm" type="submit" form="vl-add"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></td></tr>
+              </tbody>
+            </table>
+            {% for v in values %}
+            {% if !v.locked %}<form id="vl-r-{{ loop.index }}" method="post" action="/admin/value-lists"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="op" value="rename"><input type="hidden" name="list" value="{{ list }}"><input type="hidden" name="value" value="{{ v.value }}"></form>{% endif %}
+            <form id="vl-u-{{ loop.index }}" method="post" action="/admin/value-lists"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="op" value="move"><input type="hidden" name="dir" value="up"><input type="hidden" name="list" value="{{ list }}"><input type="hidden" name="value" value="{{ v.value }}"></form>
+            <form id="vl-d-{{ loop.index }}" method="post" action="/admin/value-lists"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="op" value="move"><input type="hidden" name="dir" value="down"><input type="hidden" name="list" value="{{ list }}"><input type="hidden" name="value" value="{{ v.value }}"></form>
+            {% endfor %}
+            <form id="vl-add" method="post" action="/admin/value-lists"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="op" value="add"><input type="hidden" name="list" value="{{ list }}"></form>
+          </div>
+          <div class="block">
+            <div class="block-head"><h3>Listas</h3></div>
+            <table class="t"><colgroup><col><col style="width:70px"></colgroup><tbody>
+            {% for l in lists %}<tr><td>{% if l.list == list %}<b>{{ l.label }}</b>{% else %}<a href="/admin/value-lists?lista={{ l.list }}">{{ l.label }}</a>{% endif %}</td><td class="num">{{ l.count }}</td></tr>{% endfor %}
+            </tbody></table>
+          </div>
+        </div>
+        <p class="field-hint">Un valor con candado lo nombra una regla de la base de datos (CHECK): no se cambia de nombre. Los valores no se borran.</p>
+        </div>
+      </div>
+{% endblock %}

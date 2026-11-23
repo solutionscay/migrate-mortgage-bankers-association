@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Configuración{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/admin/users">Admin</a><span class="sep">/</span><span>Configuración</span></div>
+      <h1 class="title"><b>Configuración</b><span class="sub"> · organización, escuela, correo y textos</span></h1>
+      <div class="actions"></div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+          {#- No <form> around the fields: htmx would send every field of a form with each PATCH (05: one field). -#}
+          <div class="tabs" role="tablist" aria-label="Secciones de configuración"><button type="button" role="tab" id="tab-org" aria-controls="panel-org" aria-selected="true">Organización</button><button type="button" role="tab" id="tab-esc" aria-controls="panel-esc" aria-selected="false">Escuela</button><button type="button" role="tab" id="tab-cor" aria-controls="panel-cor" aria-selected="false">Correo</button><button type="button" role="tab" id="tab-ses" aria-controls="panel-ses" aria-selected="false">Sesión</button><button type="button" role="tab" id="tab-doc" aria-controls="panel-doc" aria-selected="false">Plantillas de documentos</button><button type="button" role="tab" id="tab-val" aria-controls="panel-val" aria-selected="false">Listas de valores</button></div>
+          <div class="tabpanel" role="tabpanel" id="panel-org" aria-labelledby="tab-org"><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-org" class="req">Nombre</label>{{ field("org.name")|safe }}
+            <label>Zona horaria</label><div class="field-wrap"><div class="value">{{ timezone }}</div><div class="field-hint">Fija: todas las horas son de Puerto Rico (D-67).</div></div>
+            <label>Logo</label><div class="field-wrap">{% if let Some(l) = logo %}<div class="row"><span class="chip"><svg class="i i-sm"><use href="#i-file"/></svg>{{ l }}</span></div>{% else %}<div class="value"><span class="muted">Sin logo</span></div>{% endif %}<div class="field-hint">El logo sale en las páginas de imprimir.</div></div>
+            <div class="gap"></div>
+            <label for="cf-f1">Firmante Escuela</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("school.signer_name")|safe }}{{ field("school.signer_title")|safe }}</div></div>
+            <label for="cf-f2">Firmante Convención</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("convention.signer_name")|safe }}{{ field("convention.signer_title")|safe }}</div><div class="field-hint">Nombre y título. Los firmantes salen en cartas y certificados (BR-SYS-03).</div></div>
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-esc" aria-labelledby="tab-esc" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-nmls">Tarifa NMLS por hora</label>{{ field("nmls_cost_x_hour_cents")|safe }}
+            <label for="cf-csbs1">CSBS: id de proveedor</label>{{ field("csbs.provider_id")|safe }}
+            <label for="cf-csbs3">CSBS: id de curso</label>{{ field("csbs.course_id")|safe }}
+            <label for="cf-csbs2">CSBS: estado</label>{{ field("csbs.state_abbr")|safe }}
+            <label for="cf-csbs4">CSBS: código postal</label>{{ field("csbs.postal_code")|safe }}
+            <label for="cf-csbs5">CSBS: hora de inicio</label>{{ field("csbs.begin_time")|safe }}
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-cor" aria-labelledby="tab-cor" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-tpl">Plantilla para envíos nuevos</label>{{ field("mail.default_template_uuid")|safe }}
+            <label>Proveedor</label><div class="field-wrap"><div class="value">{{ provider }}</div><div class="field-hint">La clave vive solo en el entorno del servidor. Esta página no la muestra ni la guarda (AP-13).</div></div>
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-ses" aria-labelledby="tab-ses" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
+            <label for="cf-idle">Minutos sin uso</label>{{ field("session.idle_minutes")|safe }}
+          </div></div></div>
+          <div class="tabpanel" role="tabpanel" id="panel-doc" aria-labelledby="tab-doc" hidden>
+            <table class="t"><colgroup><col><col style="width:140px"><col style="width:140px"><col style="width:100px"></colgroup>
+            <thead><tr><th>Documento</th><th>Módulo</th><th class="num">Cambiado</th><th></th></tr></thead><tbody>
+            {% for d in docs %}<tr><td>{{ d.title }}</td><td>{{ d.module }}</td><td class="num">{{ d.changed }}</td><td class="c"><a class="btn btn-sm" href="/admin/templates/{{ d.code }}">Editar</a></td></tr>
+            {% else %}<tr><td colspan="4" class="muted">Sin plantillas de documentos.</td></tr>{% endfor %}
+            </tbody></table>
+          </div>
+          <div class="tabpanel" role="tabpanel" id="panel-val" aria-labelledby="tab-val" hidden>
+            <table class="t"><colgroup><col><col style="width:120px"><col style="width:100px"></colgroup>
+            <thead><tr><th>Lista</th><th class="num">Valores</th><th></th></tr></thead><tbody>
+            {% for l in lists %}<tr><td>{{ l.label }}</td><td class="num">{{ l.count }}</td><td class="c"><a class="btn btn-sm" href="/admin/value-lists?lista={{ l.list }}">Editar</a></td></tr>{% endfor %}
+            </tbody></table>
+          </div>
+      </div>
+{% endblock %}

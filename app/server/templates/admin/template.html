@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.title }}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/admin/users">Admin</a><span class="sep">/</span><a href="/admin/settings?tab=tab-doc">Configuración</a><span class="sep">/</span><span>Plantillas de documentos</span></div>
+      <h1 class="title"><b>{{ doc.title }}</b><span class="sub"> · {{ doc.module }} · cambiado {{ doc.changed }}{% if !doc.changed_by.is_empty() %} por {{ doc.changed_by }}{% endif %}</span></h1>
+      <div class="actions"><a class="btn" href="/admin/settings?tab=tab-doc"><svg class="i"><use href="#i-chevron-left"/></svg>Plantillas</a></div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+        <div class="grid cols-main-aside">
+          <div class="block">
+            <div class="block-head"><h3>Texto</h3><span class="count">{{ doc.code }}</span></div>
+            <div class="block-body"><div class="form ma-form-wide">
+              <label for="dt-title" class="req">Título</label>{{ title.html()|safe }}
+              <label for="dt-body" class="req">Texto</label>{{ body.html()|safe }}
+              {% if let Some(s) = doc.source %}<label>Origen</label><div class="field-wrap"><div class="value">{{ s }}</div></div>{% endif %}
+            </div></div>
+          </div>
+          <div class="block">
+            <div class="block-head"><h3>Vista previa</h3><span class="count">HTML limpio</span></div>
+            <div class="block-body" id="doc-preview">{{ doc.body|safe }}</div>
+          </div>
+        </div>
+        <p class="field-hint" style="margin-top:8px">Cada campo se guarda al salir de él. El servidor quita las etiquetas y atributos que no están permitidos (scripts, estilos, eventos).</p>
+      </div>
+{% endblock %}

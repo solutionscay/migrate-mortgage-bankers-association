@@ -1,0 +1,15 @@
+{#- One autosave field (05 "Per-field autosave"). 200: saved value. 422: typed value, aria-invalid, message, data-unsaved. -#}
+{%- macro attrs() -%}
+ id="{{ id }}" name="{{ name }}"{% if let Some(a) = aria %} aria-label="{{ a }}"{% endif %} data-saved="{{ saved }}" hx-patch="{{ url }}" hx-trigger="change" hx-target="closest .field-wrap" hx-swap="outerHTML"{% if error.is_some() %} aria-invalid="true" aria-describedby="{{ id }}-err"{% endif %}
+{%- endmacro -%}
+<div class="field-wrap"{% if error.is_some() %} data-unsaved{% endif %}>
+{%- match control -%}
+{%- when Control::Text -%}<input class="field{{ class }}" value="{{ value }}"{% call attrs() %}>
+{%- when Control::Number -%}<input class="field num{{ class }}" value="{{ value }}" inputmode="numeric"{% call attrs() %}>
+{%- when Control::Money -%}<span class="adorn{{ class }}"><span class="pre">$</span><input class="field money" value="{{ value }}" inputmode="decimal"{% call attrs() %}></span>
+{%- when Control::Select with (opts) -%}<select class="field{{ class }}"{% call attrs() %}>{% for (v, l) in opts %}<option value="{{ v }}"{% if self.is_selected(v) %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+{%- when Control::Textarea with (rows) -%}<textarea class="field{{ class }}" rows="{{ rows }}"{% call attrs() %}>{{ value }}</textarea>
+{%- endmatch -%}
+{%- if let Some(e) = error %}<div class="field-error" id="{{ id }}-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>
+{%- else if let Some(h) = hint %}<div class="field-hint">{{ h }}</div>{% endif -%}
+</div>

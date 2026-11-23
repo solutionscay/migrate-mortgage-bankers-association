@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block body_state %}{% if let Some(d) = open %} data-open="{{ d }}"{% endif %}{% endblock %}
+{% block pagebar %}
+    <div class="pagebar">
+      <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/admin/users">Admin</a><span class="sep">/</span><span>Usuarios</span></div>
+      <h1 class="title"><b>Usuarios</b><span class="sub"> · {{ active_count }} activo{% if active_count != 1 %}s{% endif %} · {{ locked_count }} bloqueado{% if locked_count != 1 %}s{% endif %}</span></h1>
+      <div class="actions"></div>
+    </div>
+{% endblock %}
+{% block content %}
+      <div class="content-inner">
+          <div class="stack">
+          {% if let Some(n) = notice %}<div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
+          {% if let Some(e) = error %}<div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div><b>No se guardó.</b> {{ e }}</div></div>{% endif %}
+          <div class="banner info"><svg class="i"><use href="#i-info"/></svg><div><b>Regla del último administrador.</b> No se puede desactivar ni bajar de rol al último ROLE-ADMIN activo. Desactivar o cambiar el rol cierra las sesiones de ese usuario (AP-11).</div></div>
+          <div class="table-wrap">
+            <table class="t">
+              <colgroup><col style="width:150px"><col><col style="width:130px"><col style="width:110px"><col style="width:200px"><col style="width:190px"><col style="width:36px"></colgroup>
+              <thead><tr><th aria-sort="ascending"><button class="sort" type="button">Usuario <svg class="i"><use href="#i-sort"/></svg></button></th><th>Nombre</th><th>Rol</th><th>Activo</th><th class="num">Bloqueado hasta</th><th class="num">Último acceso</th><th class="col-act"><span class="sr-only">Acciones</span></th></tr></thead>
+              <tbody>
+              {% for u in users %}{% include "admin/user_row.html" %}
+              {% endfor %}
+                <tr class="add-row">
+                  <td><input class="field" form="f-nuevo" name="username" value="{{ new_user.username }}" aria-label="Usuario nuevo" placeholder="usuario" autocomplete="off"{{ new_user.invalid("username")|safe }}></td>
+                  <td><input class="field" form="f-nuevo" name="display_name" value="{{ new_user.display_name }}" aria-label="Nombre" placeholder="Nombre y apellidos"{{ new_user.invalid("display_name")|safe }}></td>
+                  <td><select class="field" form="f-nuevo" name="role" aria-label="Rol"><option value="staff"{% if new_user.role != "admin" %} selected{% endif %}>ROLE-STAFF</option><option value="admin"{% if new_user.role == "admin" %} selected{% endif %}>ROLE-ADMIN</option></select></td>
+                  <td><label class="check"><input type="checkbox" form="f-nuevo" name="active" value="1"{% if new_user.active %} checked{% endif %} aria-label="Activo">Activo</label></td>
+                  <td colspan="3" style="text-align:right"><button class="btn btn-sm" type="button" data-open="dlg-nuevo"><svg class="i i-sm"><use href="#i-plus"/></svg>Crear y fijar contraseña…</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="field-hint">5 intentos fallidos bloquean el usuario 15 minutos. El mensaje de error no dice qué dato falló. Editar abre la fila: cada campo se guarda al salir de él.</p>
+          </div>
+        {% for u in users %}
+        <div class="menu" id="menu-u-{{ u.id }}" popover role="menu">
+          {% if let Some(_l) = u.locked_until %}<div class="menu-note">Bloqueado por 5 intentos fallidos</div>
+          <form method="post" action="/admin/users/{{ u.id }}/unlock"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button type="submit" role="menuitem"><svg class="i"><use href="#i-lock"/></svg>Desbloquear</button></form>{% endif %}
+          <button type="button" role="menuitem" hx-get="/admin/users/{{ u.id }}" hx-target="#u-{{ u.id }}" hx-swap="outerHTML" popovertarget="menu-u-{{ u.id }}" popovertargetaction="hide"><svg class="i"><use href="#i-edit"/></svg>Editar</button>
+          <button type="button" role="menuitem" data-open="dlg-clave-{{ u.id }}"><svg class="i"><use href="#i-lock"/></svg>Nueva contraseña…</button>
+          <hr>
+          {% if !u.active %}<form method="post" action="/admin/users/{{ u.id }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="PATCH"><input type="hidden" name="active" value="1"><button type="submit" role="menuitem"><svg class="i"><use href="#i-check"/></svg>Activar</button></form>
+          {% else if u.last_admin %}<div class="menu-note">Último ROLE-ADMIN activo: no se puede desactivar</div>
+          {% else %}<button type="button" role="menuitem" class="danger" data-open="dlg-desactivar-{{ u.id }}"><svg class="i"><use href="#i-ban"/></svg>Desactivar…</button>{% endif %}
+        </div>
+        <dialog class="dlg" id="dlg-clave-{{ u.id }}" aria-labelledby="dlg-clave-{{ u.id }}-t">
+          <form method="post" action="/admin/users/{{ u.id }}/password">
+            <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-clave-{{ u.id }}-t">Nueva contraseña · {{ u.username }}</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body"><div class="form">
+              <label for="nc-{{ u.id }}-1" class="req">Contraseña nueva</label><div class="field-wrap"><input class="field" id="nc-{{ u.id }}-1" name="nueva" type="password" autocomplete="new-password" required minlength="10" autofocus{% if pw.user_id == u.id && pw.nueva.is_some() %} aria-invalid="true"{% endif %}>{% if pw.user_id == u.id %}{% if let Some(m) = pw.nueva %}<div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% endif %}{% endif %}</div>
+              <label for="nc-{{ u.id }}-2" class="req">Repetir</label><div class="field-wrap"><input class="field" id="nc-{{ u.id }}-2" name="repetir" type="password" autocomplete="new-password" required{% if pw.user_id == u.id && pw.repetir.is_some() %} aria-invalid="true"{% endif %}>{% if pw.user_id == u.id %}{% if let Some(m) = pw.repetir %}<div class="field-error"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ m }}</div>{% endif %}{% endif %}</div>
+            </div><p class="field-hint" style="margin-top:8px">Las sesiones abiertas de {{ u.username }} se cierran. Entregue la contraseña en persona; no sale por correo.</p></div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar contraseña</button></div>
+          </form>
+        </dialog>
+        {% if u.active && !u.last_admin %}<dialog class="dlg" id="dlg-desactivar-{{ u.id }}" aria-labelledby="dlg-desactivar-{{ u.id }}-t">
+          <form method="post" action="/admin/users/{{ u.id }}">
+            <input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="PATCH"><input type="hidden" name="active" value="0">
+            <div class="dlg-head danger"><h2 id="dlg-desactivar-{{ u.id }}-t">¿Desactivar a {{ u.username }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body"><p>{{ u.display_name }} no podrá entrar y sus sesiones se cierran. El usuario no se borra; puede activarlo otra vez.</p></div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Desactivar</button></div>
+          </form>
+        </dialog>{% endif %}
+        {% endfor %}
+        <dialog class="dlg" id="dlg-nuevo" aria-labelledby="dlg-nuevo-t">
+          <form id="f-nuevo" method="post" action="/admin/users">
+            <input type="hidden" name="_csrf" value="{{ shell.csrf }}">
+            <div class="dlg-head"><h2 id="dlg-nuevo-t">Nuevo usuario · contraseña</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
+            <div class="dlg-body">
+              {% if !new_user.errors.is_empty() %}<div class="error-summary" role="alert" style="margin-bottom:8px"><b>No se creó el usuario.</b><ul>{% for (_f, _id, m) in new_user.errors %}<li>{{ m }}</li>{% endfor %}</ul></div>{% endif %}
+              <div class="form">
+              <label for="nu-pw1" class="req">Contraseña</label><div class="field-wrap"><input class="field" id="nu-pw1" name="nueva" type="password" autocomplete="new-password" required minlength="10" autofocus{{ new_user.invalid("nueva")|safe }}><div class="field-hint">Al menos 10 caracteres.</div></div>
+              <label for="nu-pw2" class="req">Repetir</label><div class="field-wrap"><input class="field" id="nu-pw2" name="repetir" type="password" autocomplete="new-password" required{{ new_user.invalid("repetir")|safe }}></div>
+            </div><p class="field-hint" style="margin-top:8px">Usuario, nombre, rol y activo vienen de la fila nueva de la tabla. Entregue la contraseña en persona; no sale por correo.</p></div>
+            <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+          </form>
+        </dialog>
+      </div>
+{% endblock %}
