@@ -2,16 +2,9 @@
 
 A demo of migrating a three-file FileMaker back office for a mortgage bankers association to one web app. The files are MBA (conventions and events), MBS (a school) and MBS_SendMail (bulk e-mail). All data in the demo is synthetic.
 
-The repo holds the full migration plan, the clickable design pages and the app as it is built. I1 (foundation) is in progress: the server runs, users sign in, and the seed tool fills a database.
+The repo holds the full migration plan, the clickable design pages and the app, built in increments.
 
 ![Registro page (UI-06)](design/screenshots/registro.png)
-
-## Where it stands
-
-- The migration plan is done and audited.
-- The M1 design is done. The operator approved it on 2026-11-23 and the epic ([#1](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/1)) is closed.
-- The operator approved the promo video (M2) on 2026-11-23. That opened the build gate G-BUILD.
-- I1 Foundation is in progress: server, sign-in, roles, seed tool and the home page are in `app/`.
 
 ## How it was made
 
@@ -79,19 +72,21 @@ A second reader re-checked 75 rules against the objects (10 were wrong, all fixe
 
 The plan cites object files and explorer catalogs. They come from the client's DDR, so they are not published here.
 
-## Milestones and epics
+## Build plan
 
-| Id | Epic | State | What it delivers |
-|---|---|---|---|
-| M1 | [#1 Design milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/1) | closed | Static HTML design pages: a component gallery and a page for every kept screen (UI-01 to UI-35), on synthetic data. |
-| M2 | [#2 Promo video milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/2) | closed | A promo video made from the plan and the M1 design. It is not part of this repo. |
-| I1 | [#3 Foundation](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/3) | open | The server runs, a user signs in, the seed tool fills a database. |
-| I2 | [#4 Convention](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/4) | open | People, events, plans, registrations, payments, sponsors, billing, door check-in. |
-| I3 | [#5 School](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/5) | open | Students, affiliates, courses, enrollments, grades, certifications. |
-| I4 | [#6 Bulk e-mail](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/6) | open | Batches to enrolled students, templates, outbox, Resend adapter. |
-| I5 | [#7 Print, reports and exports](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/7) | open | Every print document, the admin reports and the CSV exports. |
+The plan splits the work into two milestones and five increments. Each one has an epic issue; the issues track progress.
 
-G-BUILD sits between M2 and I1. It opened on 2026-11-23, when the operator approved the M2 video. I2 and I3 both depend on I1. I4 depends on I3. I5 depends on I2 and I3.
+| Id | Epic | What it delivers |
+|---|---|---|
+| M1 | [#1 Design milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/1) | Static HTML design pages: a component gallery and a page for every kept screen (UI-01 to UI-35), on synthetic data. |
+| M2 | [#2 Promo video milestone](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/2) | A promo video series that follows the build. It is not part of this repo. |
+| I1 | [#3 Foundation](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/3) | The server runs, a user signs in, the seed tool fills a database. |
+| I2 | [#4 Convention](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/4) | People, events, plans, registrations, payments, sponsors, billing, door check-in. |
+| I3 | [#5 School](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/5) | Students, affiliates, courses, enrollments, grades, certifications. |
+| I4 | [#6 Bulk e-mail](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/6) | Batches to enrolled students, templates, outbox, Resend adapter. |
+| I5 | [#7 Print, reports and exports](https://github.com/solutionscay/migrate-mortgage-bankers-association/issues/7) | Every print document, the admin reports and the CSV exports. |
+
+A build gate (G-BUILD) sits between M2 and I1: the build starts after the operator approves the design and the first video. I2 and I3 both depend on I1. I4 depends on I3. I5 depends on I2 and I3.
 
 ## Run it
 
@@ -120,9 +115,9 @@ Settings come from the environment:
 - `MBA_DB`: the database file. Default `data/mba.db`.
 - `MBA_DATA_DIR`: where uploads go (under `files/`). Default: the folder of the database.
 - `MBA_SECURE_COOKIE=1`: adds `Secure` to the session cookie. Set it behind HTTPS. It is off by default because the demo runs on plain `http://127.0.0.1`.
-- `RESEND_API_KEY`: unset means mail stays in the outbox (from I4).
+- `RESEND_API_KEY`: for the bulk e-mail module (I4). Unset means mail stays in the outbox.
 
-The same `--seed` always gives the same database. `cargo test` runs the I1 checks.
+The same `--seed` always gives the same database. `cargo test` runs the checks.
 
 ## Design
 
