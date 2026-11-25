@@ -50,7 +50,7 @@ pub static USERS: Registry = Registry {
 fn parse_role(s: &str) -> Result<Value, String> {
     match s.trim() {
         "admin" | "staff" => Ok(Value::Text(s.trim().to_owned())),
-        _ => Err("Escoja ROLE-ADMIN o ROLE-STAFF.".into()),
+        _ => Err("Escoja Administrador o Personal.".into()),
     }
 }
 
@@ -79,9 +79,9 @@ pub struct UserRow {
 impl UserRow {
     pub fn role_label(&self) -> &'static str {
         if self.role == "admin" {
-            "ROLE-ADMIN"
+            "Administrador"
         } else {
-            "ROLE-STAFF"
+            "Personal"
         }
     }
 }
@@ -259,7 +259,7 @@ pub fn name_field(u: &UserRow) -> FieldView {
 }
 
 pub fn role_field(id: i64, saved: &str) -> FieldView {
-    let opts = vec![("staff".into(), "ROLE-STAFF".into()), ("admin".into(), "ROLE-ADMIN".into())];
+    let opts = vec![("staff".into(), "Personal".into()), ("admin".into(), "Administrador".into())];
     FieldView::new(url(id), "role", &format!("u{id}-role"), Control::Select(opts), saved).aria("Rol")
 }
 
@@ -438,7 +438,7 @@ async fn create(
         nu.errors.push(("display_name", "nu-name", "Nombre: escriba de 1 a 100 caracteres.".into()));
     }
     if parse_role(&f.role).is_err() {
-        nu.errors.push(("role", "nu-role", "Rol: escoja ROLE-ADMIN o ROLE-STAFF.".into()));
+        nu.errors.push(("role", "nu-role", "Rol: escoja Administrador o Personal.".into()));
     }
     if f.nueva.chars().count() < password::MIN_LEN {
         nu.errors.push(("nueva", "nu-pw1", "Contraseña: use al menos 10 caracteres.".into()));

@@ -13,7 +13,7 @@
           <div class="stack">
           {% if let Some(n) = notice %}<div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div><b>{{ n }}</b></div></div>{% endif %}
           {% if let Some(e) = error %}<div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div><b>No se guardó.</b> {{ e }}</div></div>{% endif %}
-          <div class="banner info"><svg class="i"><use href="#i-info"/></svg><div><b>Regla del último administrador.</b> No se puede desactivar ni bajar de rol al último ROLE-ADMIN activo. Desactivar o cambiar el rol cierra las sesiones de ese usuario (AP-11).</div></div>
+          <div class="banner info"><svg class="i"><use href="#i-info"/></svg><div><b>Regla del último administrador.</b> No se puede desactivar ni bajar de rol al último administrador activo. Desactivar o cambiar el rol cierra las sesiones de ese usuario.</div></div>
           <div class="table-wrap">
             <table class="t">
               <colgroup><col style="width:150px"><col><col style="width:130px"><col style="width:110px"><col style="width:200px"><col style="width:190px"><col style="width:36px"></colgroup>
@@ -24,7 +24,7 @@
                 <tr class="add-row">
                   <td><input class="field" form="f-nuevo" name="username" value="{{ new_user.username }}" aria-label="Usuario nuevo" placeholder="usuario" autocomplete="off"{{ new_user.invalid("username")|safe }}></td>
                   <td><input class="field" form="f-nuevo" name="display_name" value="{{ new_user.display_name }}" aria-label="Nombre" placeholder="Nombre y apellidos"{{ new_user.invalid("display_name")|safe }}></td>
-                  <td><select class="field" form="f-nuevo" name="role" aria-label="Rol"><option value="staff"{% if new_user.role != "admin" %} selected{% endif %}>ROLE-STAFF</option><option value="admin"{% if new_user.role == "admin" %} selected{% endif %}>ROLE-ADMIN</option></select></td>
+                  <td><select class="field" form="f-nuevo" name="role" aria-label="Rol"><option value="staff"{% if new_user.role != "admin" %} selected{% endif %}>Personal</option><option value="admin"{% if new_user.role == "admin" %} selected{% endif %}>Administrador</option></select></td>
                   <td><label class="check"><input type="checkbox" form="f-nuevo" name="active" value="1"{% if new_user.active %} checked{% endif %} aria-label="Activo">Activo</label></td>
                   <td colspan="3" style="text-align:right"><button class="btn btn-sm" type="button" data-open="dlg-nuevo"><svg class="i i-sm"><use href="#i-plus"/></svg>Crear y fijar contraseña…</button></td>
                 </tr>
@@ -41,7 +41,7 @@
           <button type="button" role="menuitem" data-open="dlg-clave-{{ u.id }}"><svg class="i"><use href="#i-lock"/></svg>Nueva contraseña…</button>
           <hr>
           {% if !u.active %}<form method="post" action="/admin/users/{{ u.id }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="PATCH"><input type="hidden" name="active" value="1"><button type="submit" role="menuitem"><svg class="i"><use href="#i-check"/></svg>Activar</button></form>
-          {% else if u.last_admin %}<div class="menu-note">Último ROLE-ADMIN activo: no se puede desactivar</div>
+          {% else if u.last_admin %}<div class="menu-note">Último administrador activo: no se puede desactivar</div>
           {% else %}<button type="button" role="menuitem" class="danger" data-open="dlg-desactivar-{{ u.id }}"><svg class="i"><use href="#i-ban"/></svg>Desactivar…</button>{% endif %}
         </div>
         <dialog class="dlg" id="dlg-clave-{{ u.id }}" aria-labelledby="dlg-clave-{{ u.id }}-t">

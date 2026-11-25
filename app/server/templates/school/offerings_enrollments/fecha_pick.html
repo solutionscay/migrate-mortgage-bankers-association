@@ -1,14 +1,14 @@
 {#- UI-20 Fecha field (BR-CRS-01: active rows only) and, out of band when `oob`, the price card (BR-ENR-01). -#}
 <div class="field-wrap" id="mat-fecha">
 {%- if empty -%}
-<select class="field" id="mt-calendar" name="calendar" disabled><option value="">Sin fechas activas</option></select><div class="field-hint">Este ofrecimiento no tiene fechas Pendiente ni Confirmado (BR-CRS-01). Abra una fecha en Ofrecimientos.</div>
+<select class="field" id="mt-calendar" name="calendar" disabled><option value="">Sin fechas activas</option></select><div class="field-hint">Este ofrecimiento no tiene fechas Pendiente ni Confirmado. Abra una fecha en Ofrecimientos.</div>
 {%- else -%}
 <select class="field" id="mt-calendar" name="calendar"{% if disabled %} disabled{% else %} hx-get="/calendar-options/{{ kind.slug() }}" hx-include="closest form" hx-trigger="change" hx-target="#mat-fecha" hx-swap="outerHTML"{% endif %}{% if error.is_some() %} aria-invalid="true" aria-describedby="mt-calendar-err"{% endif %}>
 {%- if selected.is_empty() && !disabled %}<option value="">Escoja una fecha…</option>{% endif -%}
 {%- for (v, l) in options %}<option value="{{ v }}"{% if self.is_sel(v) %} selected{% endif %}>{{ l }}</option>{% endfor -%}
 </select>
 {%- if let Some(e) = error %}<div class="field-error" id="mt-calendar-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>
-{%- else if !disabled %}<div class="field-hint">Solo fechas activas: Pendiente o Confirmado (BR-CRS-01).</div>{% endif -%}
+{%- else if !disabled %}<div class="field-hint">Solo fechas activas: Pendiente o Confirmado.</div>{% endif -%}
 {%- endif -%}
 </div>
 {%- if oob %}

@@ -57,8 +57,8 @@
         <dialog class="dlg" id="dlg-borrar-afi" aria-labelledby="dlg-borrar-afi-t">
           <form method="post" action="/affiliates/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
             <div class="dlg-head danger"><h2 id="dlg-borrar-afi-t">¿Borrar el afiliado?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
-            <div class="dlg-body"><p style="margin-bottom:8px">Se borra <b>{{ socio }}</b>.{% if student_count > 0 %} Sus <b>{{ student_count }} estudiante{% if student_count != 1 %}s{% endif %}</b> quedan sin afiliado y pasan a precio individual en las matrículas nuevas.{% endif %}</p><p class="field-hint">El nombre de compañía escrito en cada estudiante no cambia (BR-AFF-02). Las matrículas existentes guardan su precio.</p></div>
-            <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar afiliado</button></div>
+            <div class="dlg-body"><p style="margin-bottom:8px">Se borra <b>{{ socio }}</b>.{% if student_count > 0 %} Sus <b>{{ student_count }} estudiante{% if student_count != 1 %}s{% endif %}</b> quedan sin afiliado y pasan a precio individual en las matrículas nuevas.{% endif %}</p><p class="field-hint">El nombre de compañía escrito en cada estudiante no cambia. Las matrículas existentes guardan su precio.</p></div>
+            <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar afiliado</button></div>
           </form>
         </dialog>
         {%- endif %}

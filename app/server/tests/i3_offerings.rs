@@ -387,7 +387,7 @@ async fn op_enr_05_cancel_and_delete() {
     let paid = one(&app, "SELECT uuid FROM enrollments_course WHERE serial = 10482");
     let url = format!("/enrollments/course/{paid}");
     let html = body(app.get(&url, Some(&staff)).await).await;
-    assert!(html.contains("Tiene un pago: use Dar de baja (BR-ENR-08)") && html.contains("form=\"f-baja\""));
+    assert!(html.contains("Tiene un pago: use Dar de baja<") && html.contains("form=\"f-baja\""));
     let admin = app.admin().await;
     let res = delete(&app, &url, &admin, "&confirm=1").await;
     assert_eq!(res.status(), StatusCode::CONFLICT);

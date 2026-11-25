@@ -150,7 +150,7 @@ async fn ui15_student_page_and_tabs() {
             && html.contains("4 cursos aprobados")
     );
     assert!(html.contains("<div class=\"v\">12</div>") && html.contains("<div class=\"v\">180</div>"));
-    assert!(html.contains("title=\"BR-AFF-01\">Afiliado</span>") && html.contains(">ACTIVO</span>"));
+    assert!(html.contains("info\">Afiliado</span>") && html.contains(">ACTIVO</span>"));
     assert_eq!(html.matches(">Certificado</a>").count(), 1, "only the graduated certification (BR-CRT-04)");
     assert!(html.contains("Documentación de Cierre") && html.contains("hx-push-url=\"true\""));
     assert!(html.contains(&format!("href=\"/students/{id}/enrollments/seminar/new\"")));
@@ -345,7 +345,7 @@ async fn op_stu_02_04_duplicate_and_delete() {
     let html = body(res).await;
     assert!(
         html.contains("data-open=\"dlg-borrar-stu\"")
-            && html.contains("409 · Conflicto.")
+            && html.contains("No se puede borrar.")
             && html.contains("tiene 10 matrículas")
     );
     let res = delete(&app, &format!("/students/{copy}"), &admin).await;

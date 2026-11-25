@@ -7,5 +7,5 @@
   <form class="row" style="margin-top:4px" method="post" action="/students/{{ student }}/interests" hx-post="/students/{{ student }}/interests" hx-target="#stu-interests" hx-swap="outerHTML"><input type="hidden" name="_csrf" value="{{ csrf }}"><select class="field" name="certification_uuid" aria-label="Añadir certificación de interés" style="width:260px"{% if error.is_some() %} aria-invalid="true" aria-describedby="stu-int-err"{% endif %}>{% for (u, n) in options %}<option value="{{ u }}">{{ n }}</option>{% endfor %}</select><button class="btn btn-sm" type="submit"><svg class="i i-sm"><use href="#i-plus"/></svg>Añadir</button></form>
   {%- endif %}
   {%- if let Some(e) = error %}<div class="field-error" id="stu-int-err"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}
-  <div class="field-hint">Hasta 6; cada una guarda la fecha (BR-STU-05).{% if full() %} La lista está llena.{% endif %}</div>
+  <div class="field-hint">Hasta 6; cada una guarda la fecha.{% if full() %} La lista está llena.{% endif %}</div>
 </div>

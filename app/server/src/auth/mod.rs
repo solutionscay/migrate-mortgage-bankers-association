@@ -49,8 +49,8 @@ impl Role {
     }
     pub fn label(self) -> &'static str {
         match self {
-            Role::Admin => "ROLE-ADMIN",
-            Role::Staff => "ROLE-STAFF",
+            Role::Admin => "Administrador",
+            Role::Staff => "Personal",
         }
     }
 }

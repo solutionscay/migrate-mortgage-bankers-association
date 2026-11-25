@@ -13,11 +13,11 @@
           <div class="tabs" role="tablist" aria-label="Secciones de configuración"><button type="button" role="tab" id="tab-org" aria-controls="panel-org" aria-selected="true">Organización</button><button type="button" role="tab" id="tab-esc" aria-controls="panel-esc" aria-selected="false">Escuela</button><button type="button" role="tab" id="tab-cor" aria-controls="panel-cor" aria-selected="false">Correo</button><button type="button" role="tab" id="tab-ses" aria-controls="panel-ses" aria-selected="false">Sesión</button><button type="button" role="tab" id="tab-doc" aria-controls="panel-doc" aria-selected="false">Plantillas de documentos</button><button type="button" role="tab" id="tab-val" aria-controls="panel-val" aria-selected="false">Listas de valores</button></div>
           <div class="tabpanel" role="tabpanel" id="panel-org" aria-labelledby="tab-org"><div class="block-body ma-panel"><div class="form ma-form-wide">
             <label for="cf-org" class="req">Nombre</label>{{ field("org.name")|safe }}
-            <label>Zona horaria</label><div class="field-wrap"><div class="value">{{ timezone }}</div><div class="field-hint">Fija: todas las horas son de Puerto Rico (D-67).</div></div>
+            <label>Zona horaria</label><div class="field-wrap"><div class="value">{{ timezone }}</div><div class="field-hint">Fija: todas las horas son de Puerto Rico.</div></div>
             <label>Logo</label><div class="field-wrap">{{ logo|safe }}<div class="field-hint">El logo sale en las páginas de imprimir.</div></div>
             <div class="gap"></div>
             <label for="cf-f1">Firmante Escuela</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("school.signer_name")|safe }}{{ field("school.signer_title")|safe }}</div></div>
-            <label for="cf-f2">Firmante Convención</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("convention.signer_name")|safe }}{{ field("convention.signer_title")|safe }}</div><div class="field-hint">Nombre y título. Los firmantes salen en cartas y certificados (BR-SYS-03).</div></div>
+            <label for="cf-f2">Firmante Convención</label><div class="field-wrap"><div class="inline-fields ma-two">{{ field("convention.signer_name")|safe }}{{ field("convention.signer_title")|safe }}</div><div class="field-hint">Nombre y título. Los firmantes salen en cartas y certificados.</div></div>
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-esc" aria-labelledby="tab-esc" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
             <label for="cf-nmls">Tarifa NMLS por hora</label>{{ field("nmls_cost_x_hour_cents")|safe }}
@@ -29,7 +29,7 @@
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-cor" aria-labelledby="tab-cor" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
             <label for="cf-tpl">Plantilla para envíos nuevos</label>{{ field("mail.default_template_uuid")|safe }}
-            <label>Proveedor</label><div class="field-wrap"><div class="value">{{ provider }}</div><div class="field-hint">La clave vive solo en el entorno del servidor. Esta página no la muestra ni la guarda (AP-13).</div></div>
+            <label>Proveedor</label><div class="field-wrap"><div class="value">{{ provider }}</div><div class="field-hint">La clave vive solo en el entorno del servidor. Esta página no la muestra ni la guarda.</div></div>
           </div></div></div>
           <div class="tabpanel" role="tabpanel" id="panel-ses" aria-labelledby="tab-ses" hidden><div class="block-body ma-panel"><div class="form ma-form-wide">
             <label for="cf-idle">Minutos sin uso</label>{{ field("session.idle_minutes")|safe }}

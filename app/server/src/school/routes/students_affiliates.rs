@@ -780,7 +780,7 @@ fn student_field(id: &str, name: &str, saved: String) -> FieldView {
 
 fn affiliate_field(conn: &Connection, id: &str, saved: String) -> Result<AffiliateField, AppError> {
     let f = FieldView::new(format!("/students/{id}"), "member_uuid", "es-afi", Control::Text, saved)
-        .hint("Escoger un afiliado copia su nombre en Compañía (BR-STU-02).");
+        .hint("Escoger un afiliado copia su nombre en Compañía.");
     Ok(AffiliateField { f, options: affiliate_choices(conn, "")? })
 }
 
@@ -990,9 +990,9 @@ fn student_title_oob(conn: &Connection, id: &str) -> Result<String, AppError> {
 fn student_tags_oob(conn: &Connection, id: &str) -> Result<String, AppError> {
     let a = students::academic(conn, id).map_err(|_| AppError::NotFound)?;
     let mut html =
-        format!("<span class=\"tag lg{}\" title=\"BR-STU-03\">{}</span>", status_tag(&a.status), esc(&a.status));
+        format!("<span class=\"tag lg{}\">{}</span>", status_tag(&a.status), esc(&a.status));
     if a.is_affiliate {
-        html.push_str("<span class=\"tag lg info\" title=\"BR-AFF-01\">Afiliado</span>");
+        html.push_str("<span class=\"tag lg info\">Afiliado</span>");
     }
     Ok(autosave::oob("stu-tags", &html))
 }
@@ -1496,7 +1496,7 @@ fn affiliate_record_field(id: &str, name: &str, saved: String) -> FieldView {
         _ => ("af-x", None, Control::Text),
     };
     let f = FieldView::new(url, name, dom, control, saved);
-    let f = if name == "cust_type" { f.hint("ACTIVO: sus estudiantes pagan precio de socio (BR-AFF-01).") } else { f };
+    let f = if name == "cust_type" { f.hint("ACTIVO: sus estudiantes pagan precio de socio.") } else { f };
     match aria {
         Some(a) => f.aria(a),
         None => f,

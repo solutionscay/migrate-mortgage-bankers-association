@@ -1108,7 +1108,7 @@ impl ItemPage {
 /// BR-EVT-01: an activity's end date is its start date. Read only; it follows Comienza.
 fn end_field(end: &str, oob: bool) -> String {
     format!(
-        "<div id=\"w-a-f2\"{} class=\"field-wrap\"><input class=\"field\" id=\"a-f2\" value=\"{}\" readonly aria-readonly=\"true\" title=\"Igual a Comienza (BR-EVT-01)\"></div>",
+        "<div id=\"w-a-f2\"{} class=\"field-wrap\"><input class=\"field\" id=\"a-f2\" value=\"{}\" readonly aria-readonly=\"true\" title=\"Igual a Comienza\"></div>",
         if oob { " hx-swap-oob=\"true\"" } else { "" },
         esc(end)
     )

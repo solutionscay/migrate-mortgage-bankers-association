@@ -142,7 +142,7 @@ fn setting_field(conn: &Connection, def: &FieldDef, saved: &str) -> rusqlite::Re
     Ok(match def.name {
         "nmls_cost_x_hour_cents" => f(Control::Money).class(" ma-short"),
         "session.idle_minutes" => {
-            f(Control::Number).class(" ma-short").hint("Después la sesión cierra y pide entrar otra vez (BR-AUTH-02).")
+            f(Control::Number).class(" ma-short").hint("Después la sesión cierra y pide entrar otra vez.")
         }
         "mail.default_template_uuid" => f(Control::Select(template_options(conn)?)),
         "csbs.provider_id" | "csbs.course_id" | "csbs.state_abbr" | "csbs.postal_code" | "csbs.begin_time" => {

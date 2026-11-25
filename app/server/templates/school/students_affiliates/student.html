@@ -6,7 +6,7 @@
       <div class="crumbs"><a href="/">Inicio</a><span class="sep">/</span><a href="/students">Escuela</a><span class="sep">/</span><a href="/students">Estudiantes</a><span class="sep">/</span><span id="stu-crumb">{{ nombre }}</span></div>
       <h1 class="title" id="stu-title"><b>{{ nombre }}</b> <span class="sub">{% if !compania.is_empty() %} · {{ compania }}{% endif %}{% if !number.is_empty() %} · #{{ number }}{% endif %}</span></h1>
       <div class="actions">
-        <span id="stu-tags" style="display:contents"><span class="tag lg{{ self.status_tag() }}" title="BR-STU-03">{{ academic.status }}</span>{% if academic.is_affiliate %}<span class="tag lg info" title="BR-AFF-01">Afiliado</span>{% endif %}</span>
+        <span id="stu-tags" style="display:contents"><span class="tag lg{{ self.status_tag() }}">{{ academic.status }}</span>{% if academic.is_affiliate %}<span class="tag lg info">Afiliado</span>{% endif %}</span>
         <a class="btn" href="/students/{{ uuid }}/transcript"><svg class="i"><use href="#i-print"/></svg>Transcripción</a>
         <span class="split"><a class="btn" href="{{ self.enroll_link("course") }}"><svg class="i"><use href="#i-plus"/></svg>Matricular</a><button class="btn" type="button" id="btn-matricular" data-menu="menu-matricular" aria-haspopup="menu" aria-expanded="false" aria-label="Escoger tipo"><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button></span>
         <button class="btn btn-quiet" type="button" data-menu="menu-stu" id="btn-stu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones"><svg class="i"><use href="#i-more"/></svg></button>
@@ -21,7 +21,7 @@
           <div class="tile"><div class="k">Horas</div><div class="v">{{ self.hours() }}</div><div class="d">de cursos aprobados</div></div>
           <div class="tile"><div class="k">Último curso</div><div class="v">{% if self.last_date().is_empty() %}—{% else %}{{ self.last_date() }}{% endif %}</div><div class="d">{% if let Some(c) = academic.last_course %}{{ c }}{% else %}Sin cursos{% endif %}</div></div>
         </div>
-        <p class="field-hint" style="margin:4px 0 16px">Resumen académico calculado en el servidor (BR-STU-06).</p>
+        <p class="field-hint" style="margin:4px 0 16px">Resumen académico calculado en el servidor.</p>
         <div id="stu-tabs">
         <div class="tabs" role="tablist" aria-label="Estudiante">
           {%- for (slug, id, label, count) in self.tabs() %}
@@ -32,7 +32,7 @@
         {%- match tab %}
         {%- when Tab::Certs %}
         <div class="tabpanel" role="tabpanel" id="tp-cert" aria-labelledby="tab-cert">
-          <div class="block-head" style="border-top:0"><h3>Progreso por certificación</h3><span class="count">{{ graduated }} graduada{% if graduated != 1 %}s{% endif %} · filas creadas con el estudiante (BR-STU-01)</span></div>
+          <div class="block-head" style="border-top:0"><h3>Progreso por certificación</h3><span class="count">{{ graduated }} graduada{% if graduated != 1 %}s{% endif %} · filas creadas con el estudiante</span></div>
           {%- if certs.is_empty() %}
           <div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h4>Sin certificaciones</h4><p>No hay certificaciones configuradas.</p></div>
           {%- else %}
@@ -42,7 +42,7 @@
             <tbody>{% for c in certs %}{{ c.render().unwrap_or_default()|safe }}{% endfor %}</tbody>
           </table>
           {%- endif %}
-          <div class="block-body"><span class="field-hint">Faltan = total − completados; completados cuenta cursos distintos aprobados (BR-CRT-02). «Certificado» sale solo con fecha de graduación (BR-CRT-04).</span></div>
+          <div class="block-body"><span class="field-hint">Faltan = total − completados; completados cuenta cursos distintos aprobados. «Certificado» sale solo con fecha de graduación.</span></div>
         </div>
         {%- when Tab::Courses %}
         <div class="tabpanel" role="tabpanel" id="tp-cur" aria-labelledby="tab-cur">
@@ -62,7 +62,7 @@
           </table>
           {%- for c in courses %}
           <div class="menu" id="menu-enr-{{ loop.index }}" popover role="menu">
-            <div class="menu-note">{% if c.pago > 0 %}Con pago: se da de baja, no se borra (BR-ENR-08){% else %}Sin pago: se puede quitar (AP-06){% endif %}</div>
+            <div class="menu-note">{% if c.pago > 0 %}Con pago: se da de baja, no se borra{% else %}Sin pago: se puede quitar{% endif %}</div>
             <a role="menuitem" href="/enrollments/course/{{ c.uuid }}"><svg class="i"><use href="#i-file"/></svg>Abrir matrícula</a>
           </div>
           {%- endfor %}
@@ -128,12 +128,12 @@
           <form method="post" action="/students/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
             <div class="dlg-head danger"><h2 id="dlg-borrar-stu-t">¿Borrar a {{ nombre }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
             <div class="dlg-body"><p>Se borra la ficha de <b>{{ nombre }}</b> con sus filas de certificación e intereses. No tiene matrículas. No se puede deshacer.</p></div>
-            <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+            <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
           </form>
           {%- else %}
           <div class="dlg-head danger"><h2 id="dlg-borrar-stu-t">No se puede borrar el estudiante</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
-          <div class="dlg-body"><div class="banner err" style="margin-bottom:12px"><svg class="i"><use href="#i-alert"/></svg><div><b>409 · Conflicto.</b> {{ nombre }} tiene {{ enrollments }} matrícula{% if enrollments != 1 %}s{% endif %} ({{ courses.len() }} curso{% if courses.len() != 1 %}s{% endif %}, {{ seminars.len() }} seminario{% if seminars.len() != 1 %}s{% endif %}, {{ shorts.len() }} curso{% if shorts.len() != 1 %}s{% endif %} corto{% if shorts.len() != 1 %}s{% endif %}).</div></div><p>Un estudiante con matrículas no se borra (AP-04). Dé de baja las matrículas o deje el estudiante INACTIVO.</p></div>
-          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN ve «Borrar»</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+          <div class="dlg-body"><div class="banner err" style="margin-bottom:12px"><svg class="i"><use href="#i-alert"/></svg><div><b>No se puede borrar.</b> {{ nombre }} tiene {{ enrollments }} matrícula{% if enrollments != 1 %}s{% endif %} ({{ courses.len() }} curso{% if courses.len() != 1 %}s{% endif %}, {{ seminars.len() }} seminario{% if seminars.len() != 1 %}s{% endif %}, {{ shorts.len() }} curso{% if shorts.len() != 1 %}s{% endif %} corto{% if shorts.len() != 1 %}s{% endif %}).</div></div><p>Un estudiante con matrículas no se borra. Dé de baja las matrículas o deje el estudiante INACTIVO.</p></div>
+          <div class="dlg-foot"><span class="left">Solo los administradores ven «Borrar»</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
           {%- endif %}
         </dialog>
         {%- endif %}

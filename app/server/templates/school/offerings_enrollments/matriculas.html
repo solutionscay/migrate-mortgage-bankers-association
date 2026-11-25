@@ -59,10 +59,10 @@
           </table>
         </div>
         {%- endif %}
-        <p class="field-hint" style="margin-top:8px">{% if self.is_short() %}CSV CSBS en Imprimir (BR-RPT-06). {% endif %}{% if self.is_course() %}Importar notas actualiza esta fecha por serial (BR-ENR-06). {% endif %}Una matrícula con pago no se borra: se da de baja (BR-ENR-08).</p>
+        <p class="field-hint" style="margin-top:8px">{% if self.is_short() %}CSV CSBS en Imprimir. {% endif %}{% if self.is_course() %}Importar notas actualiza esta fecha por serial. {% endif %}Una matrícula con pago no se borra: se da de baja.</p>
         {%- for l in lines %}
         <div class="menu" id="menu-enr-{{ l.n }}" popover role="menu">
-          {%- if l.paid > 0 %}<div class="menu-note">Con pago: se da de baja, no se borra (BR-ENR-08)</div>{% endif %}
+          {%- if l.paid > 0 %}<div class="menu-note">Con pago: se da de baja, no se borra</div>{% endif %}
           <a role="menuitem" href="/enrollments/{{ self.slug() }}/{{ l.uuid }}"><svg class="i"><use href="#i-file"/></svg>Abrir matrícula</a>
           {%- if l.status != "BAJA" && l.status != "Canceló" %}
           <form method="post" action="/enrollments/{{ self.slug() }}/{{ l.uuid }}/cancel"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button type="submit" role="menuitem"><svg class="i"><use href="#i-ban"/></svg>Dar de baja</button></form>
@@ -76,8 +76,8 @@
         <dialog class="dlg" id="dlg-quitar-{{ l.n }}" aria-labelledby="dlg-quitar-{{ l.n }}-t">
           <form method="post" action="/enrollments/{{ self.slug() }}/{{ l.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="confirm" value="1">
           <div class="dlg-head danger"><h2 id="dlg-quitar-{{ l.n }}-t">¿Quitar la matrícula?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
-          <div class="dlg-body"><p>Se quita la matrícula de <b>{{ l.name }}</b>. No tiene pagos, así que se puede borrar (BR-ENR-08).</p></div>
-          <div class="dlg-foot"><span class="left">Sin pago: se puede quitar (AP-06)</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
+          <div class="dlg-body"><p>Se quita la matrícula de <b>{{ l.name }}</b>. No tiene pagos, así que se puede borrar.</p></div>
+          <div class="dlg-foot"><span class="left">Sin pago: se puede quitar</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
           </form>
         </dialog>
         {%- endif %}

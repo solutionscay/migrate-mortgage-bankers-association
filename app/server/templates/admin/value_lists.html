@@ -14,7 +14,7 @@
         {% if let Some(e) = error %}<div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div><b>No se guardó.</b> {{ e }}</div></div>{% endif %}
         <div class="grid cols-main-aside">
           <div class="block">
-            <div class="block-head"><h3>Valores</h3><span class="count">{{ list }}</span></div>
+            <div class="block-head"><h3>Valores</h3><span class="count">{{ label }}</span></div>
             <table class="t">
               <colgroup><col style="width:70px"><col><col style="width:140px"><col style="width:90px"></colgroup>
               <thead><tr><th class="num">Orden</th><th>Valor</th><th></th><th class="c">Mover</th></tr></thead>

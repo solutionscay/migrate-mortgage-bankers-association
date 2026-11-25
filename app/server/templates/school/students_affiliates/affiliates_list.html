@@ -19,7 +19,7 @@
           <select class="field" name="tipo" aria-label="Tipo"><option value="">Todos los tipos</option>{% for t in self.types() %}<option{% if tipo == *t %} selected{% endif %}>{{ t }}</option>{% endfor %}</select>
           <select class="field" name="miembro" aria-label="Membresía"><option value="">Toda membresía</option>{% for (v, l) in self.memberships() %}<option value="{{ v }}"{% if *v == miembro %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
           <span class="spacer"></span>
-          <span class="field-hint">Un estudiante de un afiliado ACTIVO paga precio de socio (BR-AFF-01)</span>
+          <span class="field-hint">Un estudiante de un afiliado ACTIVO paga precio de socio</span>
         </form>
         <div id="afi-list">
         {%- if total_all == 0 %}

@@ -33,7 +33,7 @@
           {%- else %}
           <label for="mt-check_number">Ck # / Factura</label><div class="field-wrap inline-fields" style="grid-template-columns:1fr 1fr"><input class="field" id="mt-check_number" name="check_number" value="{{ v_check }}" aria-label="Número de cheque"><div class="value">{{ invoice }}</div></div>
           {%- endif %}
-          <span class="label">Balance</span><div class="field-wrap"><div class="value money sch-bal">{{ balance }}</div><div class="field-hint">Costo − pago (BR-ENR-02)</div></div>
+          <span class="label">Balance</span><div class="field-wrap"><div class="value money sch-bal">{{ balance }}</div><div class="field-hint">Costo − pago</div></div>
         </div>
         <div class="form">
           <label for="mt-expectations">Expectativas del curso</label><div class="field-wrap"><textarea class="field" id="mt-expectations" name="expectations" rows="3">{{ v_expect }}</textarea></div>
@@ -51,7 +51,7 @@
             <label class="sch-g sch-score"><span>Puntuación</span><input class="field num" id="mt-puntuacion" name="puntuacion" value="{{ v_score }}" inputmode="numeric"{% if score_error.is_some() %} aria-invalid="true" aria-describedby="mt-sc-e"{% endif %}>{% if let Some(e) = score_error %}<div class="field-error" id="mt-sc-e"><svg class="i i-sm"><use href="#i-alert"/></svg>{{ e }}</div>{% endif %}</label>
             <div class="sch-result">{% if score_error.is_some() %}{% else if let Some(l) = letter %}<span class="sch-letter lg">{{ l }}</span>{% if passed %}<span class="tag ok">Aprobado</span>{% else %}<span class="tag err">No aprobado</span>{% endif %}{% else %}<span class="muted">Sin puntuación: no hay letra todavía.</span>{% endif %}</div>
           </div>
-          <div class="field-hint">Con promedio final, la puntuación toma su valor (BR-ENR-03). Letra: 90 A, 80 B, 70 C, 60 D, menos F (BR-ENR-04). Aprueba con más de 69 (BR-ENR-05).</div>
+          <div class="field-hint">Con promedio final, la puntuación toma su valor. Letra: 90 A, 80 B, 70 C, 60 D, menos F. Aprueba con más de 69.</div>
       </fieldset>
       {%- endif %}
     </div>
@@ -59,7 +59,7 @@
     <div class="dlg-foot"><span class="left">Ctrl+S guarda · Esc cierra</span><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Matricular</button></div>
     {%- else %}
     <div class="dlg-foot">
-      {%- if paid > 0 %}<span class="sch-blocked"><button class="btn btn-danger" type="button" disabled aria-describedby="del-hint"><svg class="i"><use href="#i-trash"/></svg>Borrar</button><span class="field-hint" id="del-hint">Tiene un pago: use Dar de baja (BR-ENR-08)</span></span>
+      {%- if paid > 0 %}<span class="sch-blocked"><button class="btn btn-danger" type="button" disabled aria-describedby="del-hint"><svg class="i"><use href="#i-trash"/></svg>Borrar</button><span class="field-hint" id="del-hint">Tiene un pago: use Dar de baja</span></span>
       {%- else %}<button class="btn btn-danger" type="button" data-open="dlg-mat-borrar"><svg class="i"><use href="#i-trash"/></svg>Borrar…</button>
       {%- endif %}
       <span class="left"></span>
@@ -75,8 +75,8 @@
   <dialog class="dlg" id="dlg-mat-borrar" aria-labelledby="dlg-mat-borrar-t">
     <form method="post" action="/enrollments/{{ kind.slug() }}/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ csrf }}"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="confirm" value="1">
     <div class="dlg-head danger"><h2 id="dlg-mat-borrar-t">¿Quitar la matrícula?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
-    <div class="dlg-body"><p>Se quita la matrícula de <b>{{ delete_title }}</b>. No tiene pagos, así que se puede borrar (BR-ENR-08).</p></div>
-    <div class="dlg-foot"><span class="left">Sin pago: se puede quitar (AP-06)</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
+    <div class="dlg-body"><p>Se quita la matrícula de <b>{{ delete_title }}</b>. No tiene pagos, así que se puede borrar.</p></div>
+    <div class="dlg-foot"><span class="left">Sin pago: se puede quitar</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Quitar matrícula</button></div>
     </form>
   </dialog>
   {%- endif %}

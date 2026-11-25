@@ -13,7 +13,7 @@
 {% block content %}
       <div class="content-inner">
           <div class="stack">
-          <div class="banner warn"><svg class="i"><use href="#i-alert"/></svg><div><b>Pantalla de inventario.</b> La fuente no llama a estas pantallas (D-19). Los cambios se guardan, pero ningún proceso de la escuela los pide todavía.</div></div>
+          <div class="banner warn"><svg class="i"><use href="#i-alert"/></svg><div><b>Pantalla de inventario.</b> La fuente no llama a estas pantallas. Los cambios se guardan, pero ningún proceso de la escuela los pide todavía.</div></div>
           {%- if let Some(n) = notice %}
           <div class="banner ok" role="status"><svg class="i"><use href="#i-check"/></svg><div>{{ n }}</div></div>
           {%- endif %}
@@ -82,7 +82,7 @@
         <form method="post" action="/admin/certifications/{{ r.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
         <div class="dlg-head danger"><h2 id="dlg-borrar-crt-t">¿Borrar la certificación?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
         <div class="dlg-body"><p>Se borra <b>{{ r.name }}</b> con sus {{ r.requirements.len() }} cursos. Si un estudiante tiene progreso o graduación en ella, no se borra.</p></div>
-        <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+        <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
         </form>
       </dialog>
       {%- endif %}

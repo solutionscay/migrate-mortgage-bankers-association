@@ -6,7 +6,7 @@
     {% else %}<div class="table-wrap picker-list"><table class="t"><colgroup><col><col style="width:110px"><col style="width:110px"></colgroup><thead><tr><th>Plan de {% if let Some(e) = page.event %}{{ e.name }}{% endif %}</th><th class="num">Actividades</th><th class="money">Precio</th></tr></thead><tbody>
     {% for p in page.plans %}<tr{% if p.current %} aria-selected="true"{% endif %}><td>{% if p.current %}{{ p.name }} <span class="tag info">Actual</span>{% else %}<form method="post" action="/registrations/{{ page.h.uuid }}/plan"><input type="hidden" name="_csrf" value="{{ page.shell.csrf }}"><button class="pick-hit" type="submit" name="plan_uuid" value="{{ p.uuid }}">{{ p.name }}</button></form>{% endif %}</td><td class="num">{{ p.items }}</td><td class="money">{{ p.price }}</td></tr>
     {% endfor %}</tbody></table></div>{% endif %}
-    <p class="field-hint">Escoger otro plan pide confirmación: borra las actividades del plan actual (BR-REG-02).</p>
+    <p class="field-hint">Escoger otro plan pide confirmación: borra las actividades del plan actual.</p>
   </div>
   <div class="dlg-foot"><button class="btn" type="button" data-close>Cancelar</button></div>
 </dialog>

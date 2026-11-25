@@ -63,12 +63,12 @@
         <dialog class="dlg" id="dlg-borrar-reg-{{ loop.index }}" aria-labelledby="dlg-borrar-reg-{{ loop.index }}-t">
           <div class="dlg-head danger"><h2 id="dlg-borrar-reg-{{ loop.index }}-t">¿Borrar el registro?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
           {%- if r.payments > 0 %}
-          <div class="dlg-body"><p>El registro de <b>{% if let Some(e) = r.event %}{{ e }}{% else %}sin evento{% endif %}</b> tiene {{ r.payments }} pago{% if r.payments != 1 %}s{% endif %} ({{ self.usd(r.paid) }} vigente). Un registro con pagos no se borra: cambie el estatus a <b>Canceló</b> (AP-05).</p></div>
-          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><a class="btn btn-danger-solid" href="/registrations/{{ r.uuid }}">Abrir y cancelar</a></div>
+          <div class="dlg-body"><p>El registro de <b>{% if let Some(e) = r.event %}{{ e }}{% else %}sin evento{% endif %}</b> tiene {{ r.payments }} pago{% if r.payments != 1 %}s{% endif %} ({{ self.usd(r.paid) }} vigente). Un registro con pagos no se borra: cambie el estatus a <b>Canceló</b>.</p></div>
+          <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><a class="btn btn-danger-solid" href="/registrations/{{ r.uuid }}">Abrir y cancelar</a></div>
           {%- else %}
           <form method="post" action="/registrations/{{ r.uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
           <div class="dlg-body"><p>Se borra el registro de <b>{% if let Some(e) = r.event %}{{ e }}{% else %}sin evento{% endif %}</b> con sus líneas e invitados. No tiene pagos.</p></div>
-          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+          <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
           </form>
           {%- endif %}
         </dialog>
@@ -80,12 +80,12 @@
           <form method="post" action="/people/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
             <div class="dlg-head danger"><h2 id="dlg-borrar-t">¿Borrar a {{ name }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
             <div class="dlg-body"><p>Se borra la ficha de <b>{{ name }}</b>. No tiene registros. No se puede deshacer.</p></div>
-            <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+            <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
           </form>
           {%- else %}
           <div class="dlg-head danger"><h2 id="dlg-borrar-t">No se puede borrar</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
-          <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>{{ name }} tiene {{ regs.len() }} registro{% if regs.len() != 1 %}s{% endif %}.</b> Borre o cancele los registros primero (BR-PPL-02).</div></div></div>
-          <div class="dlg-foot"><span class="left">409 · Conflicto</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
+          <div class="dlg-body"><div class="banner err"><svg class="i"><use href="#i-alert"/></svg><div><b>{{ name }} tiene {{ regs.len() }} registro{% if regs.len() != 1 %}s{% endif %}.</b> Borre o cancele los registros primero.</div></div></div>
+          <div class="dlg-foot"><span class="left">No se puede borrar</span><button class="btn" type="button" data-close autofocus>Entendido</button></div>
           {%- endif %}
         </dialog>
         {%- endif %}

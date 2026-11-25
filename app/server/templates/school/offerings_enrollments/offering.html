@@ -41,7 +41,7 @@
         </div>
         <div class="tabpanel" role="tabpanel" id="tp-cal" aria-labelledby="tab-cal"{% if tab_det %} hidden{% endif %}>
           <div class="block-head" style="border-top:0"><h3>Fechas del {% if self.is_seminar() %}seminario{% else %}curso{% endif %}</h3><span class="count">activas: Pendiente y Confirmado</span>
-            <div class="row"><form method="post" action="/offerings/{{ self.slug() }}/{{ uuid }}/calendar"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button class="btn btn-sm" type="submit" title="Fecha nueva: Pendiente, precios del ofrecimiento (BR-CRS-02)"><svg class="i i-sm"><use href="#i-plus"/></svg>{{ self.open_label() }}</button></form></div></div>
+            <div class="row"><form method="post" action="/offerings/{{ self.slug() }}/{{ uuid }}/calendar"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><button class="btn btn-sm" type="submit" title="Fecha nueva: Pendiente, precios del ofrecimiento"><svg class="i i-sm"><use href="#i-plus"/></svg>{{ self.open_label() }}</button></form></div></div>
           {%- if rows.is_empty() %}
           <div class="empty"><svg class="i"><use href="#i-calendar"/></svg><h4>Sin fechas</h4><p>Abra una fecha para matricular estudiantes. Empieza como Pendiente con los precios del ofrecimiento.</p></div>
           {%- else %}
@@ -55,7 +55,7 @@
             </tbody>
           </table>
           {%- endif %}
-          <div class="block-body"><span class="field-hint">Una fecha no se borra: cámbiela a Cancelado (BR-CRS-05, AP-07). Se necesitan = quórum − matrícula, nunca menos de 0 (BR-CRS-03).</span></div>
+          <div class="block-body"><span class="field-hint">Una fecha no se borra: cámbiela a Cancelado. Se necesitan = quórum − matrícula, nunca menos de 0.</span></div>
         </div>
         <div class="tabpanel" role="tabpanel" id="tp-det" aria-labelledby="tab-det"{% if !tab_det %} hidden{% endif %}>
           <div class="block-body grid cols-2">
@@ -120,12 +120,12 @@
                 </tbody>
               </table>
             </div>
-            <p class="field-hint" style="margin-top:6px">Un Día de Fiesta sale en las cartas como «No habrá clases el …» (BR-CRS-06). Cursos cortos: hasta 15 fechas.</p>
+            <p class="field-hint" style="margin-top:6px">Un Día de Fiesta sale en las cartas como «No habrá clases el …». Cursos cortos: hasta 15 fechas.</p>
             {%- else %}
             <p class="field-hint" style="margin-top:12px">Un seminario tiene una sola fecha: cámbiela arriba.</p>
             {%- endif %}
           </div>
-          <div class="dlg-foot"><span class="left">Cada campo se guarda al salir de él · la fecha no se borra: use Cancelado (AP-07)</span><a class="btn btn-primary" href="/offerings/{{ self.slug() }}/{{ uuid }}">Cerrar</a></div>
+          <div class="dlg-foot"><span class="left">Cada campo se guarda al salir de él · la fecha no se borra: use Cancelado</span><a class="btn btn-primary" href="/offerings/{{ self.slug() }}/{{ uuid }}">Cerrar</a></div>
         </dialog>
         {%- for d in f.days %}
         <div class="menu" id="menu-dia-{{ d.n }}" popover role="menu">
@@ -153,14 +153,14 @@
           <div class="dlg-head danger"><h2 id="dlg-borrar-t">¿Borrar {{ name }}?</h2><button class="btn btn-icon btn-quiet" type="button" data-close aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></div>
           {%- if let Some(e) = delete_error %}
           <div class="dlg-body"><div class="banner err" role="alert"><svg class="i"><use href="#i-alert"/></svg><div>{{ e }}</div></div></div>
-          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
+          <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
           {%- else if !rows.is_empty() %}
-          <div class="dlg-body"><p>Este ofrecimiento tiene {{ rows.len() }} fecha{% if rows.len() != 1 %}s{% endif %} en el calendario. Un ofrecimiento con fechas o matrículas no se borra (AP-04).</p></div>
-          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
+          <div class="dlg-body"><p>Este ofrecimiento tiene {{ rows.len() }} fecha{% if rows.len() != 1 %}s{% endif %} en el calendario. Un ofrecimiento con fechas o matrículas no se borra.</p></div>
+          <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cerrar</button></div>
           {%- else %}
           <form method="post" action="/offerings/{{ self.slug() }}/{{ uuid }}"><input type="hidden" name="_csrf" value="{{ shell.csrf }}"><input type="hidden" name="_method" value="DELETE">
           <div class="dlg-body"><p>Se borra <b>{{ name }}</b>. No tiene fechas ni matrículas.</p></div>
-          <div class="dlg-foot"><span class="left">Solo ROLE-ADMIN</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
+          <div class="dlg-foot"><span class="left">Solo administradores</span><button class="btn" type="button" data-close autofocus>Cancelar</button><button class="btn btn-danger-solid" type="submit">Borrar</button></div>
           </form>
           {%- endif %}
         </dialog>

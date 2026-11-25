@@ -16,7 +16,7 @@
             <label for="n-nombre" class="req">Nombre</label><div class="field-wrap"><input class="field" id="n-nombre" name="name" value="{{ f.name }}" required autofocus></div>
             <label for="n-lugar">Lugar</label><div class="field-wrap"><input class="field" id="n-lugar" name="location" value="{{ f.location }}"></div>
             <label for="n-ini">Comienza</label><div class="field-wrap"><input class="field" id="n-ini" name="date_start" value="{{ f.date_start }}" inputmode="numeric" placeholder="5/6/2027"></div>
-            <label for="n-fin">Termina</label><div class="field-wrap"><input class="field" id="n-fin" name="date_end" value="{{ f.date_end }}" inputmode="numeric" placeholder="vacío = Comienza"><div class="field-hint">Vacío toma la fecha de Comienza (BR-EVT-01). Estatus Activo.</div></div>
+            <label for="n-fin">Termina</label><div class="field-wrap"><input class="field" id="n-fin" name="date_end" value="{{ f.date_end }}" inputmode="numeric" placeholder="vacío = Comienza"><div class="field-hint">Vacío toma la fecha de Comienza. Estatus Activo.</div></div>
           </div>
           <div class="row"><button class="btn btn-primary" type="submit">Guardar</button><a class="btn" href="/events">Cancelar</a></div>
         </form>

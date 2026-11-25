@@ -28,7 +28,7 @@
           {%- if is_admin %}
           <hr class="admin-only">
           {%- if s.enrollments > 0 %}
-          <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Refusado: tiene {{ s.enrollments }} matrícula{% if s.enrollments != 1 %}s{% endif %} (AP-04)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar estudiante…<span class="admin-mark">admin</span></button>
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Refusado: tiene {{ s.enrollments }} matrícula{% if s.enrollments != 1 %}s{% endif %}" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar estudiante…<span class="admin-mark">admin</span></button>
           {%- else %}
           <a role="menuitem" class="danger act-delete admin-only" href="/students/{{ s.uuid }}?open=dlg-borrar-stu"><svg class="i"><use href="#i-trash"/></svg>Borrar estudiante…<span class="admin-mark">admin</span></a>
           {%- endif %}

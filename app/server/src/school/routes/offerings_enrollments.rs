@@ -385,8 +385,8 @@ fn det_field(kind: Kind, id: &str, name: &str, saved: String) -> FieldView {
         saved,
     );
     match name {
-        "cost_individual" => f.hint("Una fecha nueva copia estos precios una vez (BR-CRS-02)."),
-        "nmls_fee" => f.hint("Con cargo NMLS: horas × tarifa NMLS (BR-CRS-04)."),
+        "cost_individual" => f.hint("Una fecha nueva copia estos precios una vez."),
+        "nmls_fee" => f.hint("Con cargo NMLS: horas × tarifa NMLS."),
         _ => f,
     }
 }
@@ -807,7 +807,7 @@ async fn offering_delete(
             let mut page = offering_page_of(&state.db(), &staff.0, kind, Some(&id), None)?;
             page.delete_error = Some(match e {
                 DomainError::HasCalendar(n) => format!(
-                    "Tiene {n} fecha{} en el calendario. Un ofrecimiento con fechas no se borra (AP-04).",
+                    "Tiene {n} fecha{} en el calendario. Un ofrecimiento con fechas no se borra.",
                     if n == 1 { "" } else { "s" }
                 ),
                 e => e.message(),
@@ -1177,7 +1177,7 @@ fn new_pick(
                 why_ok: s.member,
                 affiliate: s.affiliate_name(),
                 alt: Some(format!("{other_label} {} · no aplica", usd_opt(other))),
-                note: "Se guarda al escoger la fecha (BR-ENR-01).".into(),
+                note: "Se guarda al escoger la fecha.".into(),
                 oob: false,
             }
         }
@@ -1661,7 +1661,7 @@ fn edit_dialog(
             why_ok: member_price,
             affiliate: None,
             alt: None,
-            note: "No cambia si cambia el afiliado (BR-ENR-01).".into(),
+            note: "No cambia si cambia el afiliado.".into(),
             oob: false,
         },
         oob: false,
@@ -2197,7 +2197,7 @@ async fn enrollment_delete(
             let conn = state.db();
             let dlg = edit_dialog(&conn, &staff.0, kind, &id, None)?;
             let mut page = enrollment_page_of(&conn, &staff.0, kind, &id, dlg, "dlg-mat")?;
-            page.refusal = Some("Tiene un pago: no se borra. Use Dar de baja (BR-ENR-08).".into());
+            page.refusal = Some("Tiene un pago: no se borra. Use Dar de baja.".into());
             Ok(render_oob(StatusCode::CONFLICT, &headers, &page))
         }
         Err(e) => Ok(e.into_response()),

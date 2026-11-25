@@ -27,7 +27,7 @@
           {%- if is_admin %}
           <hr class="admin-only">
           {%- if p.registrations > 0 %}
-          <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Refusado: tiene {{ p.registrations }} registro{% if p.registrations != 1 %}s{% endif %} (BR-PPL-02)" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar convencionista…<span class="admin-mark">admin</span></button>
+          <button type="button" role="menuitem" class="danger act-delete admin-only" data-toast="Refusado: tiene {{ p.registrations }} registro{% if p.registrations != 1 %}s{% endif %}" data-kind="err"><svg class="i"><use href="#i-trash"/></svg>Borrar convencionista…<span class="admin-mark">admin</span></button>
           {%- else %}
           <a href="/people/{{ p.uuid }}?open=dlg-borrar" role="menuitem" class="danger act-delete admin-only"><svg class="i"><use href="#i-trash"/></svg>Borrar convencionista…<span class="admin-mark">admin</span></a>
           {%- endif %}
